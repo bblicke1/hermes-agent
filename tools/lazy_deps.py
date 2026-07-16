@@ -857,10 +857,15 @@ def ensure(feature: str, *, prompt: bool = True) -> None:
             except (json.JSONDecodeError, TypeError):
                 pass
     if still_missing:
-        raise FeatureUnavailable(
-            feature, still_missing,
-            "install reported success but packages still not importable "
-            "(may require Python restart)"
+        # uv/pip returned success, but importlib.metadata can retain a stale
+        # distribution view for the lifetime of this interpreter (notably on
+        # Python 3.12). The next Hermes process is the consumer and observes
+        # the installed wheel. Do not turn a successful install into a false
+        # failure; the lifecycle E2E verifies importability after restart.
+        logger.debug(
+            "Install for feature %r succeeded; metadata remains stale for %s",
+            feature,
+            still_missing,
         )
 
     # Record this feature in the data-dir activation ledger so it survives

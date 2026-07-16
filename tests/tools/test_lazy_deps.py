@@ -193,9 +193,10 @@ class TestEnsure:
         with pytest.raises(ld.FeatureUnavailable, match="pip install failed"):
             ld.ensure("test.fail", prompt=False)
 
-    def test_install_succeeds_but_still_missing_raises(self, monkeypatch):
-        # Pip says success but the package still isn't importable
-        # (e.g. site-packages caching, wrong python). Surface this.
+    def test_install_succeeds_with_stale_metadata_records_feature(self, monkeypatch):
+        # Python 3.12 can retain stale importlib.metadata state after a
+        # successful uv install. The next process sees the wheel, so do not
+        # convert an authoritative installer success into a false failure.
         monkeypatch.setitem(ld.LAZY_DEPS, "test.cache", ("zzzfake>=1",))
         monkeypatch.setattr(ld, "_is_satisfied", lambda spec: False)
         monkeypatch.setattr(ld, "_allow_lazy_installs", lambda: True)
@@ -203,8 +204,12 @@ class TestEnsure:
             ld, "_venv_pip_install",
             lambda specs, **kw: ld._InstallResult(True, "ok", ""),
         )
-        with pytest.raises(ld.FeatureUnavailable, match="still not importable"):
-            ld.ensure("test.cache", prompt=False)
+        recorded = []
+        monkeypatch.setattr(ld, "record_feature", lambda feature, via: recorded.append((feature, via)))
+
+        ld.ensure("test.cache", prompt=False)
+
+        assert recorded == [("test.cache", "ensure")]
 
 
 # ---------------------------------------------------------------------------
