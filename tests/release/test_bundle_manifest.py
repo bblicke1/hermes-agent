@@ -210,29 +210,15 @@ class TestRoundTrip:
         assert ok, f"Round-trip verify failed: {errors}"
 
 
-class TestMinisignSigning:
-    """Tests that require minisign — skipped if not available."""
+class TestEd25519Signing:
+    """Tests for Ed25519 manifest signing via PyNaCl.
 
-    @pytest.fixture
-    def minisign_available(self):
-        shutil_path = shutil.which("minisign")
-        if shutil_path is None:
-            # Try nix
-            try:
-                result = subprocess.run(
-                    ["nix", "run", "nixpkgs#minisign", "--", "-v"],
-                    capture_output=True, text=True, timeout=30
-                )
-                if result.returncode == 0 or "Usage" in result.stderr:
-                    return "nix run nixpkgs#minisign --"
-            except Exception:
-                pass
-            pytest.skip("minisign not available")
-        return shutil_path
+    No external CLI needed — PyNaCl is a Python dependency.
+    """
 
-    def test_sign_and_verify_manifest(self, bundle_fixture, tmp_path, minisign_available):
-        """Generate a throwaway minisign keypair, sign manifest, verify it."""
-        from write_manifest import sign_manifest, verify_signature, _find_minisign
+    def test_sign_and_verify_manifest(self, bundle_fixture):
+        """Generate a throwaway keypair, sign manifest, verify it."""
+        from write_manifest import sign_manifest, verify_signature
 
         write_manifest(
             bundle_fixture,
@@ -242,28 +228,12 @@ class TestMinisignSigning:
             platform="linux-x64",
         )
 
-        # Generate a throwaway keypair
-        keydir = tmp_path / "keys"
-        keydir.mkdir()
-        pubkey = keydir / "minisign.pub"
-        seckey = keydir / "minisign.key"
+        # Sign with a throwaway keypair (seckey=None generates one)
+        assert sign_manifest(bundle_fixture, seckey_b64=None)
+        assert (bundle_fixture / "manifest.json.sig").exists()
 
-        ms = _find_minisign()
-        if ms is None:
-            pytest.skip("minisign not found at runtime")
-
-        # Generate keypair
-        subprocess.run(
-            [ms, "-G", "-p", str(pubkey), "-s", str(seckey), "-W", "-f"],
-            capture_output=True, check=True
-        )
-
-        # Sign
-        assert sign_manifest(bundle_fixture, seckey)
-        assert (bundle_fixture / "manifest.json.minisig").exists()
-
-        # Verify
-        assert verify_signature(bundle_fixture, pubkey)
+        # Verify (uses the pubkey embedded in the .sig file)
+        assert verify_signature(bundle_fixture)
 
         # Tamper with manifest
         manifest_path = bundle_fixture / "manifest.json"
@@ -272,4 +242,34 @@ class TestMinisignSigning:
         manifest_path.write_text(json.dumps(content))
 
         # Verification should now fail
-        assert not verify_signature(bundle_fixture, pubkey)
+        assert not verify_signature(bundle_fixture)
+
+    def test_sign_with_explicit_key(self, bundle_fixture):
+        """Sign with a known keypair and verify with the explicit pubkey."""
+        import base64
+        from write_manifest import sign_manifest, verify_signature
+
+        write_manifest(
+            bundle_fixture,
+            version="2026.07.14",
+            channel="nightly",
+            git_sha="d" * 40,
+            platform="linux-x64",
+        )
+
+        # Generate a keypair and extract the base64 secret key
+        import nacl.signing
+        key = nacl.signing.SigningKey.generate()
+        seckey_b64 = base64.b64encode(bytes(key)).decode()
+        pubkey_b64 = base64.b64encode(bytes(key.verify_key)).decode()
+
+        # Sign with the explicit key
+        assert sign_manifest(bundle_fixture, seckey_b64=seckey_b64)
+
+        # Verify with the explicit pubkey
+        assert verify_signature(bundle_fixture, pubkey_b64=pubkey_b64)
+
+        # Verify with wrong pubkey should fail
+        wrong_key = nacl.signing.SigningKey.generate()
+        wrong_pubkey_b64 = base64.b64encode(bytes(wrong_key.verify_key)).decode()
+        assert not verify_signature(bundle_fixture, pubkey_b64=wrong_pubkey_b64)

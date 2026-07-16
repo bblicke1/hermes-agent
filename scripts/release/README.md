@@ -7,7 +7,7 @@ See `docs/updater-world.md` §2.1, §2.6 and `docs/plans/updater-rework/01-phase
 
 | Decision | Value | Rationale |
 |---|---|---|
-| Signing scheme | minisign | One static pubkey embedded in the updater; no OIDC dependency. Simpler than sigstore-cosign for a self-contained release artifact. |
+| Signing scheme | Ed25519 via PyNaCl | Pure-Python signing — no external minisign CLI to install per-platform. Uses PyNaCl (libsodium) for Ed25519 sign/verify; the Rust updater verifies with ed25519-dalek. Signature is a JSON `.sig` file with base64-encoded signature + pubkey. |
 | Channels | `nightly` (daily cron) + `stable` (manually promoted tag) | Daily nightly replaces per-commit tracking (~100 commits/day makes SHA-tracking useless for users). Stable is manually promoted from a passing nightly. |
 | Platform matrix (v1) | `linux-x64`, `linux-arm64`, `darwin-arm64`, `win-x64` | `darwin-x64` deferred unless CI capacity allows. linux-arm64 via `ubuntu-24.04-arm` runner. |
 | Bundle versioning | calver `YYYY.MM.DD[.N]` for nightlies, semver for stable | Nightlies get a date stamp; `.N` suffix if multiple builds land same day. Stable tags are `v<semver>`. |

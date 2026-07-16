@@ -72,33 +72,6 @@ jobs:
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Install minisign (for manifest signing)
-        shell: bash
-        run: |
-          case "${{ matrix.os }}" in
-            linux)
-              sudo apt-get update -qq && sudo apt-get install -y -qq minisign \
-                || (echo "::warning::minisign not in apt — bundles will be unsigned")
-              ;;
-            darwin)
-              brew install minisign \
-                || (echo "::warning::minisign not in brew — bundles will be unsigned")
-              ;;
-            win)
-              # minisign has no official Windows build in a package manager.
-              # Download the portable binary from the releases page.
-              curl -LsSf -o /tmp/minisign.zip \
-                "https://github.com/aead/minisign/releases/download/v0.2.0/minisign-windows-amd64.zip" \
-                || (echo "::warning::minisign download failed — bundles will be unsigned" && exit 0)
-              mkdir -p "$HOME/.local/bin"
-              unzip -o /tmp/minisign.zip -d "$HOME/.local/bin/" 2>/dev/null || true
-              echo "$HOME/.local/bin" >> $GITHUB_PATH
-              ;;
-          esac
-          # Verify it's on PATH
-          which minisign 2>/dev/null && echo "minisign ready" \
-            || echo "::warning::minisign not found — bundles will be unsigned"
-
       - name: Determine version
         id: version
         shell: bash
@@ -135,23 +108,20 @@ jobs:
             --git-sha "${{ github.sha }}" \
             --platform "${{ matrix.platform }}"
 
-          # Sign if the minisign secret key is available
-          if [ -n "$MINISIGN_SECRET_KEY" ]; then
-            KEYFILE=$(mktemp)
-            echo "$MINISIGN_SECRET_KEY" | base64 -d > "$KEYFILE"
+          # Sign if the Ed25519 secret key is available
+          if [ -n "$HERMES_SIGNING_KEY" ]; then
             python scripts/release/write-manifest.py \
               --bundle-dir dist/bundle \
-              --minisign-key "$KEYFILE" \
+              --signing-key "$HERMES_SIGNING_KEY" \
               --version "${{ steps.version.outputs.version }}" \
               --channel "${{ steps.version.outputs.channel }}" \
               --git-sha "${{ github.sha }}" \
               --platform "${{ matrix.platform }}"
-            rm -f "$KEYFILE"
           else
-            echo "::warning::MINISIGN_SECRET_KEY not set — unsigned bundle"
+            echo "::warning::HERMES_SIGNING_KEY not set — unsigned bundle"
           fi
         env:
-          MINISIGN_SECRET_KEY: ${{ secrets.MINISIGN_SECRET_KEY }}
+          HERMES_SIGNING_KEY: ${{ secrets.HERMES_SIGNING_KEY }}
 
       - name: Smoke test — bundle boots
         shell: bash

@@ -146,60 +146,86 @@ def verify_file_hashes(bundle_dir: Path, manifest: dict) -> tuple[bool, list[str
     return (len(errors) == 0, errors)
 
 
-def sign_manifest(bundle_dir: Path, seckey_path: Path | None = None) -> bool:
-    """Sign manifest.json with minisign, producing manifest.json.minisig.
+def sign_manifest(bundle_dir: Path, seckey_b64: str | None = None) -> bool:
+    """Sign manifest.json with Ed25519, producing manifest.json.sig.
 
-    Returns True on success, False if minisign is not available.
-    Raises on signing failure.
+    Uses PyNaCl (libsodium) for signing — no external minisign CLI needed.
+    The signature is a JSON file with the base64-encoded signature and
+    pubkey, so the Rust updater can verify with ed25519-dalek.
+
+    Args:
+        bundle_dir: Directory containing manifest.json.
+        seckey_b64: Base64-encoded Ed25519 secret key. If None, a throwaway
+                    keypair is generated (for testing).
+
+    Returns True on success.
     """
-    manifest_path = bundle_dir / "manifest.json"
-    sig_path = bundle_dir / "manifest.json.minisig"
-
-    minisign = _find_minisign()
-    if minisign is None:
-        print("WARN: minisign not found — skipping signature", file=sys.stderr)
+    try:
+        import nacl.signing
+    except ImportError:
+        print("WARN: PyNaCl not installed — skipping signature", file=sys.stderr)
         return False
 
-    cmd = [minisign, "-S", "-x", str(sig_path), "-m", str(manifest_path)]
-    if seckey_path:
-        cmd.extend(["-s", str(seckey_path)])
-    # -W: no password (for CI / automated signing with throwaway keys)
-    cmd.append("-W")
+    manifest_path = bundle_dir / "manifest.json"
+    sig_path = bundle_dir / "manifest.json.sig"
 
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    if result.returncode != 0:
-        raise RuntimeError(f"minisign signing failed: {result.stderr}")
+    if seckey_b64:
+        import base64
+        key = nacl.signing.SigningKey(base64.b64decode(seckey_b64))
+    else:
+        key = nacl.signing.SigningKey.generate()
+
+    manifest_bytes = manifest_path.read_bytes()
+    signed = key.sign(manifest_bytes)
+
+    import base64
+    sig_data = {
+        "algorithm": "ed25519",
+        "pubkey": base64.b64encode(bytes(key.verify_key)).decode(),
+        "signature": base64.b64encode(signed.signature).decode(),
+    }
+    sig_path.write_text(json.dumps(sig_data, indent=2) + "\n")
     return True
 
 
-def verify_signature(bundle_dir: Path, pubkey_path: Path | None = None) -> bool:
-    """Verify the minisign signature on manifest.json.
+def verify_signature(bundle_dir: Path, pubkey_b64: str | None = None) -> bool:
+    """Verify the Ed25519 signature on manifest.json.
+
+    Args:
+        bundle_dir: Directory containing manifest.json + manifest.json.sig.
+        pubkey_b64: Expected base64-encoded public key. If None, uses the
+                    pubkey embedded in the .sig file (trust-on-first-use).
 
     Returns True if signature is valid, False otherwise.
     """
+    try:
+        import nacl.signing
+        import nacl.exceptions
+    except ImportError:
+        print("WARN: PyNaCl not installed — cannot verify signature", file=sys.stderr)
+        return False
+
     manifest_path = bundle_dir / "manifest.json"
-    sig_path = bundle_dir / "manifest.json.minisig"
+    sig_path = bundle_dir / "manifest.json.sig"
 
     if not sig_path.exists():
         return False
 
-    minisign = _find_minisign()
-    if minisign is None:
-        print("WARN: minisign not found — cannot verify signature", file=sys.stderr)
+    sig_data = json.loads(sig_path.read_text())
+    expected_pubkey = pubkey_b64 or sig_data.get("pubkey")
+    if not expected_pubkey:
         return False
 
-    cmd = [minisign, "-V", "-x", str(sig_path), "-m", str(manifest_path), "-q"]
-    if pubkey_path:
-        cmd.extend(["-p", str(pubkey_path)])
+    import base64
+    verify_key = nacl.signing.VerifyKey(base64.b64decode(expected_pubkey))
+    manifest_bytes = manifest_path.read_bytes()
+    signature = base64.b64decode(sig_data["signature"])
 
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    return result.returncode == 0
-
-
-def _find_minisign() -> str | None:
-    """Find minisign executable."""
-    import shutil
-    return shutil.which("minisign")
+    try:
+        verify_key.verify(manifest_bytes, signature)
+        return True
+    except nacl.exceptions.BadSignatureError:
+        return False
 
 
 def main():
@@ -211,9 +237,9 @@ def main():
     parser.add_argument("--platform", help="Target platform (e.g. linux-x64)")
     parser.add_argument("--min-updater-version", default=DEFAULT_MIN_UPDATER_VERSION)
     parser.add_argument("--desktop", action="store_true", help="Bundle includes desktop app")
-    parser.add_argument("--minisign-key", help="Path to minisign secret key")
+    parser.add_argument("--signing-key", help="Base64-encoded Ed25519 secret key for signing")
     parser.add_argument("--verify", action="store_true", help="Verify existing manifest")
-    parser.add_argument("--pubkey", help="Path to minisign public key for verification")
+    parser.add_argument("--pubkey", help="Base64-encoded Ed25519 public key for verification")
     args = parser.parse_args()
 
     bundle_dir = Path(args.bundle_dir).resolve()
@@ -233,7 +259,7 @@ def main():
                 print(f"  {e}")
             sys.exit(1)
         if args.pubkey:
-            if verify_signature(bundle_dir, Path(args.pubkey)):
+            if verify_signature(bundle_dir, args.pubkey):
                 print("PASS: signature verified")
             else:
                 print("FAIL: signature verification failed", file=sys.stderr)
@@ -256,9 +282,8 @@ def main():
     )
     print(f"Wrote manifest.json with {len(manifest['files'])} file hashes")
 
-    seckey = Path(args.minisign_key) if args.minisign_key else None
-    if sign_manifest(bundle_dir, seckey):
-        print("Signed manifest.json.minisig")
+    if sign_manifest(bundle_dir, args.signing_key):
+        print("Signed manifest.json.sig")
 
 
 if __name__ == "__main__":
