@@ -134,7 +134,9 @@ def _tts_stream_stop(user_barge: bool = True) -> None:
         stop_playback()
 
 
-# ── Full-duplex agent-turn listener: arms at utterance-submit, spans generation AND playback
+# ── Full-duplex agent-turn listener: armed when speech starts
+# (_tts_stream_begin / _speak_text_with_barge), then spans generation AND playback.
+# A typed turn with speech output off does not arm it.
 # (per-playback monitors were deaf during generation and mis-calibrated against speaker bleed),
 # disarms when no session runs, no TTS is pending, and no audio flows. _fd_speak_pipelines holds
 # (stop, done) pairs of fallback whole-reply speak paths: the listener cuts their private stop

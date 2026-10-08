@@ -243,14 +243,16 @@ def _route_turn_images(agent, prompt: Any, images: list[str]) -> Any:
 
 
 def _start_turn_voice() -> tuple[Any, bool]:
-    """Arm voice-mode turn audio; ``(tts_queue, thinking_started)``.  ``_tts_stream_begin``
-    goes first: cutting a still-speaking previous turn IS this turn's barge-in, so it must
-    latch before the caller consumes the latch."""
+    """Start turn speech audio; ``(tts_queue, thinking_started)``.
+
+    ``_tts_stream_begin`` runs first so a still-speaking previous turn is cut
+    before this turn consumes that latch. The microphone is armed there, and
+    in ``_speak_text_with_barge``, only when speech output actually starts.
+    A typed turn with speech output off must not open it.
+    """
     tts_queue = _tts_stream_begin()
     if not _voice_mode_enabled():
         return tts_queue, False
-    if _voice_cfg_dict().get("barge_in", True):
-        _arm_full_duplex_listener()
     try:
         from tools.voice_mode import is_audio_output_active, start_thinking_sound
 
