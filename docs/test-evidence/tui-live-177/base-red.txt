@@ -1,0 +1,96 @@
+
+> hermes-tui@0.0.1 test
+> vitest run src/__tests__/details.test.ts src/__tests__/createGatewayEventHandler.test.ts
+
+
+ RUN  v4.1.10 /home/brad/worktrees/hermes-agent-tui-live-177/ui-tui
+
+ ❯ src/__tests__/details.test.ts (13 tests | 1 failed) 7ms
+     × parses per-section and global live preferences and resolves by turn state 3ms
+ ❯ src/__tests__/createGatewayEventHandler.test.ts (112 tests | 3 failed) 659ms
+     × anchors a diff inside its tool shelf between narration segments 22ms
+     × dedupes a narrated patch while preserving its tool result 2ms
+     × dedupes a narrated patch while preserving its tool result 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/createGatewayEventHandler.test.ts > createGatewayEventHandler > anchors a diff inside its tool shelf between narration segments
+AssertionError: expected { kind: 'diff', …(3) } to match object { kind: 'trail', text: '', …(1) }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "inlineDiffs": [
+-     {
+-       "body": "--- a/foo.ts
++   "kind": "diff",
++   "text": "```diff
++ --- a/foo.ts
+  +++ b/foo.ts
+  @@
+  -old
+- +new",
+-       "toolIndex": 0,
+-     },
+-   ],
+-   "kind": "trail",
+-   "text": "",
++ +new
++ ```",
+  }
+
+ ❯ src/__tests__/createGatewayEventHandler.test.ts:787:47
+    785|     onEvent({ payload: { context: 'foo.ts', name: 'patch', tool_id: 't…
+    786|     onEvent({ payload: { inline_diff: `  ┊ review diff\n${diff}`, resu…
+    787|     expect(turnController.segmentMessages[1]).toMatchObject({ kind: 't…
+       |                                               ^
+    788|     expect(turnController.segmentMessages[1]?.tools?.[0]).toContain('f…
+    789|     expect(turnController.segmentMessages[1]?.tools?.[0]).toContain('p…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/__tests__/createGatewayEventHandler.test.ts > createGatewayEventHandler > dedupes a narrated patch while preserving its tool result
+ FAIL  src/__tests__/createGatewayEventHandler.test.ts > createGatewayEventHandler > dedupes a narrated patch while preserving its tool result
+AssertionError: expected '' to contain 'patched result'
+
+- Expected
++ Received
+
+- patched result
+
+ ❯ src/__tests__/createGatewayEventHandler.test.ts:807:65
+    805|     onEvent({ payload: { text: assistantText }, type: 'message.complet…
+    806|     expect(appended.flatMap(msg => msg.inlineDiffs ?? [])).toEqual([])
+    807|     expect(appended.flatMap(msg => msg.tools ?? []).join('\n')).toCont…
+       |                                                                 ^
+    808|     expect(appended.at(-1)?.text).toBe(assistantText)
+    809|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/__tests__/details.test.ts > live details > parses per-section and global live preferences and resolves by turn state
+AssertionError: expected null to be 'live' // Object.is equality
+
+- Expected:
+"live"
+
++ Received:
+null
+
+ ❯ src/__tests__/details.test.ts:115:40
+    113|  describe('live details', () => {
+    114|   it('parses per-section and global live preferences and resolves by t…
+    115|     expect(parseDetailsMode(' LIVE ')).toBe('live')
+       |                                        ^
+    116|     expect(resolveSections({ tools: 'live' })).toEqual({ tools: 'live'…
+    117|     for (const name of ['thinking', 'tools', 'subagents', 'activity'] …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  4 failed | 121 passed (125)
+   Start at  14:00:49
+   Duration  1.72s (transform 860ms, setup 0ms, import 1.08s, tests 667ms, environment 0ms)

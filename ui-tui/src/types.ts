@@ -154,13 +154,14 @@ export interface Msg {
   thinkingTokens?: number
   toolTokens?: number
   tools?: string[]
+  inlineDiffs?: { toolIndex: number; body: string }[]
   todos?: TodoItem[]
   todoIncomplete?: boolean
   todoCollapsedByDefault?: boolean
 }
 
 export type Role = 'assistant' | 'system' | 'tool' | 'user'
-export type DetailsMode = 'hidden' | 'collapsed' | 'expanded'
+export type DetailsMode = 'hidden' | 'collapsed' | 'expanded' | 'live'
 export type ThinkingMode = 'collapsed' | 'truncated' | 'full'
 
 // Per-section overrides for the agent details accordion.  Resolution order

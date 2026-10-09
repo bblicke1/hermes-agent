@@ -124,3 +124,18 @@ describe('virtual height estimates', () => {
     expect(rows).toBeLessThanOrEqual(800)
   })
 })
+
+it('counts attached diffs only for an expanded tool body and invalidates their height key', () => {
+  const msg: Msg = {
+    kind: 'trail',
+    role: 'system',
+    text: '',
+    tools: ['Patch ✓'],
+    inlineDiffs: [{ toolIndex: 0, body: '-old\n+new' }]
+  }
+  const opts = { compact: false, details: true, toolsVisible: true }
+  expect(estimatedMsgHeight(msg, 80, { ...opts, toolsExpanded: true })).toBeGreaterThan(
+    estimatedMsgHeight(msg, 80, { ...opts, toolsExpanded: false })
+  )
+  expect(messageHeightKey(msg)).not.toBe(messageHeightKey({ ...msg, inlineDiffs: [] }))
+})

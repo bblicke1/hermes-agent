@@ -1,0 +1,5 @@
+SYNTHETIC PROOF — COMPLETED (c: complete, r: restart, q: quit; click chevrons)
+├─ ▸ Thinking  ~10 tokens
+└─ ▸ Tool calls (2)
+├─ ▸ Spawn tree (1)  d1 · 1 agent  █  (/agents)
+└─ ▸ Activity (1)

@@ -1,0 +1,9 @@
+
+> hermes-tui@0.0.1 build
+> node ../scripts/build/tui.mjs
+
+
+  ...../tmp/hermes-tui-KLBOXc/.tui-build-bUvTOR/product/dist/entry.js  3.8mb ⚠️
+
+⚡ Done in 89ms
+built /home/brad/worktrees/hermes-agent-tui-live-177/ui-tui/dist/entry.js

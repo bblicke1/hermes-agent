@@ -14,7 +14,11 @@ export const canHoldToolShelf = (msg: Msg | undefined) =>
 
 export const mergeToolShelfInto = (target: Msg, source: Msg): Msg => ({
   ...target,
-  tools: [...(target.tools ?? []), ...(source.tools ?? [])]
+  tools: [...(target.tools ?? []), ...(source.tools ?? [])],
+  inlineDiffs: [
+    ...(target.inlineDiffs ?? []),
+    ...(source.inlineDiffs ?? []).map(diff => ({ ...diff, toolIndex: diff.toolIndex + (target.tools?.length ?? 0) }))
+  ]
 })
 
 const isBarrierMessage = (msg: Msg | undefined) => {

@@ -877,6 +877,8 @@ DEFAULT_CONFIG = {
         "cli_rebuild_scrollback_on_redraw": False,
         # Print a one-line summary of resolved modal prompts (approval/clarify) to scrollback.
         "persist_prompts": True,
+        # TUI details_mode and sections.{thinking,tools,subagents,activity}:
+        # hidden | collapsed | expanded | live (open during a turn, folded afterward).
         "inline_diffs": True,     # inline diff previews for write_file/patch/skill_manage
         # Append a one-line advisory to the final response when a write_file/patch failed this turn
         # and was never superseded by a successful write to the same path (catches "half the

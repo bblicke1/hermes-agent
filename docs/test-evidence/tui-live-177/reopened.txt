@@ -1,0 +1,12 @@
+SYNTHETIC PROOF — COMPLETED (c: complete, r: restart, q: quit; click chevrons)
+├─ ▸ Thinking  ~10 tokens
+└─ ▾ Tool calls (2)
+  ├─ ● Terminal("printf test")
+  └─ ● Write File("demo.txt")
+    └─ --- a/demo.txt
+       +++ b/demo.txt
+       @@ -1 +1 @@
+       -old
+       +new
+├─ ▸ Spawn tree (1)  d1 · 1 agent  █  (/agents)
+└─ ▸ Activity (1)

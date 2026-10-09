@@ -38,3 +38,12 @@ def test_a_non_boolean_is_refused_rather_than_written(config_home):
 
     assert answer["error"]["code"] == 4002
     assert not config_home.exists()
+
+@pytest.mark.parametrize("key", ["details_mode", "details_mode.tools"])
+def test_live_details_persist_and_round_trip(config_home, key):
+    assert _set(key, "live")["result"]["value"] == "live"
+    display = yaml.safe_load(config_home.read_text())["display"]
+    assert display["sections"]["tools"] == "live"
+    if key == "details_mode":
+        assert display["details_mode"] == "live"
+        assert server._methods["config.get"](2, {"key": key})["result"]["value"] == "live"

@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { isSectionName, parseDetailsMode, resolveSections, sectionMode } from '../domain/details.js'
+import {
+  effectiveDetailsMode,
+  isSectionName,
+  parseDetailsMode,
+  resolveSections,
+  sectionMode
+} from '../domain/details.js'
 
 describe('parseDetailsMode', () => {
   it('accepts the canonical modes case-insensitively', () => {
@@ -107,5 +113,17 @@ describe('sectionMode', () => {
     expect(sectionMode('subagents', 'hidden', { subagents: 'expanded' })).toBe('expanded')
     expect(sectionMode('thinking', 'hidden', { thinking: 'collapsed' })).toBe('collapsed')
     expect(sectionMode('activity', 'hidden', { activity: 'expanded' })).toBe('expanded')
+  })
+})
+
+describe('live details', () => {
+  it('parses per-section and global live preferences and resolves by turn state', () => {
+    expect(parseDetailsMode(' LIVE ')).toBe('live')
+    expect(resolveSections({ tools: 'live' })).toEqual({ tools: 'live' })
+    for (const name of ['thinking', 'tools', 'subagents', 'activity'] as const) {
+      expect(sectionMode(name, 'live')).toBe('live')
+      expect(effectiveDetailsMode(sectionMode(name, 'collapsed', { [name]: 'live' }), true)).toBe('expanded')
+      expect(effectiveDetailsMode(sectionMode(name, 'collapsed', { [name]: 'live' }), false)).toBe('collapsed')
+    }
   })
 })
