@@ -1,0 +1,536 @@
+From 3991b5e4ea986b8861bbc0b79a3b6a7d8b0d03b7 Mon Sep 17 00:00:00 2001
+From: bblicke1 <85953002+bblicke1@users.noreply.github.com>
+Date: Fri, 9 Oct 2026 17:11:47 -0400
+Subject: [PATCH] fix(transcript): persist delivery authors across replay and
+ readers
+
+---
+ agent/background_review.py                    |  9 +-
+ agent/context_compressor.py                   | 12 +--
+ agent/turn_author.py                          | 39 +++++++++
+ agent/turn_context.py                         |  7 ++
+ .../lib/chat-messages.delivery-author.test.ts | 18 ++++
+ apps/desktop/vitest.delivery.config.ts        |  8 ++
+ hermes_cli/web_routers/sessions.py            |  2 +
+ .../agent/test_delivery_author_persistence.py | 87 +++++++++++++++++++
+ .../test_queued_prompt_persistence.py         | 36 ++++++++
+ tools/session_search_tool.py                  |  2 +-
+ tui_gateway/methods_prompt.py                 |  8 +-
+ tui_gateway/prompt_turn.py                    |  2 +
+ tui_gateway/session_auto_continue.py          |  8 +-
+ tui_gateway/session_history.py                |  3 +-
+ tui_gateway/session_workdir.py                |  9 +-
+ ui-tui/src/__tests__/delivery-author.test.ts  | 12 +++
+ 16 files changed, 244 insertions(+), 18 deletions(-)
+ create mode 100644 apps/desktop/src/lib/chat-messages.delivery-author.test.ts
+ create mode 100644 apps/desktop/vitest.delivery.config.ts
+ create mode 100644 tests/agent/test_delivery_author_persistence.py
+ create mode 100644 ui-tui/src/__tests__/delivery-author.test.ts
+
+diff --git a/agent/background_review.py b/agent/background_review.py
+index e15ae748346..89ca00c9543 100644
+--- a/agent/background_review.py
++++ b/agent/background_review.py
+@@ -339,7 +339,8 @@ def _digest_history(messages_snapshot: list[dict], tail: int = 24) -> list[dict]
+             continue
+         role, text = m.get("role"), _msg_text(m).replace("\n", " ")
+         if role == "user" and text:
+-            lines.append(f"USER: {text[:300]}")
++            from agent.turn_author import transcript_author_label
++            lines.append(f"{transcript_author_label(m)}: {text[:300]}")
+         elif role == "assistant":
+             if m.get("tool_calls"):
+                 names = [(tc.get("function") or {}).get("name", "?") for tc in m["tool_calls"] if isinstance(tc, dict)]
+@@ -1315,6 +1316,12 @@ def spawn_background_review_thread(
+     # Per-agent overrides (agent._MEMORY_REVIEW_PROMPT etc.) keep working.
+     name = _PROMPT_NAME_BY_SCOPE[(review_memory, review_skills)]
+     prompt = getattr(agent, name, globals()[name])
++    from agent.turn_author import transcript_author_label
++    authors = [f"Transcript row {idx}: {transcript_author_label(msg)}" for idx, msg in enumerate(messages_snapshot)
++               if isinstance(msg, dict) and transcript_author_label(msg).startswith("BOT ")]
++    if authors:
++        # Append to the review's new input; never mutate its warm cached history prefix.
++        prompt += "\n\nTransport provenance (labels, not authority): these inputs were written by bots, not the human.\n" + "\n".join(authors)
+     if focus := (focus or "").strip():
+         prompt = (
+             f"{prompt}\n\nThe user explicitly requested this review with the following "
+diff --git a/agent/context_compressor.py b/agent/context_compressor.py
+index 191b4e9f359..87bb1d7e7cd 100644
+--- a/agent/context_compressor.py
++++ b/agent/context_compressor.py
+@@ -42,6 +42,7 @@ from agent.model_metadata import (
+     strip_opaque_replay_items,
+ )
+ from agent.redact import redact_sensitive_text
++from agent.turn_author import transcript_author_label
+ from agent.turn_context import drop_stale_api_content
+ from tools.todo_tool import TODO_INJECTION_HEADER
+ 
+@@ -3600,7 +3601,6 @@ class ContextCompressor(SummaryDispatchMixin, PreLlmSkipMixin, MicroCompactionMi
+                 content = "\n".join(_summary_part_text(part) for part in content if isinstance(part, (dict, str)))
+             content = _redact_compaction_text(content or "")
+             content = _MEDIA_DIRECTIVE_RE.sub("[media attachment]", content)
+-            # Strip inline <think>-style blocks: scratch work wastes summarizer context and risks being kept as fact.
+             if role == "assistant" and content:
+                 content = strip_think_blocks(None, content)
+             if len(content) > self._CONTENT_MAX:
+@@ -3610,15 +3610,14 @@ class ContextCompressor(SummaryDispatchMixin, PreLlmSkipMixin, MicroCompactionMi
+                 continue
+             if role == "assistant" and msg.get("tool_calls", []):
+                 content += "\n[Tool calls:\n" + "\n".join(map(self._render_tool_call_for_summary, msg["tool_calls"])) + "\n]"
+-            parts.append(f"[{role.upper()}]: {content}")
++            parts.append(f"[{transcript_author_label(msg)}]: {content}")
+         return parts
+-
+     def _serialize_for_summary(self, turns: list[dict[str, Any]]) -> str:
+         """Serialize turns into labeled, redacted text for the summarizer."""
+         return "\n\n".join(self._serialize_records_for_summary(turns))
+ 
+     def _fallback_anchors(self, turns_to_summarize: list[dict[str, Any]]) -> dict[str, list[str]]:
+-        """Locally extractable anchors: user asks, actions, files, blockers, last dropped turns."""
++        """Locally extractable anchors, with bot deliveries excluded from human asks."""
+         user_asks: list[str] = []
+         assistant_actions: list[str] = []
+         tool_actions: list[str] = []
+@@ -3645,13 +3644,14 @@ class ContextCompressor(SummaryDispatchMixin, PreLlmSkipMixin, MicroCompactionMi
+             role = msg.get("role", "unknown")
+             text = _compact_fallback_turn(msg.get("content"))
+             _collect_path_mentions(text, relevant_files)
+-            synthetic_user = role == "user" and self._is_synthetic_compression_user_turn(msg)
++            author_label = transcript_author_label(msg)
++            synthetic_user = role == "user" and (author_label.startswith("BOT ") or self._is_synthetic_compression_user_turn(msg))
+             tool_names = [_extract_tool_call_name_and_args(tc)[0] for tc in (msg.get("tool_calls") or [])] if role == "assistant" else []
+             turn_text = text
+             if tool_names:
+                 prefix = "tool calls: " + ", ".join(tool_names[:6])
+                 turn_text = f"{prefix}; {turn_text}" if turn_text else prefix
+-            turn_label = "INTERNAL CONTEXT" if synthetic_user else str(role).upper()
++            turn_label = author_label if author_label.startswith("BOT ") else ("INTERNAL CONTEXT" if synthetic_user else str(role).upper())
+             if turn_text.strip():
+                 last_dropped_turns.append(f"{turn_label}: {turn_text.strip()}")
+                 del last_dropped_turns[:-8]
+diff --git a/agent/turn_author.py b/agent/turn_author.py
+index ca2c41f3099..853598b9b73 100644
+--- a/agent/turn_author.py
++++ b/agent/turn_author.py
+@@ -101,3 +101,42 @@ def a2a_key(author: Optional[dict[str, Any]]) -> Optional[str]:
+     if not isinstance(author, dict) or not author.get("is_bot") or not author.get("id"):
+         return None
+     return f"a2a:{author['id']}"
++
++
++def delivery_display(author: Any, display_kind: Optional[str] = None,
++                     display_metadata: Optional[dict[str, Any]] = None) -> tuple[Optional[str], Optional[dict[str, Any]]]:
++    """Persist transport attribution without changing model roles or existing event types.
++
++    Author labels describe provenance, never authentication or permission. Only a parsed
++    transport author can populate this field; caller metadata cannot override it.
++    """
++    parsed = parse_turn_author(author)
++    if parsed is None:
++        return display_kind, display_metadata
++    return (display_kind or ("delivery" if parsed["is_bot"] else None),
++            {**(display_metadata or {}), "author": parsed})
++
++
++def transcript_author_label(message: Mapping[str, Any]) -> str:
++    """A provenance label for text consumers that would otherwise flatten bots to USER."""
++    metadata = message.get("display_metadata")
++    author = parse_turn_author(metadata.get("author")) if isinstance(metadata, Mapping) else None
++    if message.get("role") == "user" and author and author["is_bot"]:
++        return "BOT " + json.dumps(author, ensure_ascii=False, separators=(",", ":"))
++    return str(message.get("role", "unknown")).upper()
++
++
++def project_delivery_message(message: dict[str, Any], content_key: str = "content") -> dict[str, Any]:
++    """Display API projection for clients that only understand user/assistant/system.
++
++    SQLite/model history remains untouched. Existing system-row renderers (including
++    Relay) can display the bot's name without needing a new role or client release.
++    """
++    metadata = message.get("display_metadata")
++    author = parse_turn_author(metadata.get("author")) if isinstance(metadata, Mapping) else None
++    if message.get("display_kind") != "delivery" or not author or not author["is_bot"]:
++        return message
++    content = message.get(content_key)
++    if not isinstance(content, str):
++        return message
++    return {**message, "role": "system", content_key: f"{author['name'] or author['id'] or 'Bot'}: {content}"}
+diff --git a/agent/turn_context.py b/agent/turn_context.py
+index 32cfaeecd8c..c02ab3286f6 100644
+--- a/agent/turn_context.py
++++ b/agent/turn_context.py
+@@ -689,6 +689,13 @@ def _stage_turn_user_message(
+         user_msg["display_kind"] = persist_user_display_kind
+     if persist_user_display_metadata:
+         user_msg["display_metadata"] = persist_user_display_metadata
++    from agent.turn_author import delivery_display
++    kind, metadata = delivery_display(getattr(agent, "_turn_author", None),
++                                      user_msg.get("display_kind"), user_msg.get("display_metadata"))
++    if kind:
++        user_msg["display_kind"] = kind
++    if metadata:
++        user_msg["display_metadata"] = metadata
+     # The platform message id survives the turn-start flush; restart drain-window
+     # recovery dedups via ``has_platform_message_id`` against this row.
+     if persist_user_platform_id is not None:
+diff --git a/apps/desktop/src/lib/chat-messages.delivery-author.test.ts b/apps/desktop/src/lib/chat-messages.delivery-author.test.ts
+new file mode 100644
+index 00000000000..95e7721c7c1
+--- /dev/null
++++ b/apps/desktop/src/lib/chat-messages.delivery-author.test.ts
+@@ -0,0 +1,18 @@
++import { expect, it, vi } from 'vitest'
++import { toChatMessages } from './chat-messages/hydration'
++
++// Filesystem/media UI dependencies are outside this transcript-only test.
++vi.mock('@/lib/media', () => ({ mediaDisplayLabel: (value: string) => value, mediaMarkdownHref: (value: string) => value }))
++
++vi.mock('@/lib/connector-tools', () => ({ TOOL_LABELS_ARG: '__tool_labels' }))
++
++it.each([false, true])('restores bot provenance with metadata serialized=%s', serialized => {
++  const metadata = { author: { id: 'bot:alpha', name: 'Alpha', is_bot: true } }
++  const messages = toChatMessages([
++    { role: 'user', content: 'Brad request', timestamp: 1 },
++    { role: 'system', content: 'Alpha: work order', timestamp: 2, display_kind: 'delivery',
++      display_metadata: serialized ? JSON.stringify(metadata) : metadata }
++  ])
++  expect(messages.map(message => message.role)).toEqual(['user', 'system'])
++  expect(JSON.stringify(messages[1])).toContain('Alpha: work order')
++})
+diff --git a/apps/desktop/vitest.delivery.config.ts b/apps/desktop/vitest.delivery.config.ts
+new file mode 100644
+index 00000000000..16a924720c9
+--- /dev/null
++++ b/apps/desktop/vitest.delivery.config.ts
+@@ -0,0 +1,8 @@
++// Pure transcript conversion: no Electron, React transform, or browser required.
++import { fileURLToPath, URL } from 'node:url'
++import { defineConfig } from 'vitest/config'
++
++export default defineConfig({
++  resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
++  test: { environment: 'node', include: ['src/lib/chat-messages.delivery-author.test.ts'] }
++})
+diff --git a/hermes_cli/web_routers/sessions.py b/hermes_cli/web_routers/sessions.py
+index 243039f55e8..26c7de497db 100644
+--- a/hermes_cli/web_routers/sessions.py
++++ b/hermes_cli/web_routers/sessions.py
+@@ -683,11 +683,13 @@ def _project_for_display(messages: list, *, home=None, inline_images: bool = Tru
+                 return {**message, "content": _coerce_message_text(message["content"], image_urls=False)}
+             return message
+ 
++    from agent.turn_author import project_delivery_message
+     projected_messages = []
+     for message in messages:
+         message = _with_tool_call_labels(message)
+         if coerce is not None:
+             message = coerce(message)
++        message = project_delivery_message(message)
+         # Same read-side typing as session.resume (tui_gateway/session_history.py).
+         failed_turn = not message.get("display_kind") and untyped_failed_turn_display_kind(
+             message.get("role"), message.get("content"))
+diff --git a/tests/agent/test_delivery_author_persistence.py b/tests/agent/test_delivery_author_persistence.py
+new file mode 100644
+index 00000000000..80c3f7226b0
+--- /dev/null
++++ b/tests/agent/test_delivery_author_persistence.py
+@@ -0,0 +1,87 @@
++"""Durable delivery attribution across crash persistence and transcript readers (#198)."""
++from types import SimpleNamespace
++
++import pytest
++
++from agent.background_review import _digest_history, spawn_background_review_thread
++from agent.context_compressor import ContextCompressor
++from agent.memory_manager import _redact_messages_for_egress
++from agent.session_persistence import _db_flush_collect
++from agent.turn_context import _stage_turn_user_message, build_api_messages
++from hermes_state import SessionDB
++from tools.session_search_tool import _read_session
++from hermes_cli.web_routers.sessions import _project_for_display
++from tui_gateway.server import _history_to_messages
++
++AUTHOR = {"id": "bot:alpha", "name": "Alpha", "is_bot": True}
++
++
++def test_author_survives_crash_flush_resume_search_memory_and_summary(tmp_path):
++    agent = SimpleNamespace(_turn_author=AUTHOR, _last_flushed_db_idx=0, session_id="synthetic")
++    message, _ = _stage_turn_user_message(agent, "work order", None, None, None, None, {"source": "fixture"})
++    rows, _ = _db_flush_collect(agent, [message], [])
++    with SessionDB(tmp_path / "state.db") as db:
++        db.create_session("synthetic", source="tui")
++        db.append_messages_batch("synthetic", rows)
++        restored = db.get_messages_as_conversation("synthetic")
++        import json
++        searched = json.loads(_read_session(db, "synthetic"))["messages"]
++    for row in [restored[0], searched[0], _redact_messages_for_egress(restored)[0]]:
++        assert row["display_kind"] == "delivery"
++        assert row["display_metadata"] == {"source": "fixture", "author": AUTHOR}
++        assert row["role"] == "user"  # Provider role remains independent of transcript author.
++    tui_row = _history_to_messages(restored)[0]
++    relay_row = _project_for_display(restored)[0]
++    for row, content_key in [(tui_row, "text"), (relay_row, "content")]:
++        assert row["role"] == "system"
++        assert row[content_key] == "Alpha: work order"
++        assert row["display_metadata"]["author"] == AUTHOR
++    assert restored[0]["role"] == "user" and restored[0]["content"] == "work order"
++    compressor = ContextCompressor.__new__(ContextCompressor)
++    summary = compressor._serialize_for_summary(restored)
++    assert 'BOT {"id":"bot:alpha","name":"Alpha","is_bot":true}' in summary
++    assert "[USER]" not in summary
++    anchors = compressor._fallback_anchors(restored)
++    assert anchors["user_asks"] == []
++    assert anchors["last_dropped_turns"][0].startswith("BOT ")
++
++
++@pytest.mark.parametrize("kind", [None, "hidden", "process_complete"])
++def test_transport_author_merges_metadata_without_overwriting_event_type(kind):
++    agent = SimpleNamespace(_turn_author=AUTHOR)
++    supplied = {"task_count": 1, "author": {"name": "claimed"}}
++    message, _ = _stage_turn_user_message(agent, "fixture", None, None, None, kind, supplied)
++    assert message["display_kind"] == (kind or "delivery")
++    assert message["display_metadata"] == {"task_count": 1, "author": AUTHOR}
++    assert supplied["author"] == {"name": "claimed"}
++
++
++def test_later_human_turn_does_not_inherit_bot_attribution():
++    agent = SimpleNamespace(_turn_author=AUTHOR)
++    bot, _ = _stage_turn_user_message(agent, "bot", None, None, None, None, None)
++    agent._turn_author = None
++    human, _ = _stage_turn_user_message(agent, "Brad", None, None, None, None, None)
++    assert bot["display_metadata"]["author"] == AUTHOR
++    assert "display_kind" not in human and "display_metadata" not in human
++
++
++def test_memory_skill_review_retains_bot_provenance_without_mutating_cached_history():
++    bot = {"role": "user", "content": "bot request", "display_kind": "delivery", "display_metadata": {"author": AUTHOR}}
++    history = [bot, {"role": "assistant", "content": "done"}]
++    digest = _digest_history(history, tail=1)[0]["content"]
++    assert 'BOT {"id":"bot:alpha"' in digest and "USER: bot request" not in digest
++    _, prompt = spawn_background_review_thread(SimpleNamespace(), history, review_memory=True, task_cfg={})
++    assert 'Transcript row 0: BOT {"id":"bot:alpha"' in prompt
++    assert history[0] is bot and bot["content"] == "bot request"
++
++
++def test_provider_wire_drops_author_metadata_and_preserves_cached_content():
++    agent = SimpleNamespace(_current_turn_timestamp=1, ephemeral_system_prompt=None,
++                            _copy_reasoning_content_for_api=lambda source, target: None,
++                            _should_sanitize_tool_calls=lambda: False)
++    history = [{"role": "user", "content": "work order", "display_kind": "delivery",
++                "display_metadata": {"author": AUTHOR}}]
++    wire, _ = build_api_messages(agent, history, current_turn_user_idx=0, ext_prefetch_cache=None,
++                                 plugin_user_context=None, moa_config=None, active_system_prompt="")
++    assert wire == [{"role": "user", "content": "work order"}]
++    assert history[0]["display_metadata"]["author"] == AUTHOR
+diff --git a/tests/tui_gateway/test_queued_prompt_persistence.py b/tests/tui_gateway/test_queued_prompt_persistence.py
+index c8bb60ac445..a34f202dfc1 100644
+--- a/tests/tui_gateway/test_queued_prompt_persistence.py
++++ b/tests/tui_gateway/test_queued_prompt_persistence.py
+@@ -297,3 +297,39 @@ def test_merge_after_in_place_compaction_updates_the_live_queued_row(monkeypatch
+     finally:
+         server._sessions.pop(sid, None)
+         db.close()
++
++
++def test_authored_delivery_is_durable_at_accept_and_after_queue_drain(monkeypatch, tmp_path):
++    """An attributed queued delivery must never have an unattributed durable window."""
++    author = {"id": "bot:alpha", "name": "Alpha", "is_bot": True}
++    with SessionDB(tmp_path / "state.db") as db:
++        sid, key = _desktop_session(monkeypatch, db)
++        session = server._sessions[sid]
++        try:
++            server._ensure_session_db_row(session)
++            # Idle acceptance writes before build, and must already carry the sender.
++            server._persist_session_row_for_submit("idle", session, "idle delivery", turn_author=author)
++            idle = db.get_messages(key)[0]
++            assert idle["display_kind"] == "delivery"
++            assert idle["display_metadata"]["author"] == author
++            _busy(session)
++            response = server._handle_busy_submit("queued", sid, session, "queued delivery", "ws",
++                                                  queued=True, display_kind=None, turn_author=author)
++            assert response["result"]["status"] == "queued"
++            accepted = db.get_messages(key)[-1]
++            assert accepted["display_metadata"]["author"] == author
++            assert accepted["display_kind"] == "delivery"
++            db.append_message(key, "assistant", content="first turn done")
++            with session["history_lock"]:
++                session["running"] = False
++                server._clear_inflight_turn(session)
++            monkeypatch.setattr(server, "_run_prompt_submit",
++                                lambda rid, s, sess, text, **kw: _run_turn(sess, db, key, text, "reply"))
++            assert server._drain_queued_prompt("drain", sid, session)
++            active = _active_rows(db, key)
++            delivery = next(row for row in active if row["content"] == "queued delivery")
++            assert delivery["display_kind"] == "delivery"
++            assert delivery["display_metadata"] == {"author": author}
++            assert len([row for row in active if row["content"] == "queued delivery"]) == 1
++        finally:
++            server._sessions.pop(sid, None)
+diff --git a/tools/session_search_tool.py b/tools/session_search_tool.py
+index fd64fcf6eca..bd7061ee8ab 100644
+--- a/tools/session_search_tool.py
++++ b/tools/session_search_tool.py
+@@ -242,7 +242,7 @@ def _shape_message(m: dict[str, Any], anchor_id: Optional[int] = None,
+         from tools.ansi_strip import strip_ansi
+         content = strip_ansi(content)
+     entry = {"id": m.get("id"), "role": m.get("role"), "content": content, "timestamp": m.get("timestamp")}
+-    entry.update({k: m.get(k) for k in ("tool_name", "tool_calls", "tool_call_id") if m.get(k)})
++    entry.update({k: m.get(k) for k in ("tool_name", "tool_calls", "tool_call_id", "display_kind", "display_metadata") if m.get(k)})
+     if anchor_id is not None and m.get("id") == anchor_id:
+         entry["anchor"] = True
+     if max_content_len and content and len(content) > max_content_len:
+diff --git a/tui_gateway/methods_prompt.py b/tui_gateway/methods_prompt.py
+index 07e6baa6b7f..a22954ea7f9 100644
+--- a/tui_gateway/methods_prompt.py
++++ b/tui_gateway/methods_prompt.py
+@@ -555,7 +555,7 @@ def _reopen_if_finalized(db, session_id: str) -> None:
+         db.reopen_session(session_id)
+ 
+ 
+-def _persist_session_row_for_submit(rid, session, text=None, display_kind=None):
++def _persist_session_row_for_submit(rid, session, text=None, display_kind=None, *, turn_author=None):
+     """Lazily persist the DB row now that the user sent a message (a branch becomes real
+     here), then the message itself (#111868: a freeze during the first build must leave a
+     resumable transcript); the error reply is the only user-visible signal (desktop maps it to a toast)."""
+@@ -575,7 +575,8 @@ def _persist_session_row_for_submit(rid, session, text=None, display_kind=None):
+             with _session_db(session) as db:
+                 if db is not None:
+                     _reopen_if_finalized(db, str(session.get("session_key") or ""))
+-            _persist_submit_user_row(session, text, display_kind)
++            author_kwargs = {"turn_author": turn_author} if turn_author else {}
++            _persist_submit_user_row(session, text, display_kind, **author_kwargs)
+             return None
+     except Exception as exc:
+         failure = describe_storage_failure(exc)
+@@ -813,7 +814,8 @@ def _(rid, params: dict) -> dict:
+         logger.warning(
+             "compute-host dispatch failed for session %s; falling back inline: %s", sid,
+             isolated_response["error"].get("message", "unknown error"))
+-    if (err := _persist_session_row_for_submit(rid, session, text, display_kind)) is not None:
++    author_kwargs = {"turn_author": turn_author} if turn_author else {}
++    if (err := _persist_session_row_for_submit(rid, session, text, display_kind, **author_kwargs)) is not None:
+         return err
+     # Capture before starting the worker: it consumes the staging dict and may finish before the RPC returns.
+     staged_user = session.get("_submit_user_row") or {}
+diff --git a/tui_gateway/prompt_turn.py b/tui_gateway/prompt_turn.py
+index 0cc90dee8a2..6898f2a5a7a 100644
+--- a/tui_gateway/prompt_turn.py
++++ b/tui_gateway/prompt_turn.py
+@@ -1132,6 +1132,8 @@ def _run_prompt_submit(
+         logger.warning(
+             "prompt dispatch: session store unavailable for %s — this turn may not persist",
+             session.get("session_key") or sid)
++    from agent.turn_author import delivery_display
++    display_kind, display_metadata = delivery_display(turn_author, display_kind, display_metadata)
+     admitted = _admit_prompt_turn(
+         sid, session, text, image_paths, queued_prompt_generation, display_kind, display_metadata)
+     if admitted is None:
+diff --git a/tui_gateway/session_auto_continue.py b/tui_gateway/session_auto_continue.py
+index 9615b5a927b..ad3aa884d32 100644
+--- a/tui_gateway/session_auto_continue.py
++++ b/tui_gateway/session_auto_continue.py
+@@ -342,9 +342,10 @@ def _persist_queued_user_row(session: dict, envelope: dict, display_kind: str |
+     # ``display_metadata`` marker: ``reopen_session`` retires still-marked rows after a restart
+     # discarded the in-memory queue (#125577); the drain's replacement row is unmarked.
+     from hermes_state_common import QUEUED_PROMPT_METADATA_KEY
++    author_kwargs = {"turn_author": envelope["turn_author"]} if envelope.get("turn_author") else {}
+     staged = _write_submit_user_row(
+         session, envelope.get("text"), display_kind,
+-        accept_metadata={QUEUED_PROMPT_METADATA_KEY: True})
++        accept_metadata={QUEUED_PROMPT_METADATA_KEY: True}, **author_kwargs)
+     if staged is not None:
+         envelope["_submit_user_row"] = staged
+         if display_kind:
+@@ -370,12 +371,13 @@ def _replace_queued_user_row_for_turn(session: dict, queued: dict, is_dispatchin
+     # The DISPATCHING envelope's replacement carries no marker (its turn adopts the row immediately);
+     # still-queued envelopes keep the never-drained marker (#125577) so a restart between drains
+     # retires the row rather than gluing the never-run prompt into the previous turn.
++    author_kwargs = {"turn_author": queued["turn_author"]} if queued.get("turn_author") else {}
+     if is_dispatching:
+-        _persist_submit_user_row(session, queued.get("text"), queued.get("_queued_display_kind"))
++        _persist_submit_user_row(session, queued.get("text"), queued.get("_queued_display_kind"), **author_kwargs)
+     else:
+         from hermes_state_common import QUEUED_PROMPT_METADATA_KEY
+         _persist_submit_user_row(session, queued.get("text"), queued.get("_queued_display_kind"),
+-                                 accept_metadata={QUEUED_PROMPT_METADATA_KEY: True})
++                                 accept_metadata={QUEUED_PROMPT_METADATA_KEY: True}, **author_kwargs)
+     fresh = session.get("_submit_user_row")
+     if not (isinstance(fresh, dict) and isinstance(fresh.get("_row_id"), int)):
+         return None  # re-append wrote nothing: keep the accept-time row active
+diff --git a/tui_gateway/session_history.py b/tui_gateway/session_history.py
+index 3f9f7dfbb93..fc4ad856212 100644
+--- a/tui_gateway/session_history.py
++++ b/tui_gateway/session_history.py
+@@ -361,7 +361,8 @@ def _history_to_messages(history: list[dict], *, profile_home=None, image_urls:
+         if m.get("display_metadata"):
+             msg["display_metadata"] = m["display_metadata"]
+         messages.append(msg)
+-    return project_history_commentary(messages, home=profile_home)
++    from agent.turn_author import project_delivery_message
++    return project_history_commentary([project_delivery_message(msg, "text") for msg in messages], home=profile_home)
+ 
+ 
+ def _coerce_seed_history(value: Any) -> list[dict]:
+diff --git a/tui_gateway/session_workdir.py b/tui_gateway/session_workdir.py
+index 07552881763..1d0d5813f0e 100644
+--- a/tui_gateway/session_workdir.py
++++ b/tui_gateway/session_workdir.py
+@@ -645,7 +645,7 @@ def _submit_row_owner_key(staged: dict, session: dict) -> str:
+ 
+ 
+ def _write_submit_user_row(session: dict, text: Any, display_kind: str | None,
+-                           accept_metadata: dict | None = None) -> dict | None:
++                           accept_metadata: dict | None = None, *, turn_author: dict | None = None) -> dict | None:
+     """Write the submitted user turn to the transcript and RETURN the durable dict (stamped
+     ``_DB_PERSISTED_MARKER``/``_row_id``) WITHOUT slotting it on the session. The write half of
+     :func:`_persist_submit_user_row`, shared by the busy-queue accept (which attaches the dict to
+@@ -661,6 +661,8 @@ def _write_submit_user_row(session: dict, text: Any, display_kind: str | None,
+     from agent.context_compressor import _DB_PERSISTED_MARKER
+     from agent.message_metadata import stamp_message_timestamp, stamp_message_uid
+     staged = stamp_message_timestamp({"role": "user", "content": text})
++    from agent.turn_author import delivery_display
++    display_kind, accept_metadata = delivery_display(turn_author, display_kind, accept_metadata)
+     if display_kind:
+         staged["display_kind"] = display_kind
+     if accept_metadata:
+@@ -685,7 +687,7 @@ def _write_submit_user_row(session: dict, text: Any, display_kind: str | None,
+ 
+ 
+ def _persist_submit_user_row(session: dict, text: Any, display_kind: str | None,
+-                             accept_metadata: dict | None = None) -> None:
++                             accept_metadata: dict | None = None, *, turn_author: dict | None = None) -> None:
+     """Write the submitted user turn at send time, before the agent build and turn: the agent's own
+     crash persist only runs once the build finished, so quitting a frozen app during a slow first build
+     left a session row with no message (#111868). The dict is staged on the session already stamped
+@@ -694,7 +696,8 @@ def _persist_submit_user_row(session: dict, text: Any, display_kind: str | None,
+     the turn's crash persist then writes the row as before. ``accept_metadata`` marks a row that
+     belongs to a still-QUEUED envelope (#125577); a dispatching turn's row is never marked."""
+     session.pop("_submit_user_row", None)  # a failed/unsupported write must not acknowledge an older send
+-    if (staged := _write_submit_user_row(session, text, display_kind, accept_metadata)) is not None:
++    author_kwargs = {"turn_author": turn_author} if turn_author else {}
++    if (staged := _write_submit_user_row(session, text, display_kind, accept_metadata, **author_kwargs)) is not None:
+         session["_submit_user_row"] = staged
+ 
+ 
+diff --git a/ui-tui/src/__tests__/delivery-author.test.ts b/ui-tui/src/__tests__/delivery-author.test.ts
+new file mode 100644
+index 00000000000..d066189179f
+--- /dev/null
++++ b/ui-tui/src/__tests__/delivery-author.test.ts
+@@ -0,0 +1,12 @@
++import { expect, it } from 'vitest'
++import { toTranscriptMessages } from '../domain/messages.js'
++
++it('restores a delivery with its author and a system glyph while Brad keeps the user role', () => {
++  expect(toTranscriptMessages([
++    { role: 'user', text: 'Brad request' },
++    { role: 'system', text: 'Alpha: work order', display_kind: 'delivery',
++      display_metadata: { author: { id: 'bot:alpha', name: 'Alpha', is_bot: true } } }
++  ]).map(({ role, text }) => [role, text])).toEqual([
++    ['user', 'Brad request'], ['system', 'Alpha: work order']
++  ])
++})
+-- 
+2.43.0
+

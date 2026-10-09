@@ -1,0 +1,20 @@
+▶ not activated — using HERMES_PYTHON: /home/brad/.hermes/installs/66cef3827c817e6e/test-environment/gen-0d5891f1091642ea909f2ee4a8cf4321/venv/bin/python
+▶ running per-file parallel test suite via run_tests_parallel.py
+  (TZ=UTC LANG=C.UTF-8 PYTHONHASHSEED=0; clean env)
+▶ pre-compiling bytecode cache
+▶ launching test runner
+Discovered 2 test files (~15 tests) under ['tests/agent/test_delivery_author_persistence.py', 'tests/tui_gateway/test_queued_prompt_persistence.py']; running with -j 16
+[ 33.3% |     5/~15 | ✓7 | ✗0] ✓ tests/agent/test_delivery_author_persistence.py (7✓, 1.9s)
+[100.0% |    15/~15 | ✓17 | ✗ 0] ✓ tests/tui_gateway/test_queued_prompt_persistence.py (10✓, 6.4s)
+
+=== Summary: 2 files, 17 tests passed, 0 failed (100% complete) in 6.4s (16 workers) ===
+  Durations cached to test_durations.json (2 files)
+
+=== Per-file subprocess time distribution ===
+  Files:   2
+  Total subprocess CPU-wall: 8.3s  (runner wall: 6.4s, parallelism: 16x)
+  P50: 6.38s  P90: 6.38s  P95: 6.38s  P99: 6.38s  Max: 6.38s
+  <1s: 0 files (0%)  <2s: 1 files (50%)
+  Top 10 slowest:
+      6.38s  tests/tui_gateway/test_queued_prompt_persistence.py
+      1.94s  tests/agent/test_delivery_author_persistence.py
