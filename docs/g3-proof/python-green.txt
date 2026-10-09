@@ -3,18 +3,18 @@
   (TZ=UTC LANG=C.UTF-8 PYTHONHASHSEED=0; clean env)
 ▶ pre-compiling bytecode cache
 ▶ launching test runner
-Discovered 2 test files (~15 tests) under ['tests/agent/test_delivery_author_persistence.py', 'tests/tui_gateway/test_queued_prompt_persistence.py']; running with -j 16
-[ 33.3% |     5/~15 | ✓7 | ✗0] ✓ tests/agent/test_delivery_author_persistence.py (7✓, 1.9s)
-[100.0% |    15/~15 | ✓17 | ✗ 0] ✓ tests/tui_gateway/test_queued_prompt_persistence.py (10✓, 6.4s)
+Discovered 2 test files (~22 tests) under ['tests/agent/test_delivery_author_persistence.py', 'tests/tui_gateway/test_queued_prompt_persistence.py']; running with -j 16
+[ 45.5% |    10/~22 | ✓13 | ✗ 0] ✓ tests/agent/test_delivery_author_persistence.py (13✓, 2.2s)
+[100.0% |    22/~22 | ✓25 | ✗ 0] ✓ tests/tui_gateway/test_queued_prompt_persistence.py (12✓, 7.0s)
 
-=== Summary: 2 files, 17 tests passed, 0 failed (100% complete) in 6.4s (16 workers) ===
+=== Summary: 2 files, 25 tests passed, 0 failed (100% complete) in 7.1s (16 workers) ===
   Durations cached to test_durations.json (2 files)
 
 === Per-file subprocess time distribution ===
   Files:   2
-  Total subprocess CPU-wall: 8.3s  (runner wall: 6.4s, parallelism: 16x)
-  P50: 6.38s  P90: 6.38s  P95: 6.38s  P99: 6.38s  Max: 6.38s
-  <1s: 0 files (0%)  <2s: 1 files (50%)
+  Total subprocess CPU-wall: 9.2s  (runner wall: 7.1s, parallelism: 16x)
+  P50: 7.03s  P90: 7.03s  P95: 7.03s  P99: 7.03s  Max: 7.03s
+  <1s: 0 files (0%)  <2s: 0 files (0%)
   Top 10 slowest:
-      6.38s  tests/tui_gateway/test_queued_prompt_persistence.py
-      1.94s  tests/agent/test_delivery_author_persistence.py
+      7.03s  tests/tui_gateway/test_queued_prompt_persistence.py
+      2.21s  tests/agent/test_delivery_author_persistence.py

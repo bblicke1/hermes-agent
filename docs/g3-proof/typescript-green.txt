@@ -1,6 +1,5 @@
-TUI: vitest run src/__tests__/delivery-author.test.ts — 1 passed (228ms).
-Desktop: vitest run --config vitest.delivery.config.ts — 2 passed (278ms).
-Both used the existing canonical node_modules via a worktree-local dependency symlink; no installs.
-Desktop standard config is unavailable: @rolldown/plugin-babel missing.
-The focused node config tests the real hydration converter, mocking only media presentation and connector label constants (no tools in these fixtures).
-No Electron, physical TUI, Android, live delivery, or real session acceptance is claimed.
+TUI: node ../node_modules/vitest/vitest.mjs run src/__tests__/delivery-author.test.ts — 1 passed (233ms).
+Desktop: node ../../node_modules/vitest/vitest.mjs run --config vitest.delivery.config.ts — 2 passed (292ms).
+Fixtures now exercise the final role=user bot prefix, with no delivery kind.
+Existing dependencies only; no installs. Focused Desktop config mocks media presentation and connector labels.
+No physical TUI, Electron, Relay, live delivery or private-session acceptance claimed.
