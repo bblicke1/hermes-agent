@@ -1,0 +1,121 @@
+ ┊  Synthetic history 73                                                                      │
+ ┊  Synthetic history 74                                                                      │
+ ┊  Synthetic history 75                                                                      │
+ ┊  Synthetic history 76                                                                      │
+ ┊  Synthetic history 77                                                                      │
+ ┊  Synthetic history 78                                                                      │
+ ┊  Synthetic history 79                                                                      │
+ ┊  Synthetic history 80                                                                      │
+ ┊  Synthetic history 81                                                                      │
+ ┊  Synthetic history 82                                                                      │
+ ┊  Synthetic history 83                                                                      │
+ ┊  Synthetic history 84                                                                      │
+ ┊  Synthetic history 85                                                                      │
+ ┊  Synthetic history 86                                                                      │
+ ┊  Synthetic history 87                                                                      │
+ ┊  Synthetic history 88                                                                      │
+ ┊  Synthetic history 89                                                                      │
+ ┊  Synthetic history 90                                                                      │
+ ┊  Synthetic history 91                                                                      │
+ ┊  Synthetic history 92                                                                      │
+ ┊  Synthetic history 93                                                                      │
+ ┊  Synthetic history 94                                                                      │
+ ┊  Synthetic history 95                                                                      │
+ ┊  Synthetic history 96                                                                      │
+ ┊  Synthetic history 97                                                                      │
+ ┊  Synthetic history 98                                                                      │
+ ┊  Synthetic history 99                                                                      │
+ ┊  Synthetic history 100                                                                     │
+ ┊  Synthetic history 101                                                                     │
+ ┊  Synthetic history 102                                                                     │
+ ┊  Synthetic history 103                                                                     │
+ ┊  Synthetic history 104                                                                     │
+ ┊  Synthetic history 105                                                                     │
+ ┊  Synthetic history 106                                                                     │
+ ┊  Synthetic history 107                                                                     │
+ ┊  Synthetic history 108                                                                     │
+ ┊  Synthetic history 109                                                                     │
+ ┊  Synthetic history 110                                                                     │
+ ┊  Synthetic history 111                                                                     │
+ ┊  Synthetic history 112                                                                     │
+ ┊  Synthetic history 113                                                                     │
+ ┊  Synthetic history 114                                                                     │
+ ┊  Synthetic history 115                                                                     │
+ ┊  Synthetic history 116                                                                     │
+ ┊  Synthetic history 117                                                                     ┃
+ ┊  Synthetic history 118                                                                     ┃
+ ┊  Synthetic history 119                                                                     ┃
+ ┊  Synthetic history 120                                                                     ┃
+ ┊  Synthetic history 121                                                                     ┃
+ ┊  Synthetic history 122                                                                     ┃
+ ┊  Synthetic history 123                                                                     ┃
+ ┊  Synthetic history 124                                                                     ┃
+ ┊  Synthetic history 125                                                                     ┃
+ ┊  Synthetic history 126                                                                     ┃
+ ┊  Synthetic history 127                                                                     ┃
+ ┊  Synthetic history 128                                                                     ┃
+ ┊  Synthetic history 129                                                                     ┃
+ ┊  Synthetic history 130                                                                     ┃
+ ┊  Synthetic history 131                                                                     ┃
+ ┊  Synthetic history 132                                                                     ┃
+ ┊  Synthetic history 133                                                                     ┃
+ ┊  Synthetic history 134                                                                     ┃
+ ┊  Synthetic history 135                                                                     ┃
+ ┊  Synthetic history 136                                                                     ┃
+ ┊  Synthetic history 137                                                                     ┃
+ ┊  Synthetic history 138                                                                     ┃
+ ┊  Synthetic history 139                                                                     ┃
+ ┊  Synthetic history 140                                                                     ┃
+ ┊  Synthetic history 141                                                                     ┃
+ ┊  Synthetic history 142                                                                     ┃
+ ┊  Synthetic history 143                                                                     ┃
+ ┊  Synthetic history 144                                                                     ┃
+ ┊  Synthetic history 145                                                                     ┃
+ ┊  Synthetic history 146                                                                     ┃
+ ┊  Synthetic history 147                                                                     ┃
+ ┊  Synthetic history 148                                                                     ┃
+ ┊  Synthetic history 149                                                                     ┃
+ ┊  Synthetic history 150                                                                     ┃
+ ┊  Synthetic history 151                                                                     ┃
+ ┊  Synthetic history 152                                                                     ┃
+ ┊  Synthetic history 153                                                                     ┃
+ ┊  Synthetic history 154                                                                     ┃
+ ┊  Synthetic history 155                                                                     ┃
+ ┊  Synthetic history 156                                                                     ┃
+ ┊  Synthetic history 157                                                                     ┃
+ ┊  Synthetic history 158                                                                     ┃
+ ┊  Synthetic history 159                                                                     ┃
+ ┊  Synthetic history 160                                                                     ┃
+ ┊  Synthetic history 161                                                                     ┃
+ ┊  Synthetic history 162                                                                     ┃
+ ┊  Synthetic history 163                                                                     ┃
+ ┊  Synthetic history 164                                                                     ┃
+ ┊  Synthetic history 165                                                                     ┃
+ ┊  Synthetic history 166                                                                     ┃
+ ┊  Synthetic history 167                                                                     ┃
+ ┊  Synthetic history 168                                                                     ┃
+ ┊  Synthetic history 169                                                                     ┃
+ ┊  Synthetic history 170                                                                     ┃
+ ┊  Synthetic history 171                                                                     ┃
+ ┊  Synthetic history 172                                                                     ┃
+ ┊  Synthetic history 173                                                                     ┃
+ ┊  Synthetic history 174                                                                     ┃
+ ┊  Synthetic history 175                                                                     ┃
+ ┊  Synthetic history 176                                                                     ┃
+ ┊  Synthetic history 177                                                                     ┃
+ ┊  Synthetic history 178                                                                     ┃
+ ┊  Synthetic history 179                                                                     ┃
+                                                                                              ┃
+ ↪ steered                                                                                    ┃
+ ❯ Synthetic correction                                                                       ┃
+                                                                                              ┃
+
+
+ ─ (´･_･`) contemplating… │                                                           ─ ~/repo
+ ▾ Todo (0/10)
+   [ ] Synthetic task 0
+   [ ] Synthetic task 1
+   [ ] Synthetic task 2
+   +7 more
+
+ ❯ SYNTHETIC: u/d scroll; x collapse; s steer; c complete; e end; q quits

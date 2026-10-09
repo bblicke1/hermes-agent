@@ -139,3 +139,10 @@ it('counts attached diffs only for an expanded tool body and invalidates their h
   )
   expect(messageHeightKey(msg)).not.toBe(messageHeightKey({ ...msg, inlineDiffs: [] }))
 })
+
+it('reserves a line for the steered label and invalidates the height cache', () => {
+  const msg: Msg = { role: 'user', text: 'correction' }
+  const opts = { compact: false, details: false }
+  expect(estimatedMsgHeight({ ...msg, steered: true }, 80, opts)).toBe(estimatedMsgHeight(msg, 80, opts) + 1)
+  expect(messageHeightKey({ ...msg, steered: true })).not.toBe(messageHeightKey(msg))
+})

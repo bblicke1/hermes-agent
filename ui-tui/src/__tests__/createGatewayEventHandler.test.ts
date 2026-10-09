@@ -197,7 +197,7 @@ describe('createGatewayEventHandler', () => {
     expect(getUiState().info?.stored_session_id).toBe('durable-2')
   })
 
-  it('archives incomplete todos into transcript flow at end of turn so they scroll up', () => {
+  it('retains incomplete todos in the composer dock at end of turn', () => {
     const appended: Msg[] = []
 
     const todos = [
@@ -218,11 +218,8 @@ describe('createGatewayEventHandler', () => {
     const finalText = appended.find(msg => msg.role === 'assistant' && msg.text === 'Started a todo list.')
 
     expect(finalText).toBeDefined()
-    expect(trail).toMatchObject({ kind: 'trail', role: 'system', todos, todoIncomplete: true })
-    // Todo archive must sit ABOVE the final assistant text so the panel
-    // doesn't visibly jump across the final answer at end-of-turn.
-    expect(appended.indexOf(trail!)).toBeLessThan(appended.indexOf(finalText!))
-    expect(getTurnState().todos).toEqual([])
+    expect(trail).toBeUndefined()
+    expect(getTurnState().todos).toEqual(todos)
   })
 
   it('opens a billing confirm dialog routing Nous to /topup', () => {

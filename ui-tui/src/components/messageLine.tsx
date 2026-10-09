@@ -300,6 +300,11 @@ export const MessageLine = memo(function MessageLine({
         </Box>
       )}
 
+      {msg.steered && msg.role === 'user' && (
+        <Text color={t.color.muted} dim>
+          ↪ steered
+        </Text>
+      )}
       {stamp && (
         <Box>
           <NoSelect flexShrink={0} fromLeftEdge width={gutterWidth}>

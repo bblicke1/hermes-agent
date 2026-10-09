@@ -1,3 +1,4 @@
+import { Box } from '@hermes/ink'
 import { useStore } from '@nanostores/react'
 import { memo } from 'react'
 
@@ -5,7 +6,8 @@ import type { AppLayoutProgressProps } from '../app/interfaces.js'
 import { toggleTodoCollapsed, useTurnSelector } from '../app/turnStore.js'
 import { $uiState } from '../app/uiStore.js'
 import { blockRenders } from '../domain/blockLayout.js'
-import { appendToolShelfMessage } from '../lib/liveProgress.js'
+import { appendToolShelfMessage, isTodoDone } from '../lib/liveProgress.js'
+import { todoPanelRows } from '../lib/todo.js'
 import type { ActiveTool, DetailsMode, Msg, SectionVisibility } from '../types.js'
 
 import { MessageLine } from './messageLine.js'
@@ -118,7 +120,20 @@ export const LiveTodoPanel = memo(function LiveTodoPanel() {
   const todos = useTurnSelector(state => state.todos)
   const collapsed = useTurnSelector(state => state.todoCollapsed)
 
-  return <TodoPanel collapsed={collapsed} onToggle={toggleTodoCollapsed} t={ui.theme} todos={todos} />
+  if (!ui.busy && isTodoDone(todos)) return null
+
+  return (
+    <Box height={todoPanelRows(todos, collapsed, 6)} flexShrink={0} flexDirection="column">
+      <TodoPanel
+        collapsed={collapsed}
+        maxRows={6}
+        incomplete={!ui.busy}
+        onToggle={toggleTodoCollapsed}
+        t={ui.theme}
+        todos={todos}
+      />
+    </Box>
+  )
 })
 
 interface StreamingAssistantProps {

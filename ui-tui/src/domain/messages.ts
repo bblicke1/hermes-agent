@@ -102,7 +102,12 @@ export const toTranscriptMessages = (rows: unknown): Msg[] => {
       out.push({ role, text, ...(createdAt !== undefined && { createdAt }), ...(pending.length && { tools: pending }) })
       pending = []
     } else if (role === 'user' || role === 'system') {
-      out.push({ role, text, ...(createdAt !== undefined && { createdAt }) })
+      out.push({
+        role,
+        text,
+        ...(display_kind === 'steer' && { steered: true }),
+        ...(createdAt !== undefined && { createdAt })
+      })
       pending = []
     }
   }

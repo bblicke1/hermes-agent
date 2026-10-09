@@ -1,6 +1,9 @@
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { ComposerToken } from '../app/interfaces.js'
+import { submitSteer } from '../app/submissionCore.js'
+import { getUiState, patchUiState, resetUiState } from '../app/uiStore.js'
+import type { GatewayClient } from '../gatewayClient.js'
 import { prepareSubmission, shouldInterpolateSubmission } from '../app/useSubmission.js'
 
 describe('prepareSubmission', () => {
@@ -49,5 +52,59 @@ describe('visible interpolation combined with a collapsed paste', () => {
     expect(submission.display).toBe(`Tue for ${label}`)
     expect(submission.display).not.toContain('{!')
     expect(submission.text).toBe('Tue for line one\nline two')
+  })
+})
+
+describe('accepted steer transcript', () => {
+  beforeEach(() => {
+    resetUiState()
+    patchUiState({ sid: 'test', busy: true })
+  })
+  it('appends the accepted display exactly once without clearing the live turn', async () => {
+    const request = vi.fn().mockResolvedValue({ status: 'queued' })
+    const appendMessage = vi.fn(),
+      fallback = vi.fn()
+    await submitSteer(
+      'test',
+      { text: 'expanded text', display: 'compact paste' },
+      { gw: { request } as unknown as GatewayClient, appendMessage },
+      fallback
+    )
+    expect(request).toHaveBeenCalledWith('session.steer', { session_id: 'test', text: 'expanded text' })
+    expect(appendMessage).toHaveBeenCalledExactlyOnceWith({ role: 'user', text: 'compact paste', steered: true })
+    expect(fallback).not.toHaveBeenCalled()
+    expect(getUiState().busy).toBe(true)
+  })
+  it.each(['rejected', 'error'])('keeps the existing %s fallback and adds no steer row', async status => {
+    const request =
+      status === 'error' ? vi.fn().mockRejectedValue(new Error('offline')) : vi.fn().mockResolvedValue({ status })
+    const appendMessage = vi.fn(),
+      fallback = vi.fn()
+    await submitSteer(
+      'test',
+      { text: 'correction', display: 'correction' },
+      { gw: { request } as unknown as GatewayClient, appendMessage },
+      fallback
+    )
+    expect(appendMessage).not.toHaveBeenCalled()
+    expect(fallback).toHaveBeenCalledWith(
+      status === 'error'
+        ? 'steer failed — message queued for next turn'
+        : 'steer rejected — message queued for next turn'
+    )
+  })
+  it('does not append an old session acknowledgment to a new conversation', async () => {
+    const request = vi.fn().mockImplementation(async () => {
+      patchUiState({ sid: 'other' })
+      return { status: 'queued' }
+    })
+    const appendMessage = vi.fn()
+    await submitSteer(
+      'test',
+      { text: 'correction', display: 'correction' },
+      { gw: { request } as unknown as GatewayClient, appendMessage },
+      vi.fn()
+    )
+    expect(appendMessage).not.toHaveBeenCalled()
   })
 })

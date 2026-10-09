@@ -26,6 +26,7 @@ export const messageHeightKey = (msg: Msg) => {
   return [
     msg.role,
     msg.kind ?? '',
+    msg.steered ? 'steered' : '',
     hashText(
       [
         msg.text,
@@ -149,6 +150,8 @@ export const estimatedMsgHeight = (
       }
     }
   }
+
+  if (msg.steered && msg.role === 'user') h++
 
   if (msg.role === 'user' || msg.kind === 'diff') {
     // Top + bottom blank line.
