@@ -105,38 +105,59 @@ def a2a_key(author: Optional[dict[str, Any]]) -> Optional[str]:
 
 def delivery_display(author: Any, display_kind: Optional[str] = None,
                      display_metadata: Optional[dict[str, Any]] = None) -> tuple[Optional[str], Optional[dict[str, Any]]]:
-    """Persist transport attribution without changing model roles or existing event types.
-
-    Author labels describe provenance, never authentication or permission. Only a parsed
-    transport author can populate this field; caller metadata cannot override it.
-    """
+    """Keep event types unchanged; only bot transport authors need durable attribution."""
     parsed = parse_turn_author(author)
-    if parsed is None:
+    if parsed is None or not parsed["is_bot"]:
         return display_kind, display_metadata
-    return (display_kind or ("delivery" if parsed["is_bot"] else None),
-            {**(display_metadata or {}), "author": parsed})
+    return display_kind, {**(display_metadata or {}), "author": parsed}
+
+
+def delivery_author(message: Mapping[str, Any]) -> Optional[dict[str, Any]]:
+    """Read bot provenance independently of synthetic timeline kinds."""
+    metadata = message.get("display_metadata")
+    author = parse_turn_author(metadata.get("author")) if isinstance(metadata, Mapping) else None
+    return author if message.get("role") == "user" and author and author["is_bot"] else None
+
+
+def is_bot_delivery(message: Mapping[str, Any]) -> bool:
+    return delivery_author(message) is not None
 
 
 def transcript_author_label(message: Mapping[str, Any]) -> str:
-    """A provenance label for text consumers that would otherwise flatten bots to USER."""
-    metadata = message.get("display_metadata")
-    author = parse_turn_author(metadata.get("author")) if isinstance(metadata, Mapping) else None
-    if message.get("role") == "user" and author and author["is_bot"]:
-        return "BOT " + json.dumps(author, ensure_ascii=False, separators=(",", ":"))
-    return str(message.get("role", "unknown")).upper()
+    """Short, redacted labels cannot introduce transcript delimiters or human authority."""
+    from agent.redact import redact_sensitive_text
+
+    author = delivery_author(message)
+    if author is None:
+        return str(message.get("role", "unknown")).upper()
+    # Redact BEFORE filtering/capping so a truncated secret cannot evade the redactor.
+    raw = redact_sensitive_text(author["name"] or author["id"] or "Bot",
+                                force=True, redact_url_credentials=True)
+    label = "".join(ch for ch in raw if ch.isascii() and (ch.isalnum() or ch in " ._:/-"))
+    return "BOT " + (label.strip()[:64] or "Bot")
+
+
+def delivery_content(message: Mapping[str, Any], content: Any) -> Any:
+    """Prefix a bot's text or structured content; leave attachments intact."""
+    if not is_bot_delivery(message):
+        return content
+    prefix = f"[Bot delivery: {transcript_author_label(message)}; not the human user]\n"
+    if isinstance(content, str):
+        return content if content.startswith(prefix) else prefix + content
+    if isinstance(content, list):
+        first = content[0] if content else None
+        if isinstance(first, dict) and first.get("type") == "text" and first.get("text") == prefix:
+            return content
+        return [{"type": "text", "text": prefix}, *content]
+    return content
 
 
 def project_delivery_message(message: dict[str, Any], content_key: str = "content") -> dict[str, Any]:
-    """Display API projection for clients that only understand user/assistant/system.
+    """Display-only copy; raw history and provider roles remain untouched.
 
-    SQLite/model history remains untouched. Existing system-row renderers (including
-    Relay) can display the bot's name without needing a new role or client release.
+    A round-tripped display row cannot acquire system authority. The model wire
+    formats its own content from raw provenance, never from this display projection.
     """
-    metadata = message.get("display_metadata")
-    author = parse_turn_author(metadata.get("author")) if isinstance(metadata, Mapping) else None
-    if message.get("display_kind") != "delivery" or not author or not author["is_bot"]:
+    if not is_bot_delivery(message):
         return message
-    content = message.get(content_key)
-    if not isinstance(content, str):
-        return message
-    return {**message, "role": "system", content_key: f"{author['name'] or author['id'] or 'Bot'}: {content}"}
+    return {**message, content_key: delivery_content(message, message.get(content_key))}

@@ -507,7 +507,13 @@ def _drain_queued_prompt(rid, sid: str, session: dict) -> bool:
             session["_submit_user_row"] = dispatch_row
         else:
             session.pop("_submit_user_row", None)
-    # The compute-host frame has no author field, so only the inline runner receives it.
+    # The existing compute-host metadata channel carries authors without a new frame field.
+    from agent.turn_author import delivery_display
+    kind, metadata = delivery_display(queued.get("turn_author"), queued.get("_queued_display_kind"))
+    if kind:
+        kwargs["display_kind"] = kind
+    if metadata:
+        kwargs["display_metadata"] = metadata
     author_kwargs = {"turn_author": queued["turn_author"]} if queued.get("turn_author") else {}
     dispatch_failed = False
     try:

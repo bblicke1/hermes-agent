@@ -781,9 +781,8 @@ def _(rid, params: dict) -> dict:
     if err is not None:
         return err
     if turn_isolation:
-        if turn_author:
-            logger.debug("isolated compute turns carry no author yet; the turn from %s runs unattributed",
-                         turn_author.get("id"))
+        from agent.turn_author import delivery_display
+        display_kind, display_metadata = delivery_display(turn_author, display_kind, display_metadata)
         # The isolated dispatch returns BELOW before the inline persist, so the reopen
         # cannot live only in _persist_session_row_for_submit: the turn is already
         # admitted here (running, in flight, active-slot lease claimed, truncation

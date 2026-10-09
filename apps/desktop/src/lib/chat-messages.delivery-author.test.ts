@@ -10,9 +10,9 @@ it.each([false, true])('restores bot provenance with metadata serialized=%s', se
   const metadata = { author: { id: 'bot:alpha', name: 'Alpha', is_bot: true } }
   const messages = toChatMessages([
     { role: 'user', content: 'Brad request', timestamp: 1 },
-    { role: 'system', content: 'Alpha: work order', timestamp: 2, display_kind: 'delivery',
+    { role: 'user', content: '[Bot delivery: BOT Alpha; not the human user]\nwork order', timestamp: 2,
       display_metadata: serialized ? JSON.stringify(metadata) : metadata }
   ])
-  expect(messages.map(message => message.role)).toEqual(['user', 'system'])
-  expect(JSON.stringify(messages[1])).toContain('Alpha: work order')
+  expect(messages.map(message => message.role)).toEqual(['user', 'user'])
+  expect(messages[1].parts).toContainEqual({ type: 'text', text: '[Bot delivery: BOT Alpha; not the human user]\nwork order', timestamp: 2 })
 })

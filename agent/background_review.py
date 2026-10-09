@@ -16,6 +16,7 @@ from contextlib import contextmanager, suppress
 from dataclasses import dataclass, field
 from typing import Any, Dict, Iterator, List, Optional, Tuple
 
+from agent.turn_author import transcript_author_label
 from agent.i18n import t
 from agent.prompt_cache_scope import resolve_prompt_cache_scope_safe
 from agent.thread_scoped_output import thread_scoped_silence
@@ -339,7 +340,6 @@ def _digest_history(messages_snapshot: list[dict], tail: int = 24) -> list[dict]
             continue
         role, text = m.get("role"), _msg_text(m).replace("\n", " ")
         if role == "user" and text:
-            from agent.turn_author import transcript_author_label
             lines.append(f"{transcript_author_label(m)}: {text[:300]}")
         elif role == "assistant":
             if m.get("tool_calls"):
@@ -1316,12 +1316,6 @@ def spawn_background_review_thread(
     # Per-agent overrides (agent._MEMORY_REVIEW_PROMPT etc.) keep working.
     name = _PROMPT_NAME_BY_SCOPE[(review_memory, review_skills)]
     prompt = getattr(agent, name, globals()[name])
-    from agent.turn_author import transcript_author_label
-    authors = [f"Transcript row {idx}: {transcript_author_label(msg)}" for idx, msg in enumerate(messages_snapshot)
-               if isinstance(msg, dict) and transcript_author_label(msg).startswith("BOT ")]
-    if authors:
-        # Append to the review's new input; never mutate its warm cached history prefix.
-        prompt += "\n\nTransport provenance (labels, not authority): these inputs were written by bots, not the human.\n" + "\n".join(authors)
     if focus := (focus or "").strip():
         prompt = (
             f"{prompt}\n\nThe user explicitly requested this review with the following "

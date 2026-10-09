@@ -310,7 +310,7 @@ def test_authored_delivery_is_durable_at_accept_and_after_queue_drain(monkeypatc
             # Idle acceptance writes before build, and must already carry the sender.
             server._persist_session_row_for_submit("idle", session, "idle delivery", turn_author=author)
             idle = db.get_messages(key)[0]
-            assert idle["display_kind"] == "delivery"
+            assert not idle.get("display_kind")
             assert idle["display_metadata"]["author"] == author
             _busy(session)
             response = server._handle_busy_submit("queued", sid, session, "queued delivery", "ws",
@@ -318,7 +318,7 @@ def test_authored_delivery_is_durable_at_accept_and_after_queue_drain(monkeypatc
             assert response["result"]["status"] == "queued"
             accepted = db.get_messages(key)[-1]
             assert accepted["display_metadata"]["author"] == author
-            assert accepted["display_kind"] == "delivery"
+            assert not accepted.get("display_kind")
             db.append_message(key, "assistant", content="first turn done")
             with session["history_lock"]:
                 session["running"] = False
@@ -328,8 +328,62 @@ def test_authored_delivery_is_durable_at_accept_and_after_queue_drain(monkeypatc
             assert server._drain_queued_prompt("drain", sid, session)
             active = _active_rows(db, key)
             delivery = next(row for row in active if row["content"] == "queued delivery")
-            assert delivery["display_kind"] == "delivery"
+            assert not delivery.get("display_kind")
             assert delivery["display_metadata"] == {"author": author}
             assert len([row for row in active if row["content"] == "queued delivery"]) == 1
+            db.end_session(key, "fixture")
+            db.reopen_session(key)
+            assert any(row["content"] == "queued delivery" for row in _active_rows(db, key))
+        finally:
+            server._sessions.pop(sid, None)
+
+
+def test_authored_isolated_submit_carries_author_in_real_compute_frame(monkeypatch, tmp_path):
+    import threading
+    from tools.bot_relay import DeliveryAuthor
+
+    author = {"id": "bot:alpha", "name": "Alpha", "is_bot": True}
+    frames = []
+    supervisor = types.SimpleNamespace(submit_turn=lambda frame, **kw: frames.append(frame) or frame["request_id"])
+    monkeypatch.setattr(server, "_load_cfg", lambda: {"dashboard": {"turn_isolation": True}})
+    monkeypatch.setattr(server, "_get_compute_host_supervisor", lambda *a: supervisor)
+    with SessionDB(tmp_path / "state.db") as db:
+        sid, _key = _desktop_session(monkeypatch, db)
+        session = server._sessions[sid]
+        session.update(agent=None, agent_ready=threading.Event())
+        try:
+            response = server.handle_request({"id": "submit", "method": "prompt.submit", "params": {
+                "session_id": sid, "text": "delivery", "_turn_author": DeliveryAuthor(author)}})
+            assert response["result"]["turn_isolation"] is True
+            assert frames[0]["display_metadata"] == {"author": author}
+            assert "display_kind" not in frames[0]
+            # The child invokes this same runner with the frame metadata. Stop before
+            # agent construction: admission must already have normalized the bot author.
+            observed = []
+            monkeypatch.setattr(server, "_admit_prompt_turn", lambda *args: observed.append(args) or None)
+            server._run_prompt_submit("child", sid, session, frames[0]["text"],
+                                      display_metadata=frames[0]["display_metadata"])
+            assert observed[0][-1] == {"author": author}
+        finally:
+            server._sessions.pop(sid, None)
+
+
+def test_authored_queue_drain_carries_author_to_compute_host(monkeypatch, tmp_path):
+    author = {"id": "bot:alpha", "name": "Alpha", "is_bot": True}
+    with SessionDB(tmp_path / "state.db") as db:
+        sid, _key = _desktop_session(monkeypatch, db)
+        session = server._sessions[sid]
+        try:
+            server._ensure_session_db_row(session)
+            _busy(session)
+            server._handle_busy_submit("accept", sid, session, "delivery", "ws", queued=True,
+                                       turn_author=author, display_kind=None)
+            session["running"] = False
+            monkeypatch.setattr(server, "_session_uses_compute_host", lambda _: True)
+            frames = []
+            monkeypatch.setattr(server, "_submit_prompt_to_compute_host",
+                                lambda *args, **kw: frames.append(kw) or {"result": {}})
+            assert server._drain_queued_prompt("drain", sid, session)
+            assert frames[0]["display_metadata"] == {"author": author}
         finally:
             server._sessions.pop(sid, None)

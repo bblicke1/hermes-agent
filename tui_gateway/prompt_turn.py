@@ -1132,7 +1132,9 @@ def _run_prompt_submit(
         logger.warning(
             "prompt dispatch: session store unavailable for %s — this turn may not persist",
             session.get("session_key") or sid)
-    from agent.turn_author import delivery_display
+    from agent.turn_author import delivery_author, delivery_display
+    # Internal compute-host frames already carry trusted transport provenance in metadata.
+    turn_author = turn_author or delivery_author({"role": "user", "display_metadata": display_metadata})
     display_kind, display_metadata = delivery_display(turn_author, display_kind, display_metadata)
     admitted = _admit_prompt_turn(
         sid, session, text, image_paths, queued_prompt_generation, display_kind, display_metadata)
