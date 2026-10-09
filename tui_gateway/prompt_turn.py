@@ -1132,6 +1132,8 @@ def _run_prompt_submit(
         logger.warning(
             "prompt dispatch: session store unavailable for %s — this turn may not persist",
             session.get("session_key") or sid)
+    from agent.turn_author import delivery_display
+    display_kind, display_metadata = delivery_display(turn_author, display_kind, display_metadata)
     admitted = _admit_prompt_turn(
         sid, session, text, image_paths, queued_prompt_generation, display_kind, display_metadata)
     if admitted is None:

@@ -101,3 +101,42 @@ def a2a_key(author: Optional[dict[str, Any]]) -> Optional[str]:
     if not isinstance(author, dict) or not author.get("is_bot") or not author.get("id"):
         return None
     return f"a2a:{author['id']}"
+
+
+def delivery_display(author: Any, display_kind: Optional[str] = None,
+                     display_metadata: Optional[dict[str, Any]] = None) -> tuple[Optional[str], Optional[dict[str, Any]]]:
+    """Persist transport attribution without changing model roles or existing event types.
+
+    Author labels describe provenance, never authentication or permission. Only a parsed
+    transport author can populate this field; caller metadata cannot override it.
+    """
+    parsed = parse_turn_author(author)
+    if parsed is None:
+        return display_kind, display_metadata
+    return (display_kind or ("delivery" if parsed["is_bot"] else None),
+            {**(display_metadata or {}), "author": parsed})
+
+
+def transcript_author_label(message: Mapping[str, Any]) -> str:
+    """A provenance label for text consumers that would otherwise flatten bots to USER."""
+    metadata = message.get("display_metadata")
+    author = parse_turn_author(metadata.get("author")) if isinstance(metadata, Mapping) else None
+    if message.get("role") == "user" and author and author["is_bot"]:
+        return "BOT " + json.dumps(author, ensure_ascii=False, separators=(",", ":"))
+    return str(message.get("role", "unknown")).upper()
+
+
+def project_delivery_message(message: dict[str, Any], content_key: str = "content") -> dict[str, Any]:
+    """Display API projection for clients that only understand user/assistant/system.
+
+    SQLite/model history remains untouched. Existing system-row renderers (including
+    Relay) can display the bot's name without needing a new role or client release.
+    """
+    metadata = message.get("display_metadata")
+    author = parse_turn_author(metadata.get("author")) if isinstance(metadata, Mapping) else None
+    if message.get("display_kind") != "delivery" or not author or not author["is_bot"]:
+        return message
+    content = message.get(content_key)
+    if not isinstance(content, str):
+        return message
+    return {**message, "role": "system", content_key: f"{author['name'] or author['id'] or 'Bot'}: {content}"}

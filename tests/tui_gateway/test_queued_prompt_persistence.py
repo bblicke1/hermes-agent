@@ -297,3 +297,39 @@ def test_merge_after_in_place_compaction_updates_the_live_queued_row(monkeypatch
     finally:
         server._sessions.pop(sid, None)
         db.close()
+
+
+def test_authored_delivery_is_durable_at_accept_and_after_queue_drain(monkeypatch, tmp_path):
+    """An attributed queued delivery must never have an unattributed durable window."""
+    author = {"id": "bot:alpha", "name": "Alpha", "is_bot": True}
+    with SessionDB(tmp_path / "state.db") as db:
+        sid, key = _desktop_session(monkeypatch, db)
+        session = server._sessions[sid]
+        try:
+            server._ensure_session_db_row(session)
+            # Idle acceptance writes before build, and must already carry the sender.
+            server._persist_session_row_for_submit("idle", session, "idle delivery", turn_author=author)
+            idle = db.get_messages(key)[0]
+            assert idle["display_kind"] == "delivery"
+            assert idle["display_metadata"]["author"] == author
+            _busy(session)
+            response = server._handle_busy_submit("queued", sid, session, "queued delivery", "ws",
+                                                  queued=True, display_kind=None, turn_author=author)
+            assert response["result"]["status"] == "queued"
+            accepted = db.get_messages(key)[-1]
+            assert accepted["display_metadata"]["author"] == author
+            assert accepted["display_kind"] == "delivery"
+            db.append_message(key, "assistant", content="first turn done")
+            with session["history_lock"]:
+                session["running"] = False
+                server._clear_inflight_turn(session)
+            monkeypatch.setattr(server, "_run_prompt_submit",
+                                lambda rid, s, sess, text, **kw: _run_turn(sess, db, key, text, "reply"))
+            assert server._drain_queued_prompt("drain", sid, session)
+            active = _active_rows(db, key)
+            delivery = next(row for row in active if row["content"] == "queued delivery")
+            assert delivery["display_kind"] == "delivery"
+            assert delivery["display_metadata"] == {"author": author}
+            assert len([row for row in active if row["content"] == "queued delivery"]) == 1
+        finally:
+            server._sessions.pop(sid, None)

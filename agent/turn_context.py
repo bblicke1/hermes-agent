@@ -689,6 +689,13 @@ def _stage_turn_user_message(
         user_msg["display_kind"] = persist_user_display_kind
     if persist_user_display_metadata:
         user_msg["display_metadata"] = persist_user_display_metadata
+    from agent.turn_author import delivery_display
+    kind, metadata = delivery_display(getattr(agent, "_turn_author", None),
+                                      user_msg.get("display_kind"), user_msg.get("display_metadata"))
+    if kind:
+        user_msg["display_kind"] = kind
+    if metadata:
+        user_msg["display_metadata"] = metadata
     # The platform message id survives the turn-start flush; restart drain-window
     # recovery dedups via ``has_platform_message_id`` against this row.
     if persist_user_platform_id is not None:

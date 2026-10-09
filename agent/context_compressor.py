@@ -42,6 +42,7 @@ from agent.model_metadata import (
     strip_opaque_replay_items,
 )
 from agent.redact import redact_sensitive_text
+from agent.turn_author import transcript_author_label
 from agent.turn_context import drop_stale_api_content
 from tools.todo_tool import TODO_INJECTION_HEADER
 
@@ -3600,7 +3601,6 @@ class ContextCompressor(SummaryDispatchMixin, PreLlmSkipMixin, MicroCompactionMi
                 content = "\n".join(_summary_part_text(part) for part in content if isinstance(part, (dict, str)))
             content = _redact_compaction_text(content or "")
             content = _MEDIA_DIRECTIVE_RE.sub("[media attachment]", content)
-            # Strip inline <think>-style blocks: scratch work wastes summarizer context and risks being kept as fact.
             if role == "assistant" and content:
                 content = strip_think_blocks(None, content)
             if len(content) > self._CONTENT_MAX:
@@ -3610,15 +3610,14 @@ class ContextCompressor(SummaryDispatchMixin, PreLlmSkipMixin, MicroCompactionMi
                 continue
             if role == "assistant" and msg.get("tool_calls", []):
                 content += "\n[Tool calls:\n" + "\n".join(map(self._render_tool_call_for_summary, msg["tool_calls"])) + "\n]"
-            parts.append(f"[{role.upper()}]: {content}")
+            parts.append(f"[{transcript_author_label(msg)}]: {content}")
         return parts
-
     def _serialize_for_summary(self, turns: list[dict[str, Any]]) -> str:
         """Serialize turns into labeled, redacted text for the summarizer."""
         return "\n\n".join(self._serialize_records_for_summary(turns))
 
     def _fallback_anchors(self, turns_to_summarize: list[dict[str, Any]]) -> dict[str, list[str]]:
-        """Locally extractable anchors: user asks, actions, files, blockers, last dropped turns."""
+        """Locally extractable anchors, with bot deliveries excluded from human asks."""
         user_asks: list[str] = []
         assistant_actions: list[str] = []
         tool_actions: list[str] = []
@@ -3645,13 +3644,14 @@ class ContextCompressor(SummaryDispatchMixin, PreLlmSkipMixin, MicroCompactionMi
             role = msg.get("role", "unknown")
             text = _compact_fallback_turn(msg.get("content"))
             _collect_path_mentions(text, relevant_files)
-            synthetic_user = role == "user" and self._is_synthetic_compression_user_turn(msg)
+            author_label = transcript_author_label(msg)
+            synthetic_user = role == "user" and (author_label.startswith("BOT ") or self._is_synthetic_compression_user_turn(msg))
             tool_names = [_extract_tool_call_name_and_args(tc)[0] for tc in (msg.get("tool_calls") or [])] if role == "assistant" else []
             turn_text = text
             if tool_names:
                 prefix = "tool calls: " + ", ".join(tool_names[:6])
                 turn_text = f"{prefix}; {turn_text}" if turn_text else prefix
-            turn_label = "INTERNAL CONTEXT" if synthetic_user else str(role).upper()
+            turn_label = author_label if author_label.startswith("BOT ") else ("INTERNAL CONTEXT" if synthetic_user else str(role).upper())
             if turn_text.strip():
                 last_dropped_turns.append(f"{turn_label}: {turn_text.strip()}")
                 del last_dropped_turns[:-8]
