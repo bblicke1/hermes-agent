@@ -1,0 +1,28 @@
+{
+  "author": {
+    "id": "bot:g1-test",
+    "is_bot": true,
+    "name": "g1-test"
+  },
+  "claimed_at": 1791602415122899409,
+  "completed_at": 1791602415689140635,
+  "created_at": 1791602412078834203,
+  "delivery_id": "2b623734130549d59f206ad512501379",
+  "error": "",
+  "id": "2b623734130549d59f206ad512501379",
+  "lease_id": "2d236f474e79483fac2659cfc18c58fd",
+  "live_session_id": "3dacd5ff",
+  "message": "G3-SCRIPT-198. Record the synthetic fact G3_ORIGIN_FACT=blue was supplied by this bot, not by Brad. Reply exactly G3-SCRIPT-ACK. Do not message another agent.",
+  "owner": {
+    "lease_id": "2d236f474e79483fac2659cfc18c58fd",
+    "live_session_id": "3dacd5ff",
+    "profile_home": "/home/brad/worktrees/hermes-scripts-a2a-spike-195/.g3-runtime/profiles/g3-receiver",
+    "session_id": "g3-receiver-198"
+  },
+  "profile_home": "/home/brad/worktrees/hermes-scripts-a2a-spike-195/.g3-runtime/profiles/g3-receiver",
+  "reason": "",
+  "reply": "G3-SCRIPT-ACK",
+  "sequence": 1,
+  "session_id": "g3-receiver-198",
+  "status": "settled"
+}

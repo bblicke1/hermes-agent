@@ -1,0 +1,94 @@
+{
+  "runtime_head": "1e0c7730d791f5ce855c5c78935cfea6fb1e43a9",
+  "fix_commit": "328aa69e22818718fa545905bff81eb199f70a0d",
+  "files": [
+    {
+      "file": "agent/background_review.py",
+      "deployed_sha256": "523a231404d5a4db5cbd9be2ff753969b22faf840b4d5302628aec3081e82f99",
+      "fix_sha256": "523a231404d5a4db5cbd9be2ff753969b22faf840b4d5302628aec3081e82f99",
+      "matches_fix": true,
+      "post_acceptance_sha256": "523a231404d5a4db5cbd9be2ff753969b22faf840b4d5302628aec3081e82f99",
+      "unchanged_during_checks": true
+    },
+    {
+      "file": "agent/context_compressor.py",
+      "deployed_sha256": "68dea6cf345fa331053dfb2dd0c13ff3889704ec60a8f12a88e580ba615c1f8f",
+      "fix_sha256": "68dea6cf345fa331053dfb2dd0c13ff3889704ec60a8f12a88e580ba615c1f8f",
+      "matches_fix": true,
+      "post_acceptance_sha256": "68dea6cf345fa331053dfb2dd0c13ff3889704ec60a8f12a88e580ba615c1f8f",
+      "unchanged_during_checks": true
+    },
+    {
+      "file": "agent/turn_author.py",
+      "deployed_sha256": "4c254ce71c5f8e5766b34886bce70bbbcc379561d335845d973b91bcd8f221a7",
+      "fix_sha256": "4c254ce71c5f8e5766b34886bce70bbbcc379561d335845d973b91bcd8f221a7",
+      "matches_fix": true,
+      "post_acceptance_sha256": "4c254ce71c5f8e5766b34886bce70bbbcc379561d335845d973b91bcd8f221a7",
+      "unchanged_during_checks": true
+    },
+    {
+      "file": "agent/turn_context.py",
+      "deployed_sha256": "2125b1b53c523416680d9a2cac902a5d955387e78608f27d65cef3ce0b6d8fe0",
+      "fix_sha256": "2125b1b53c523416680d9a2cac902a5d955387e78608f27d65cef3ce0b6d8fe0",
+      "matches_fix": true,
+      "post_acceptance_sha256": "2125b1b53c523416680d9a2cac902a5d955387e78608f27d65cef3ce0b6d8fe0",
+      "unchanged_during_checks": true
+    },
+    {
+      "file": "hermes_cli/web_routers/sessions.py",
+      "deployed_sha256": "534bf0439c9b95f975d68b63100b46bbdea3c2095372ad5b8e1787c460d46445",
+      "fix_sha256": "534bf0439c9b95f975d68b63100b46bbdea3c2095372ad5b8e1787c460d46445",
+      "matches_fix": true,
+      "post_acceptance_sha256": "534bf0439c9b95f975d68b63100b46bbdea3c2095372ad5b8e1787c460d46445",
+      "unchanged_during_checks": true
+    },
+    {
+      "file": "tools/session_search_tool.py",
+      "deployed_sha256": "494ffe221e4cb0b345e334a30f6da861622d364538acb32e14e4ec0fe7776611",
+      "fix_sha256": "494ffe221e4cb0b345e334a30f6da861622d364538acb32e14e4ec0fe7776611",
+      "matches_fix": true,
+      "post_acceptance_sha256": "494ffe221e4cb0b345e334a30f6da861622d364538acb32e14e4ec0fe7776611",
+      "unchanged_during_checks": true
+    },
+    {
+      "file": "tui_gateway/methods_prompt.py",
+      "deployed_sha256": "3b76053f950a023714088273290bb8f322c702377fb2f3b273423b991a9684cf",
+      "fix_sha256": "3b76053f950a023714088273290bb8f322c702377fb2f3b273423b991a9684cf",
+      "matches_fix": true,
+      "post_acceptance_sha256": "3b76053f950a023714088273290bb8f322c702377fb2f3b273423b991a9684cf",
+      "unchanged_during_checks": true
+    },
+    {
+      "file": "tui_gateway/prompt_turn.py",
+      "deployed_sha256": "cc6e682572c9c3ad110e2bd459cfdab7c191d62749caa0f85a33c731b929d425",
+      "fix_sha256": "d22621317b399c1a7a93ba7509da80bfbb005c1b4e226d0345b9af1db6df2a1c",
+      "matches_fix": false,
+      "post_acceptance_sha256": "cc6e682572c9c3ad110e2bd459cfdab7c191d62749caa0f85a33c731b929d425",
+      "unchanged_during_checks": true
+    },
+    {
+      "file": "tui_gateway/session_auto_continue.py",
+      "deployed_sha256": "b1e645f3de78bb20c36c6a3d8ffb08e6abde82c5037d368ac4e2047c45cc70c1",
+      "fix_sha256": "b1e645f3de78bb20c36c6a3d8ffb08e6abde82c5037d368ac4e2047c45cc70c1",
+      "matches_fix": true,
+      "post_acceptance_sha256": "b1e645f3de78bb20c36c6a3d8ffb08e6abde82c5037d368ac4e2047c45cc70c1",
+      "unchanged_during_checks": true
+    },
+    {
+      "file": "tui_gateway/session_history.py",
+      "deployed_sha256": "9fd3e6173dad8875ed8a06e3addf8e6dbe05328b9899b5ff574b9e4e7ca43fe1",
+      "fix_sha256": "9fd3e6173dad8875ed8a06e3addf8e6dbe05328b9899b5ff574b9e4e7ca43fe1",
+      "matches_fix": true,
+      "post_acceptance_sha256": "9fd3e6173dad8875ed8a06e3addf8e6dbe05328b9899b5ff574b9e4e7ca43fe1",
+      "unchanged_during_checks": true
+    },
+    {
+      "file": "tui_gateway/session_workdir.py",
+      "deployed_sha256": "7111bfaed5d0e8d5b0f2e3ab3baffe8a3962318bb14d1653586ef3ae086d5add",
+      "fix_sha256": "7111bfaed5d0e8d5b0f2e3ab3baffe8a3962318bb14d1653586ef3ae086d5add",
+      "matches_fix": true,
+      "post_acceptance_sha256": "7111bfaed5d0e8d5b0f2e3ab3baffe8a3962318bb14d1653586ef3ae086d5add",
+      "unchanged_during_checks": true
+    }
+  ]
+}

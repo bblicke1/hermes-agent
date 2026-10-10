@@ -1,0 +1,27 @@
+[
+  {
+    "who": "receiver",
+    "pane": "wN:p9Y",
+    "tab": "wN:t9Y"
+  },
+  {
+    "who": "sender",
+    "pane": "wN:p9Z",
+    "tab": "wN:t9Z"
+  },
+  {
+    "who": "receiver",
+    "pane": "wN:p90",
+    "tab": "wN:t90"
+  },
+  {
+    "who": "receiver",
+    "pane": "wN:pA1",
+    "tab": "wN:tA1"
+  },
+  {
+    "who": "sender",
+    "pane": "wN:pA2",
+    "tab": "wN:tA2"
+  }
+]

@@ -1,0 +1,18 @@
+diff --git a/home/brad/worktrees/hermes-agent-author-198/tui_gateway/prompt_turn.py b/home/brad/.hermes/hermes-agent/tui_gateway/prompt_turn.py
+index 7169095..a329edc 100644
+--- a/home/brad/worktrees/hermes-agent-author-198/tui_gateway/prompt_turn.py
++++ b/home/brad/.hermes/hermes-agent/tui_gateway/prompt_turn.py
+@@ -246,3 +246,7 @@ def _start_turn_voice() -> tuple[Any, bool]:
+-    """Arm voice-mode turn audio; ``(tts_queue, thinking_started)``.  ``_tts_stream_begin``
+-    goes first: cutting a still-speaking previous turn IS this turn's barge-in, so it must
+-    latch before the caller consumes the latch."""
++    """Start turn speech audio; ``(tts_queue, thinking_started)``.
++
++    ``_tts_stream_begin`` runs first so a still-speaking previous turn is cut
++    before this turn consumes that latch. The microphone is armed there, and
++    in ``_speak_text_with_barge``, only when speech output actually starts.
++    A typed turn with speech output off must not open it.
++    """
+@@ -252,2 +255,0 @@ def _start_turn_voice() -> tuple[Any, bool]:
+-    if _voice_cfg_dict().get("barge_in", True):
+-        _arm_full_duplex_listener()

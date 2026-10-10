@@ -1,0 +1,23 @@
+{
+  "delivery_id": "e83d7290cbb14fa4bea81369839e35ad",
+  "id": "e83d7290cbb14fa4bea81369839e35ad",
+  "owner": {
+    "profile_home": "/home/brad/worktrees/hermes-scripts-a2a-spike-195/.g3-runtime",
+    "session_id": "g3-sender-198",
+    "lease_id": "c813811181614827a512fc5f87c820ac",
+    "live_session_id": "c8f054d4"
+  },
+  "profile_home": "/home/brad/worktrees/hermes-scripts-a2a-spike-195/.g3-runtime",
+  "session_id": "g3-sender-198",
+  "lease_id": "c813811181614827a512fc5f87c820ac",
+  "live_session_id": "c8f054d4",
+  "message": "G3-ROUNDTRIP-198. Call message_agent to target g3-receiver with message: G3-PING-198. Please call message_agent back to target hermes with message G3-PONG-198 exactly once, then reply G3-RECEIVER-DONE. After sending, reply G3-SENDER-SENT. When you later receive G3-PONG-198, reply G3-ROUNDTRIP-DONE without sending any further messages.",
+  "status": "queued",
+  "created_at": 1791602443137557200,
+  "sequence": 1,
+  "author": {
+    "id": "bot:g1-test",
+    "name": "g1-test",
+    "is_bot": true
+  }
+}

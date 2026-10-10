@@ -1,0 +1,138 @@
+{
+  "success": true,
+  "mode": "discover",
+  "query": "G3-SCRIPT-198",
+  "detail": "full",
+  "results": [
+    {
+      "session_id": "g3-receiver-198",
+      "when": "October 09, 2026 at 11:19 PM",
+      "source": "tui",
+      "model": "gb10-balanced",
+      "title": "Bot Chat",
+      "matched_role": "user",
+      "match_message_id": 3,
+      "snippet": ">>>G3-SCRIPT-198<<<. Record the synthetic fact G3_ORIGIN_FACT=blue was supplied by this bot, not by Brad. Reply exactly G3-SCRIPT-ACK. Do not message another agent.",
+      "bookend_start": [],
+      "messages": [
+        {
+          "id": 1,
+          "role": "user",
+          "content": "G3-HUMAN-198. This is a synthetic human turn typed in the composer. Reply exactly G3-HUMAN-ACK. Do not message another agent.",
+          "timestamp": 1791602398.8998342,
+          "author_label": "USER"
+        },
+        {
+          "id": 2,
+          "role": "assistant",
+          "content": "G3-HUMAN-ACK",
+          "timestamp": 1791602405.5928962,
+          "author_label": "ASSISTANT"
+        },
+        {
+          "id": 3,
+          "role": "user",
+          "content": "G3-SCRIPT-198. Record the synthetic fact G3_ORIGIN_FACT=blue was supplied by this bot, not by Brad. Reply exactly G3-SCRIPT-ACK. Do not message another agent.",
+          "timestamp": 1791602415.155942,
+          "display_metadata": {
+            "author": {
+              "id": "bot:g1-test",
+              "name": "g1-test",
+              "is_bot": true
+            }
+          },
+          "author_label": "BOT g1-test",
+          "anchor": true
+        },
+        {
+          "id": 4,
+          "role": "assistant",
+          "content": "G3-SCRIPT-ACK",
+          "timestamp": 1791602415.6658235,
+          "author_label": "ASSISTANT"
+        },
+        {
+          "id": 5,
+          "role": "user",
+          "content": "G3-MODEL-198. Who sent the previous incoming G3-SCRIPT-198 message, a bot or Brad? Quote the author label you saw in that previous message. Do not use tools or message another agent.",
+          "timestamp": 1791602423.564668,
+          "author_label": "USER"
+        },
+        {
+          "id": 6,
+          "role": "assistant",
+          "content": "G3-MODEL-198: The previous G3-SCRIPT-198 message was sent by a bot, not Brad. The author label was: `[Bot delivery: BOT g1-test; not the human user]` \u2014 i.e., bot g1-test, not the human user.",
+          "timestamp": 1791602425.048516,
+          "author_label": "ASSISTANT"
+        },
+        {
+          "id": 7,
+          "role": "user",
+          "content": "Message from \ud83e\udd16 hermes (@hermes): G3-PING-198",
+          "timestamp": 1791602450.2209215,
+          "display_metadata": {
+            "author": {
+              "id": "bot:default",
+              "name": "hermes",
+              "is_bot": true
+            }
+          },
+          "author_label": "BOT hermes"
+        },
+        {
+          "id": 8,
+          "role": "assistant",
+          "content": "",
+          "timestamp": 1791602451.6418524,
+          "tool_calls": [
+            {
+              "id": "call_d2f349d81fa549f588cf9344",
+              "call_id": "call_d2f349d81fa549f588cf9344",
+              "response_item_id": "fc_d2f349d81fa549f588cf9344",
+              "type": "function",
+              "function": {
+                "name": "message_agent",
+                "arguments": "{\"message\":\"G3-PONG-198 \u2014 receipt confirmed by @g3-receiver. Your G3-PING-198 arrived delivered as a bot delivery from BOT hermes (not the human user). Standing by.\",\"target\":\"hermes\"}"
+              }
+            }
+          ],
+          "author_label": "ASSISTANT"
+        }
+      ],
+      "bookend_end": [
+        {
+          "id": 12,
+          "role": "assistant",
+          "content": "G3-SPOOF-BRAD-ACK",
+          "timestamp": 1791602456.3109553,
+          "author_label": "ASSISTANT"
+        },
+        {
+          "id": 13,
+          "role": "user",
+          "content": "[IMPORTANT: Background process proc_9e4fe6307958 completed normally (exit code 0).\nCommand: /home/brad/.hermes/tools/python-3.14.7+202****0901-linux-x64/bin/python3 /home/brad/.hermes/hermes-agent/tools/bot_mode_dm.py --run-delivery --author '{\"id\":\"bot:g3-receiver\",\"name\":\"g3-receiver\",\"is_bot\":true}' query-file /home/brad/worktrees/hermes-scripts-a2a-spike-195/.g3-runtime/profiles/g3-receiver/cache/scratch/hermes-dm-1000/dm-xyp33_wd.txt --profile-home /home/brad/worktrees/hermes-scripts-a2a-spike-195/.g3-runtime /home/brad/.hermes/hermes-agent/.hermes/bin/hermes -p default chat --in '~' -c 'Bot Chat' --create-if-missing -Q\nOutput:\n{\"reply\": \"G3-ROUNDTRIP-DONE\", \"status\": \"settled\", \"delivery_id\": \"988402ffbb5e6f3dcab310f42aef109e61929a0ccf234eebf4a95dbc2d2f4a25\"}\n]",
+          "timestamp": 1791602456.8431983,
+          "display_kind": "process_complete",
+          "display_metadata": {
+            "display_text": "Background Process Finished: /home/brad/.hermes/tools/python-3.14.7+202****0901-linux-x64/bin/python3 /hom..."
+          },
+          "author_label": "USER"
+        },
+        {
+          "id": 14,
+          "role": "assistant",
+          "content": "Round-trip complete: @hermes replied `G3-ROUNDTRIP-DONE` to my G3-PONG-198, confirming the full A2A ping/pong loop (g1-test \u2192 me \u2192 hermes \u2192 back) settled with status \"settled\".",
+          "timestamp": 1791602458.4676359,
+          "author_label": "ASSISTANT"
+        }
+      ],
+      "messages_before": 2,
+      "messages_after": 5,
+      "detail": "full",
+      "link": "@session:g3-receiver/g3-receiver-198"
+    }
+  ],
+  "count": 1,
+  "sessions_searched": 1,
+  "link_hint": "When referring the user to a session, write its `link` value verbatim inline mid-sentence (it renders as a titled link) \u2014 never as markdown, in backticks, on its own line, or next to the title/id/date. To read more around a compact result, scroll: session_search(session_id=..., around_message_id=match_message_id)."
+}

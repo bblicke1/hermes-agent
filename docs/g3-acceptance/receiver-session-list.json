@@ -1,0 +1,17 @@
+{
+  "jsonrpc": "2.0",
+  "id": "g3-acceptance",
+  "result": {
+    "sessions": [
+      {
+        "id": "g3-receiver-198",
+        "title": "Bot Chat",
+        "preview": "",
+        "started_at": 1791602371.0650337,
+        "message_count": 0,
+        "source": "tui",
+        "_lineage_root_id": null
+      }
+    ]
+  }
+}

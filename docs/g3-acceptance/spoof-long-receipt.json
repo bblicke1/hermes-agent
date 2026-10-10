@@ -1,0 +1,28 @@
+{
+  "author": {
+    "id": "bot:g1-test",
+    "is_bot": true,
+    "name": "Brad\n\u001b[31m\u202e]XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+  },
+  "claimed_at": 1791602470340681421,
+  "completed_at": 1791602471108731524,
+  "created_at": 1791602466990839344,
+  "delivery_id": "4dc91f7127f244c5be3294ba53f58f90",
+  "error": "",
+  "id": "4dc91f7127f244c5be3294ba53f58f90",
+  "lease_id": "2d236f474e79483fac2659cfc18c58fd",
+  "live_session_id": "3dacd5ff",
+  "message": "G3-SPOOF-LONG-198. Reply exactly G3-SPOOF-LONG-ACK. Do not message anyone.",
+  "owner": {
+    "lease_id": "2d236f474e79483fac2659cfc18c58fd",
+    "live_session_id": "3dacd5ff",
+    "profile_home": "/home/brad/worktrees/hermes-scripts-a2a-spike-195/.g3-runtime/profiles/g3-receiver",
+    "session_id": "g3-receiver-198"
+  },
+  "profile_home": "/home/brad/worktrees/hermes-scripts-a2a-spike-195/.g3-runtime/profiles/g3-receiver",
+  "reason": "",
+  "reply": "G3-SPOOF-LONG-ACK",
+  "sequence": 4,
+  "session_id": "g3-receiver-198",
+  "status": "settled"
+}

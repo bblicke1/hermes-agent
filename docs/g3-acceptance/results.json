@@ -1,0 +1,42 @@
+[
+  {
+    "check": 1,
+    "result": "PASS",
+    "evidence": "receiver-script-db.json, script-receipt.json"
+  },
+  {
+    "check": 2,
+    "result": "PASS",
+    "evidence": "receiver-model-db.json (human before and after bot)"
+  },
+  {
+    "check": 3,
+    "result": "PASS",
+    "evidence": "receiver-resumed-tui.txt, panes.json"
+  },
+  {
+    "check": 4,
+    "result": "PASS",
+    "evidence": "receiver-model-db.json, receiver-resumed-tui.txt"
+  },
+  {
+    "check": 5,
+    "result": "PASS",
+    "evidence": "sender-roundtrip-db.json, receiver-roundtrip-db.json, both resumed TUI captures"
+  },
+  {
+    "check": 6,
+    "result": "PASS",
+    "evidence": "session-search.json (receiver-home process, explicit receiver DB)"
+  },
+  {
+    "check": 7,
+    "result": "PASS",
+    "evidence": "compression-with-padding-rpc.json, receiver-post-compress-db.json (summary row 21)"
+  },
+  {
+    "check": 8,
+    "result": "PASS",
+    "evidence": "spoof admissions/receipts, receiver-spoof-resumed-tui.txt (64-character sanitized name)"
+  }
+]

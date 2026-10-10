@@ -1,0 +1,7 @@
+{
+  "config": "model:\n  default: gb10-balanced\n  provider: gb10-gateway\nproviders:\n  gb10-gateway:\n    api: http://192.168.10.62:8120/v1\n    api_key: EMPTY\n    default_model: gb10-balanced\n    transport: chat_completions\nfallback_providers: []\ntoolsets: [terminal, file]\nplatform_toolsets:\n  cli: [terminal, file]\nmemory:\n  memory_enabled: false\n  user_profile_enabled: false\nplugins:\n  enabled: []\nmcp_servers: {}\nagent:\n  reasoning_effort: none\n  max_turns: 8\nterminal:\n  backend: local\ncompression:\n  enabled: true\n  threshold: 0.9\n  protect_first_n: 0\n  protect_last_n: 2\nauxiliary:\n  compression:\n    provider: gb10-gateway\n    model: gb10-balanced\ntelemetry:\n  shared_metrics:\n    enabled: false\n    send: false\n    offer_version: 2\nonboarding:\n  seen:\n    profile_build_offered: true\n",
+  "homes": {
+    "sender": "/home/brad/worktrees/hermes-scripts-a2a-spike-195/.g3-runtime",
+    "receiver": "/home/brad/worktrees/hermes-scripts-a2a-spike-195/.g3-runtime/profiles/g3-receiver"
+  }
+}
