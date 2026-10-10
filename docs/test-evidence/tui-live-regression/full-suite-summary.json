@@ -1,0 +1,35 @@
+{
+  "numPassedTests": 1636,
+  "numFailedTests": 0,
+  "numPendingTests": 2,
+  "numTotalTests": 1638,
+  "success": true,
+  "testFiles": 181,
+  "reviewedFiles": [
+    {
+      "name": "src/__tests__/appChromeBlockedTimers.test.tsx",
+      "status": "passed",
+      "tests": 29
+    },
+    {
+      "name": "src/__tests__/liveSections.test.tsx",
+      "status": "passed",
+      "tests": 3
+    },
+    {
+      "name": "src/__tests__/subscriptionOverlay.test.tsx",
+      "status": "passed",
+      "tests": 23
+    },
+    {
+      "name": "src/lib/liveProgress.test.ts",
+      "status": "passed",
+      "tests": 7
+    },
+    {
+      "name": "packages/hermes-ink/src/ink/ink-backpressure.test.ts",
+      "status": "passed",
+      "tests": 4
+    }
+  ]
+}

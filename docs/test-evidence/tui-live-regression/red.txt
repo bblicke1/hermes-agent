@@ -1,0 +1,122 @@
+
+> hermes-tui@0.0.1 test
+> vitest run src/lib/liveProgress.test.ts
+
+
+ RUN  v4.1.10 /home/brad/worktrees/hermes-agent-tui-live-177/ui-tui
+
+ ❯ src/lib/liveProgress.test.ts (7 tests | 4 failed) 11ms
+     × merges adjacent tool shelves into one contextual shelf 5ms
+     × adds tools to the nearest contextual thinking shelf 1ms
+     × merges through intervening thinking-only rows back into the nearest holder 1ms
+     × collapses a chronological thinking/tool/thinking/tool stream into one shelf 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/lib/liveProgress.test.ts > appendToolShelfMessage > merges adjacent tool shelves into one contextual shelf
+AssertionError: expected [ { kind: 'trail', …(4) } ] to deeply equal [ { kind: 'trail', …(3) } ]
+
+- Expected
++ Received
+
+@@ -1,7 +1,8 @@
+  [
+    {
++     "inlineDiffs": [],
+      "kind": "trail",
+      "role": "system",
+      "text": "",
+      "tools": [
+        "one ✓",
+
+ ❯ src/lib/liveProgress.test.ts:38:20
+     36|     })
+     37|
+     38|     expect(merged).toEqual([{ kind: 'trail', role: 'system', text: '',…
+       |                    ^
+     39|   })
+     40|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/lib/liveProgress.test.ts > appendToolShelfMessage > adds tools to the nearest contextual thinking shelf
+AssertionError: expected [ { kind: 'trail', …(5) } ] to deeply equal [ { kind: 'trail', …(4) } ]
+
+- Expected
++ Received
+
+@@ -1,7 +1,8 @@
+  [
+    {
++     "inlineDiffs": [],
+      "kind": "trail",
+      "role": "system",
+      "text": "",
+      "thinking": "plan",
+      "tools": [
+
+ ❯ src/lib/liveProgress.test.ts:47:20
+     45|     )
+     46|
+     47|     expect(merged).toEqual([{ kind: 'trail', role: 'system', text: '',…
+       |                    ^
+     48|   })
+     49|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/lib/liveProgress.test.ts > appendToolShelfMessage > merges through intervening thinking-only rows back into the nearest holder
+AssertionError: expected { kind: 'trail', role: 'system', …(4) } to deeply equal { kind: 'trail', role: 'system', …(3) }
+
+- Expected
++ Received
+
+@@ -1,6 +1,7 @@
+  {
++   "inlineDiffs": [],
+    "kind": "trail",
+    "role": "system",
+    "text": "",
+    "thinking": "plan",
+    "tools": [
+
+ ❯ src/lib/liveProgress.test.ts:64:23
+     62|
+     63|     expect(merged).toHaveLength(2)
+     64|     expect(merged[0]).toEqual({
+       |                       ^
+     65|       kind: 'trail',
+     66|       role: 'system',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/lib/liveProgress.test.ts > appendToolShelfMessage > collapses a chronological thinking/tool/thinking/tool stream into one shelf
+AssertionError: expected { kind: 'trail', role: 'system', …(4) } to deeply equal { kind: 'trail', role: 'system', …(3) }
+
+- Expected
++ Received
+
+@@ -1,6 +1,7 @@
+  {
++   "inlineDiffs": [],
+    "kind": "trail",
+    "role": "system",
+    "text": "",
+    "thinking": "plan",
+    "tools": [
+
+ ❯ src/lib/liveProgress.test.ts:86:24
+     84|
+     85|     expect(reduced).toHaveLength(2)
+     86|     expect(reduced[0]).toEqual({
+       |                        ^
+     87|       kind: 'trail',
+     88|       role: 'system',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 3 passed (7)
+   Start at  22:07:06
+   Duration  129ms (transform 23ms, setup 0ms, import 33ms, tests 11ms, environment 0ms)
