@@ -56,20 +56,6 @@ const INTERRUPT_COOLDOWN_MS = 1500
 const ACTIVITY_LIMIT = 8
 const TRAIL_LIMIT = 8
 
-// Extracts the raw patch from a diff-only segment produced by
-// pushInlineDiffSegment. Used at message.complete to dedupe against final
-// assistant text that narrates the same patch. Returns null for anything
-// else so real assistant narration never gets touched.
-const diffSegmentBody = (msg: Msg): null | string => {
-  if (msg.kind !== 'diff') {
-    return null
-  }
-
-  const m = msg.text.match(/^```diff\n([\s\S]*?)\n```$/)
-
-  return m ? m[1]! : null
-}
-
 const hasDetails = (msg: Msg): boolean => Boolean(msg.thinking || msg.tools?.length || msg.toolTokens)
 
 const isTodoStatus = (status: unknown): status is TodoItem['status'] =>
@@ -543,36 +529,20 @@ class TurnController {
   }
 
   pushInlineDiffSegment(diffText: string, tools: string[] = []) {
-    // Strip CLI chrome the gateway emits before the unified diff (e.g. a
-    // leading "┊ review diff" header written by `_emit_inline_diff` for the
-    // terminal printer). That header only makes sense as stdout dressing,
-    // not inside a markdown ```diff block.
-    const stripped = diffText.replace(/^\s*┊[^\n]*\n?/, '').trim()
+    const body = diffText.replace(/^\s*┊[^\n]*\n?/, '').trim()
+    if (!body) return
 
-    if (!stripped) {
-      return
-    }
-
-    // Flush any in-progress streaming text as its own segment first, so the
-    // diff lands BETWEEN the assistant narration that preceded the edit and
-    // whatever the agent streams afterwards — not glued onto the final
-    // message. This is the whole point of segment-anchored diffs: the diff
-    // renders where the edit actually happened.
     this.flushStreamingSegment()
+    const last = this.segmentMessages.at(-1)
+    if (last?.inlineDiffs?.at(-1)?.body === body && last.tools?.at(-1) === tools.at(-1)) return
 
-    const block = `\`\`\`diff\n${stripped}\n\`\`\``
-
-    // Skip consecutive duplicates (same tool firing tool.complete twice, or
-    // two edits producing the same patch). Keeping this cheap — deeper
-    // dedupe against the final assistant text happens at message.complete.
-    if (this.segmentMessages.at(-1)?.text === block) {
-      return
-    }
-
-    this.segmentMessages = [
-      ...this.segmentMessages,
-      { kind: 'diff', role: 'assistant', text: block, ...(tools.length && { tools }) }
-    ]
+    this.segmentMessages = appendToolShelfMessage(this.segmentMessages, {
+      kind: 'trail',
+      role: 'system',
+      text: '',
+      tools,
+      inlineDiffs: [{ toolIndex: Math.max(0, tools.length - 1), body }]
+    })
     patchTurnState({ streamSegments: this.segmentMessages })
   }
 
@@ -676,18 +646,16 @@ class TurnController {
       tools = []
     }
 
-    // Drop diff-only segments the agent is about to narrate in the final
-    // reply. Without this, a closing "here's the diff …" message would
-    // render two stacked copies of the same patch. Only touches segments
-    // with `kind: 'diff'` emitted by pushInlineDiffSegment — real
-    // assistant narration stays put.
+    // Remove only duplicate patches; preserve the tool row and its result.
     const finalHasOwnDiffFence = /```(?:diff|patch)\b/i.test(finalText)
-
-    const segments = this.segmentMessages.filter(msg => {
-      const body = diffSegmentBody(msg)
-
-      return body === null || (!finalHasOwnDiffFence && !finalText.includes(body))
-    })
+    const segments = this.segmentMessages.map(msg =>
+      msg.inlineDiffs?.length
+        ? {
+            ...msg,
+            inlineDiffs: msg.inlineDiffs.filter(diff => !finalHasOwnDiffFence && !finalText.includes(diff.body))
+          }
+        : msg
+    )
 
     const hasReasoningSegment =
       this.reasoningSegmentIndex !== null || segments.some(msg => Boolean(msg.thinking?.trim()))

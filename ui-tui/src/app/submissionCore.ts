@@ -1,5 +1,7 @@
 import type { GatewayClient } from '../gatewayClient.js'
-import type { InputDetectDropResponse, PromptSubmitResponse } from '../gatewayTypes.js'
+import type { InputDetectDropResponse, PromptSubmitResponse, SessionSteerResponse } from '../gatewayTypes.js'
+import type { QueueItem } from '../hooks/useQueue.js'
+import { asRpcResult } from '../lib/rpc.js'
 import type { Msg } from '../types.js'
 
 import { turnController } from './turnController.js'
@@ -149,4 +151,21 @@ export function submitPrompt(
       startSubmit(r.text || text, deps.expand(r.text || text), showUserMessage)
     })
     .catch(() => startSubmit(text, deps.expand(text), showUserMessage))
+}
+
+// A queued steer is acknowledged once, without starting or clearing the current turn.
+export const submitSteer = async (
+  sid: string,
+  item: QueueItem,
+  deps: Pick<SubmitPromptDeps, 'gw' | 'appendMessage'>,
+  fallback: (note: string) => void
+) => {
+  try {
+    const raw = await deps.gw.request<SessionSteerResponse>('session.steer', { session_id: sid, text: item.text })
+    const result = asRpcResult<SessionSteerResponse>(raw)
+    if (result?.status !== 'queued') return fallback('steer rejected — message queued for next turn')
+    if (getUiState().sid === sid) deps.appendMessage({ role: 'user', text: item.display ?? item.text, steered: true })
+  } catch {
+    fallback('steer failed — message queued for next turn')
+  }
 }

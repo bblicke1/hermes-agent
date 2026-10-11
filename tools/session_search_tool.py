@@ -15,6 +15,7 @@ import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Union
 
+from agent.turn_author import transcript_author_label
 from hermes_state_common import _BOUNDARY_END_REASONS
 from hermes_time import safe_strftime
 
@@ -242,7 +243,8 @@ def _shape_message(m: dict[str, Any], anchor_id: Optional[int] = None,
         from tools.ansi_strip import strip_ansi
         content = strip_ansi(content)
     entry = {"id": m.get("id"), "role": m.get("role"), "content": content, "timestamp": m.get("timestamp")}
-    entry.update({k: m.get(k) for k in ("tool_name", "tool_calls", "tool_call_id") if m.get(k)})
+    entry.update({k: m.get(k) for k in ("tool_name", "tool_calls", "tool_call_id", "display_kind", "display_metadata") if m.get(k)})
+    entry["author_label"] = transcript_author_label(m)
     if anchor_id is not None and m.get("id") == anchor_id:
         entry["anchor"] = True
     if max_content_len and content and len(content) > max_content_len:

@@ -1,0 +1,19 @@
+SYNTHETIC PROOF — RUNNING (c: complete, r: restart, q: quit; click chevrons)
+├─ ▾ Thinking  ~10 tokens
+│ └─ Synthetic: write a demo file.
+└─ ▾ Tool calls (2)
+  ├─ ● Terminal("printf test")
+  └─ ● Write File("demo.txt")
+    └─ --- a/demo.txt
+       +++ b/demo.txt
+       @@ -1 +1 @@
+       -old
+       +new
+├─ ▾ Spawn tree (1)  d1 · 1 agent  █  (/agents)
+│ └─ ▾ Synthetic helper  completed
+│   ├─ ▾ Thinking (1)
+│   │ └─ Helper
+│   └─ ▾ Progress (1)
+│     └─ Helper note.
+└─ ▾ Activity (1)
+  └─ · Synthetic activity stream

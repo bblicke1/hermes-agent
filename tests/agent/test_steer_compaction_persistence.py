@@ -29,6 +29,15 @@ def test_flushed_steer_keeps_one_display_identity_across_compactions(tmp_path):
 
     agent._flush_messages_to_session_db([steer], [])
 
+    # Reflush the same steer when the model continues/echoes it: one user row,
+    # with the typed projection resume uses, rather than a second DB writer.
+    agent._flush_messages_to_session_db([steer], [])
+    from tui_gateway import server
+    projected = server._history_to_messages(db.get_messages_as_conversation(session_id))
+    assert [(row["role"], row["text"], row.get("display_kind")) for row in projected] == [
+        ("user", "focus on the persistence failure", "steer"),
+    ]
+
     durable_timestamp = db.get_messages(session_id)[0]["timestamp"]
     assert steer["timestamp"] == durable_timestamp
 

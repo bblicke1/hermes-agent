@@ -5,7 +5,7 @@ import { TYPING_IDLE_MS } from '../config/timing.js'
 import { expandTokens } from '../domain/attachments.js'
 import { completionToApplyOnSubmit } from '../domain/slash.js'
 import type { GatewayClient } from '../gatewayClient.js'
-import type { SessionSteerResponse, ShellExecResponse } from '../gatewayTypes.js'
+import type { ShellExecResponse } from '../gatewayTypes.js'
 import { queueItem, type QueueItem } from '../hooks/useQueue.js'
 import { asRpcResult } from '../lib/rpc.js'
 import { hasInterpolation, INTERPOLATION_RE } from '../protocol/interpolation.js'
@@ -13,7 +13,7 @@ import type { Msg } from '../types.js'
 
 import { reportSlashCommand } from './createSlashHandler.js'
 import type { ComposerActions, ComposerRefs, ComposerState, ComposerToken } from './interfaces.js'
-import { submitPrompt } from './submissionCore.js'
+import { submitPrompt, submitSteer } from './submissionCore.js'
 import { turnController } from './turnController.js'
 import { getUiState, patchUiState } from './uiStore.js'
 
@@ -229,15 +229,7 @@ export function useSubmission(opts: UseSubmissionOptions) {
       }
 
       if (mode === 'steer' && live.sid) {
-        gw.request<SessionSteerResponse>('session.steer', { session_id: live.sid, text: item.text })
-          .then(raw => {
-            const r = asRpcResult<SessionSteerResponse>(raw)
-
-            if (r?.status !== 'queued') {
-              fallback('steer rejected — message queued for next turn')
-            }
-          })
-          .catch(() => fallback('steer failed — message queued for next turn'))
+        void submitSteer(live.sid, item, { gw, appendMessage }, fallback)
 
         return
       }
@@ -248,7 +240,7 @@ export function useSubmission(opts: UseSubmissionOptions) {
       // and file-drop interpolation exactly once.
       send(item.text)
     },
-    [composerActions, gw, send, sys]
+    [appendMessage, composerActions, gw, send, sys]
   )
 
   const dispatchSubmission = useCallback(
@@ -335,7 +327,7 @@ export function useSubmission(opts: UseSubmissionOptions) {
       composerActions.pushHistory(toHistory)
 
       if (getUiState().busy) {
-        return handleBusyInput(queueItem(full))
+        return handleBusyInput(queueItem(submission.text, submission.display))
       }
 
       if (shouldInterpolateSubmission(full)) {

@@ -1,0 +1,35 @@
+
+
+
+
+
+
+
+ ─ still starting… │  │ voice off                                ─ …live-177-j60iv62_/workspace
+No accounts configured for use with 1Password CLI.
+
+ - Turn on the 1Password desktop app integration to sign in with the accounts you've added to th
+e app: https://www.1password.dev/cli/app-integration/ for details.
+ - Add an account manually with 'op account add' and sign in by entering your password on the co
+mmand line. See 'op account add --help' for details.
+ - Authenticate using a 1Password service account by setting the 'OP_SERVICE_ACCOUNT_TOKEN' envi
+ronment variable to your service account token. Learn more: https://www.1password.dev/service-ac
+counts/
+ - Use 1Password CLI with a Connect server by setting the 'OP_CONNECT_HOST' and 'OP_CONNECT_TOKE
+N' environment variables to your Connect host and token, respectively. Learn more: https://www.1
+password.dev/connect/
+
+Do /quitNo accounts configured for use with 1Password CLI.
+
+ - Turn on the 1Password desktop app integration to sign in with the accounts you've added to th
+e app: https://www.1password.dev/cli/app-integration/ for details.
+ - Add an account manually with 'op account add' and sign in by entering your password on the co
+mmand line. See 'op account add --help' for details.
+ - Authenticate using a 1Password service account by setting the 'OP_SERVICE_ACCOUNT_TOKEN' envi
+ronment variable to your service account token. Learn more: https://www.1password.dev/service-ac
+counts/
+ - Use 1Password CLI with a Connect server by setting the 'OP_CONNECT_HOST' and 'OP_CONNECT_TOKE
+N' environment variables to your Connect host and token, respectively. Learn more: https://www.1
+password.dev/connect/
+
+Do you want to add an account manually now? [Y/n]

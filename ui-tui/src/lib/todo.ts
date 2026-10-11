@@ -57,3 +57,7 @@ export function todoTree(todos: readonly TodoItem[]): [TodoItem, number][] {
 
   return out
 }
+
+// Includes the header and bottom gap; each live item uses one truncated row.
+export const todoPanelRows = (todos: readonly TodoItem[], collapsed: boolean, maxRows = Infinity) =>
+  todos.length ? (collapsed ? 2 : Math.min(todos.length + 2, Math.max(3, maxRows))) : 0

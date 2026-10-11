@@ -61,7 +61,7 @@ export const writeActiveSessionFile = (sessionId: null | string, file = process.
 export const liveSessionInflightMessages = (inflight?: null | InflightTurn): Msg[] => {
   const user = String(inflight?.user ?? '').trim()
 
-  return user
+  const original = user
     ? toTranscriptMessages([
         {
           role: 'user',
@@ -71,6 +71,37 @@ export const liveSessionInflightMessages = (inflight?: null | InflightTurn): Msg
         }
       ])
     : []
+  return [
+    ...original,
+    ...(inflight?.corrections ?? [])
+      .filter(text => text.trim())
+      .map(text => ({ role: 'user' as const, text, steered: true }))
+  ]
+}
+
+// Persisted steer rows may already be flushed while the turn is still running.
+// Match within the current prompt's suffix, with counts, so repeated corrections
+// remain distinct and a resume never adds a second copy of a delivered steer.
+export const resumedTranscriptMessages = (rows: unknown, inflight?: null | InflightTurn): Msg[] => {
+  const persisted = toTranscriptMessages(rows)
+  const pending = liveSessionInflightMessages(inflight)
+  if (!pending.length) return persisted
+  if (pending[0]?.steered) return [...persisted, ...pending]
+  const anchor = persisted.findLastIndex(msg => msg.role === 'user' && !msg.steered && msg.text === pending[0]?.text)
+  if (anchor < 0) return [...persisted, ...pending]
+  const counts = new Map<string, number>()
+  for (const msg of persisted.slice(anchor + 1)) {
+    if (msg.steered) counts.set(msg.text, (counts.get(msg.text) ?? 0) + 1)
+  }
+  return [
+    ...persisted,
+    ...pending.slice(1).filter(msg => {
+      const count = counts.get(msg.text) ?? 0
+      if (!count) return true
+      counts.set(msg.text, count - 1)
+      return false
+    })
+  ]
 }
 
 export const hydrateLiveSessionInflight = (inflight?: null | InflightTurn) => {
@@ -337,7 +368,7 @@ export function useSessionLifecycle(opts: UseSessionLifecycleOptions) {
 
           resetSession()
           setSessionStartedAt(r.started_at ? r.started_at * 1000 : Date.now())
-          const transcript = [...toTranscriptMessages(r.messages), ...liveSessionInflightMessages(r.inflight)]
+          const transcript = resumedTranscriptMessages(r.messages, r.inflight)
           setHistoryItems(info ? [introMsg(info), ...transcript] : transcript)
           writeActiveSessionFile(storedSid)
           patchUiState({
@@ -399,7 +430,7 @@ export function useSessionLifecycle(opts: UseSessionLifecycleOptions) {
             resetSession()
             setSessionStartedAt(r.started_at ? r.started_at * 1000 : Date.now())
 
-            const resumed = [...toTranscriptMessages(r.messages), ...liveSessionInflightMessages(r.inflight)]
+            const resumed = resumedTranscriptMessages(r.messages, r.inflight)
 
             setHistoryItems(info ? [introMsg(info), ...resumed] : resumed)
             writeActiveSessionFile(storedSid)

@@ -4,7 +4,7 @@ import { memo, type ReactNode, useEffect, useMemo, useRef, useState } from 'reac
 import spinners, { type BrailleSpinnerName } from 'unicode-animations'
 
 import { THINKING_COT_MAX } from '../config/limits.js'
-import { sectionMode } from '../domain/details.js'
+import { effectiveDetailsMode, sectionMode } from '../domain/details.js'
 import { useT } from '../i18n/useT.js'
 import {
   buildSubagentTree,
@@ -33,6 +33,7 @@ import type {
   ActiveTool,
   ActivityItem,
   DetailsMode,
+  Msg,
   SectionVisibility,
   SubagentNode,
   SubagentProgress,
@@ -688,6 +689,8 @@ interface Group {
 
 export const ToolTrail = memo(function ToolTrail({
   busy = false,
+  turnRunning = busy,
+  inlineDiffs = [],
   commandOverride = false,
   detailsMode = 'collapsed',
   outcome = '',
@@ -706,6 +709,8 @@ export const ToolTrail = memo(function ToolTrail({
   activity = []
 }: {
   busy?: boolean
+  turnRunning?: boolean
+  inlineDiffs?: Msg['inlineDiffs']
   commandOverride?: boolean
   detailsMode?: DetailsMode
   outcome?: string
@@ -728,7 +733,7 @@ export const ToolTrail = memo(function ToolTrail({
 }) {
   const T = useT().chatBits.thinking
 
-  const visible = useMemo(
+  const preferences = useMemo(
     () => ({
       thinking: sectionMode('thinking', detailsMode, sections, commandOverride),
       tools: sectionMode('tools', detailsMode, sections, commandOverride),
@@ -737,9 +742,19 @@ export const ToolTrail = memo(function ToolTrail({
     }),
     [commandOverride, detailsMode, sections]
   )
+  const visible = useMemo(
+    () => ({
+      thinking: effectiveDetailsMode(preferences.thinking, turnRunning),
+      tools: effectiveDetailsMode(preferences.tools, turnRunning),
+      subagents: effectiveDetailsMode(preferences.subagents, turnRunning),
+      activity: effectiveDetailsMode(preferences.activity, turnRunning)
+    }),
+    [preferences, turnRunning]
+  )
 
   const thinkingDefaultExpanded =
-    visible.thinking === 'expanded' && (preferExpandedThinking || commandOverride || sections?.thinking === 'expanded')
+    visible.thinking === 'expanded' &&
+    (preferExpandedThinking || commandOverride || sections?.thinking === 'expanded' || preferences.thinking === 'live')
 
   const [now, setNow] = useState(() => Date.now())
   // Local toggles own the open state once mounted.  Init from the resolved
@@ -771,33 +786,36 @@ export const ToolTrail = memo(function ToolTrail({
     return () => clearInterval(id)
   }, [openTools, tools.length, visible.tools])
 
-  // Effects run after the FIRST render too, not just on later updates — so
-  // this re-sync was clobbering the reasoningAlwaysVisible mount value above
-  // right after mount, collapsing a just-opened MoA reference panel under
-  // `thinking: hidden` before the user ever saw it (#64701). Skip only the
-  // very first run; every subsequent `visible` change (the case this effect
-  // exists for) still re-syncs without the override, so a manual collapse
-  // still sticks per the no-OR-at-effect-time rule above.
-  const skippedInitialSync = useRef(false)
+  // Resync only sections whose preference or effective visibility changed.
+  // A live turn boundary must not undo manual toggles on other sections;
+  // the initial MoA reference expansion must also survive mount effects.
+  const previousVisibility = useRef({ visible, preferences, thinkingDefaultExpanded })
   useEffect(() => {
-    if (!skippedInitialSync.current) {
-      skippedInitialSync.current = true
-
-      return
+    const previous = previousVisibility.current
+    if (
+      previous.thinkingDefaultExpanded !== thinkingDefaultExpanded ||
+      previous.visible.thinking !== visible.thinking ||
+      previous.preferences.thinking !== preferences.thinking
+    ) {
+      setOpenThinking(thinkingDefaultExpanded)
     }
-
-    setOpenThinking(thinkingDefaultExpanded)
-    setOpenTools(visible.tools === 'expanded')
-    setOpenSubagents(visible.subagents === 'expanded')
-    setOpenMeta(visible.activity === 'expanded')
-  }, [thinkingDefaultExpanded, visible])
+    if (previous.visible.tools !== visible.tools || previous.preferences.tools !== preferences.tools)
+      setOpenTools(visible.tools === 'expanded')
+    if (previous.visible.subagents !== visible.subagents || previous.preferences.subagents !== preferences.subagents) {
+      setOpenSubagents(visible.subagents === 'expanded')
+      setDeepSubagents(visible.subagents === 'expanded')
+    }
+    if (previous.visible.activity !== visible.activity || previous.preferences.activity !== preferences.activity)
+      setOpenMeta(visible.activity === 'expanded')
+    previousVisibility.current = { visible, preferences, thinkingDefaultExpanded }
+  }, [thinkingDefaultExpanded, visible, preferences])
 
   // `collapsed` is an auto preference: keep the panel open while reasoning
   // is live (stream pulses keep `reasoningActive` true) and collapse it the
   // moment the reasoning phase ends (`endReasoningPhase` flips it false).
   // `expanded` stays fully manual, `hidden` never renders content, and MoA
   // reference panels (reasoningAlwaysVisible) are left alone.
-  const thinkingAuto = visible.thinking === 'collapsed' && !reasoningAlwaysVisible
+  const thinkingAuto = preferences.thinking === 'collapsed' && !reasoningAlwaysVisible
   useEffect(() => {
     if (!thinkingAuto) {
       return
@@ -856,6 +874,10 @@ export const ToolTrail = memo(function ToolTrail({
           dimColor: parsed.mark !== '✗',
           key: `tr-${i}-d`
         })
+      }
+
+      for (const diff of inlineDiffs.filter(diff => diff.toolIndex === i)) {
+        pushDetail({ color: t.color.text, content: diff.body, key: `tr-${i}-diff` })
       }
 
       continue

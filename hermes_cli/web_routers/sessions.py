@@ -683,11 +683,13 @@ def _project_for_display(messages: list, *, home=None, inline_images: bool = Tru
                 return {**message, "content": _coerce_message_text(message["content"], image_urls=False)}
             return message
 
+    from agent.turn_author import project_delivery_message
     projected_messages = []
     for message in messages:
         message = _with_tool_call_labels(message)
         if coerce is not None:
             message = coerce(message)
+        message = project_delivery_message(message)
         # Same read-side typing as session.resume (tui_gateway/session_history.py).
         failed_turn = not message.get("display_kind") and untyped_failed_turn_display_kind(
             message.get("role"), message.get("content"))

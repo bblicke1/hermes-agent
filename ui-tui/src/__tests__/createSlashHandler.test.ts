@@ -598,6 +598,13 @@ describe('createSlashHandler', () => {
     })
   })
 
+  it('sets tools live at runtime and persists it', () => {
+    const ctx = buildCtx()
+    expect(createSlashHandler(ctx)('/details tools live')).toBe(true)
+    expect(getUiState().sections.tools).toBe('live')
+    expect(ctx.gateway.rpc).toHaveBeenCalledWith('config.set', { key: 'details_mode.tools', value: 'live' })
+  })
+
   it('clears a per-section override on /details <section> reset', () => {
     const ctx = buildCtx()
     createSlashHandler(ctx)('/details tools expanded')

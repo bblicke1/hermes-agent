@@ -26,7 +26,18 @@ export const messageHeightKey = (msg: Msg) => {
   return [
     msg.role,
     msg.kind ?? '',
-    hashText([msg.text, msg.thinking ?? '', msg.tools?.join('\n') ?? '', todoSig, panelSig, introSig].join('\0'))
+    msg.steered ? 'steered' : '',
+    hashText(
+      [
+        msg.text,
+        msg.thinking ?? '',
+        msg.tools?.join('\n') ?? '',
+        JSON.stringify(msg.inlineDiffs ?? []),
+        todoSig,
+        panelSig,
+        introSig
+      ].join('\0')
+    )
   ].join(':')
 }
 
@@ -76,6 +87,7 @@ export const estimatedMsgHeight = (
     thinkingVisible = details,
     thinkingExpanded = thinkingVisible,
     toolsVisible = details,
+    toolsExpanded = toolsVisible,
     userPrompt = '',
     withSeparator = false
   }: {
@@ -85,6 +97,7 @@ export const estimatedMsgHeight = (
     thinkingExpanded?: boolean
     thinkingVisible?: boolean
     toolsVisible?: boolean
+    toolsExpanded?: boolean
     userPrompt?: string
     withSeparator?: boolean
   }
@@ -125,14 +138,20 @@ export const estimatedMsgHeight = (
 
     if (hasVisibleDetails) {
       h +=
-        (hasVisibleTools ? (msg.tools?.length ?? 0) : 0) +
-        (hasVisibleThinking ? (thinkingExpanded ? wrappedLines(msg.thinking ?? '', bodyWidth) : 1) : 0)
+        (hasVisibleTools
+          ? toolsExpanded
+            ? (msg.tools?.length ?? 0) +
+              (msg.inlineDiffs ?? []).reduce((n, diff) => n + wrappedLines(diff.body, bodyWidth), 0)
+            : 1
+          : 0) + (hasVisibleThinking ? (thinkingExpanded ? wrappedLines(msg.thinking ?? '', bodyWidth) : 1) : 0)
 
       if (msg.role === 'assistant' && /\S/.test(msg.text)) {
         h += 2
       }
     }
   }
+
+  if (msg.steered && msg.role === 'user') h++
 
   if (msg.role === 'user' || msg.kind === 'diff') {
     // Top + bottom blank line.

@@ -342,9 +342,10 @@ def _persist_queued_user_row(session: dict, envelope: dict, display_kind: str | 
     # ``display_metadata`` marker: ``reopen_session`` retires still-marked rows after a restart
     # discarded the in-memory queue (#125577); the drain's replacement row is unmarked.
     from hermes_state_common import QUEUED_PROMPT_METADATA_KEY
+    author_kwargs = {"turn_author": envelope["turn_author"]} if envelope.get("turn_author") else {}
     staged = _write_submit_user_row(
         session, envelope.get("text"), display_kind,
-        accept_metadata={QUEUED_PROMPT_METADATA_KEY: True})
+        accept_metadata={QUEUED_PROMPT_METADATA_KEY: True}, **author_kwargs)
     if staged is not None:
         envelope["_submit_user_row"] = staged
         if display_kind:
@@ -370,12 +371,13 @@ def _replace_queued_user_row_for_turn(session: dict, queued: dict, is_dispatchin
     # The DISPATCHING envelope's replacement carries no marker (its turn adopts the row immediately);
     # still-queued envelopes keep the never-drained marker (#125577) so a restart between drains
     # retires the row rather than gluing the never-run prompt into the previous turn.
+    author_kwargs = {"turn_author": queued["turn_author"]} if queued.get("turn_author") else {}
     if is_dispatching:
-        _persist_submit_user_row(session, queued.get("text"), queued.get("_queued_display_kind"))
+        _persist_submit_user_row(session, queued.get("text"), queued.get("_queued_display_kind"), **author_kwargs)
     else:
         from hermes_state_common import QUEUED_PROMPT_METADATA_KEY
         _persist_submit_user_row(session, queued.get("text"), queued.get("_queued_display_kind"),
-                                 accept_metadata={QUEUED_PROMPT_METADATA_KEY: True})
+                                 accept_metadata={QUEUED_PROMPT_METADATA_KEY: True}, **author_kwargs)
     fresh = session.get("_submit_user_row")
     if not (isinstance(fresh, dict) and isinstance(fresh.get("_row_id"), int)):
         return None  # re-append wrote nothing: keep the accept-time row active
@@ -505,7 +507,13 @@ def _drain_queued_prompt(rid, sid: str, session: dict) -> bool:
             session["_submit_user_row"] = dispatch_row
         else:
             session.pop("_submit_user_row", None)
-    # The compute-host frame has no author field, so only the inline runner receives it.
+    # The existing compute-host metadata channel carries authors without a new frame field.
+    from agent.turn_author import delivery_display
+    kind, metadata = delivery_display(queued.get("turn_author"), queued.get("_queued_display_kind"))
+    if kind:
+        kwargs["display_kind"] = kind
+    if metadata:
+        kwargs["display_metadata"] = metadata
     author_kwargs = {"turn_author": queued["turn_author"]} if queued.get("turn_author") else {}
     dispatch_failed = False
     try:
