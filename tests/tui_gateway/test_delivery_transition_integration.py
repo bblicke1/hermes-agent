@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 import threading
 from unittest.mock import patch
+from types import SimpleNamespace
 from tools import bot_live_delivery as delivery
 from tui_gateway import server
 from tui_gateway.transport import bind_transport, reset_transport
@@ -98,9 +99,49 @@ assert current["delivery_reachability"]["reachable"] is False
 assert server._poll_bot_live_delivery_once(new_sid, current) is False
 assert current["delivery_advertisement"]["session_id"] == current["session_key"]
 assert current["delivery_reachability"]["reachable"] is True
+# Sample every production in-process compression caller at the sync seam.
+# RPC/slash contexts own only the busy flag at this point; turn-result commit
+# exits its history context before the continuation is synchronized.
+agent = SimpleNamespace(session_id=current["session_key"], tools=[], _cached_system_prompt="")
+current["agent"] = agent
+current["agent_ready"].set()
+sync = server._sync_session_key_after_compress
+compression_samples = []
+route = [""]
+def sampled_sync(live_sid, record, **kwargs):
+    compression_samples.append((route[0], record["history_lock"].locked()))
+    assert not record["history_lock"].locked(), "compression caller owns non-reentrant history lock"
+    return sync(live_sid, record, **kwargs)
+def rotate(record, *args, **kwargs):
+    old = record["session_key"]
+    new = "compression-" + route[0]
+    db = server._get_db()
+    db.create_session(old, "tui", model="test-model")
+    db.end_session(old, "compression")
+    db.create_session(new, "tui", parent_session_id=old, model="test-model")
+    record["agent"].session_id = new
+    return 0, {}
+with patch.object(server, "_sync_session_key_after_compress", sampled_sync), \
+     patch.object(server, "_compress_session_history", rotate), \
+     patch.object(server, "_session_info", lambda *a: {}), \
+     patch.object(server, "_restart_slash_worker", lambda *a: None):
+    route[0] = "rpc"
+    threaded(lambda: rpc("session.compress", session_id=new_sid))
+    route[0] = "slash"
+    threaded(lambda: server._compress_live_with_feedback(new_sid, current, agent, "", snapshot_kwargs=True))
+    route[0] = "turn"
+    rotate(current)
+    st = SimpleNamespace(agent=agent, result={"messages": []}, history=list(current["history"]),
+                         history_version=current["history_version"])
+    threaded(lambda: server._absorb_turn_result(new_sid, current, st, "synthetic", None, None))
+assert compression_samples == [("rpc", False), ("slash", False), ("turn", False)]
+assert current["session_key"] == "compression-turn"
+assert delivery.find_session_live_owner(home, "compression-turn")["live_session_id"] == new_sid
+# This agent is a test double; closing the real record needs no model teardown.
+current["agent"] = None
 rpc("session.close", session_id=new_sid)
 (Path(os.environ["HERMES_HOME"]) / "handler-proof.json").write_text(
-    json.dumps({"warm_resume_locks": lock_samples, "new_handler_ordering": True, "idle_tick_retry": True}), encoding="utf-8")
+    json.dumps({"warm_resume_locks": lock_samples, "new_handler_ordering": True, "idle_tick_retry": True, "compression_caller_locks": compression_samples}), encoding="utf-8")
 '''
 
 
@@ -124,3 +165,4 @@ def test_real_resume_attach_new_handlers_and_idle_tick(tmp_path):
     assert result.returncode == 0, result.stdout + result.stderr
     evidence = json.loads((home / 'handler-proof.json').read_text(encoding='utf-8'))
     assert evidence['new_handler_ordering'] and evidence['idle_tick_retry']
+    assert evidence['compression_caller_locks'] == [['rpc', False], ['slash', False], ['turn', False]]

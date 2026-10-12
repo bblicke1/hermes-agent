@@ -22,7 +22,8 @@ def runtime(monkeypatch, tmp_path):
     namespace = {"__name__": "tui_gateway.server", "__package__": "tui_gateway", "_sessions": {}, "_sessions_lock": threading.RLock(),
                  "_session_source": lambda s: s.get("source", "tui"),
                  "_session_home": lambda s: tmp_path,
-                 "logger": logging.getLogger(__name__), "contextlib": contextlib,
+                 "logger": logging.getLogger(__name__), "contextlib": contextlib, "logging": logging,
+                 "_DELIVERY_DEFERRAL_WARN_AFTER": getattr(session_lifecycle, "_DELIVERY_DEFERRAL_WARN_AFTER", 12),
                  "_transfer_active_session_slot": lambda *a, **k: True,
                  "_restart_slash_worker": lambda *a: None,
                  "_ok": lambda rid, result: {"result": result},
@@ -49,7 +50,7 @@ def runtime(monkeypatch, tmp_path):
         _response_profile_name=lambda profile: "test",
     )
     for module, names in (
-        (session_lifecycle, ("_write_tui_delivery_status", "_retire_tui_delivery_locked", "_refresh_tui_delivery_locked", "_register_open_tui_delivery", "_finalize_delivery_advertisement")),
+        (session_lifecycle, ("_note_tui_delivery_deferral", "_write_tui_delivery_status", "_retire_tui_delivery_locked", "_refresh_tui_delivery_locked", "_register_open_tui_delivery", "_finalize_delivery_advertisement")),
         (session_compression, ("_sync_session_key_after_compress",)),
         (compute_host_bridge, ("_compute_host_adopt_frame_meta",)),
         (methods_session, ("_create_session", "_resume_response",)),
@@ -360,3 +361,81 @@ def test_compression_races_idle_registration_without_blocking_paint(runtime, mon
     assert not compressor.is_alive() and not painter.is_alive()
     assert owner(home, "A") is None
     assert owner(home, "B")["live_session_id"] == sid
+
+
+@pytest.mark.parametrize("reuse_token", [False, True])
+def test_deferred_retirement_preserves_readvertised_old_key(runtime, monkeypatch, reuse_token):
+    home, _, server = runtime
+    sid, session = open_session(home, server)
+    server._register_open_tui_delivery(sid, session)
+    old = dict(session["delivery_advertisement"])
+    revoke = delivery.revoke_advertisement
+    def unavailable(*args):
+        raise OSError("synthetic retirement failure")
+    monkeypatch.setattr(delivery, "revoke_advertisement", unavailable)
+    session["agent"] = SimpleNamespace(session_id="B")
+    server._sync_session_key_after_compress(sid, session)
+    # A new occupant reuses A before this runtime retries its pending cleanup.
+    replacement = delivery.advertise_session(home, "A", "replacement-live", retired_live_ids=frozenset({sid}))
+    if reuse_token:
+        replacement["lease_id"] = old["lease_id"]
+        delivery.atomic_json_write(delivery._advertisement_path(home, "A"), replacement, mode=0o600)
+    healthy = {"reachable": True, "live_session_id": "replacement-live", "delivery_token": replacement["lease_id"]}
+    delivery.write_delivery_reachability(home, "A", healthy)
+    monkeypatch.setattr(delivery, "revoke_advertisement", revoke)
+    server._register_open_tui_delivery(sid, session)
+    assert owner(home, "A")["live_session_id"] == "replacement-live"
+    assert owner(home, "A")["lease_id"] == replacement["lease_id"]
+    assert status(home, "A")["reachable"] is True
+    assert status(home, "A")["live_session_id"] == "replacement-live"
+    assert not session.get("delivery_retirements")
+
+
+def test_finalize_flushes_retirements_without_current_advertisement(runtime):
+    home, _, server = runtime
+    sid, session = open_session(home, server)
+    server._register_open_tui_delivery(sid, session)
+    old = session.pop("delivery_advertisement")
+    session["delivery_retirements"] = {(old["session_id"], old["lease_id"]): old}
+    assert server._finalize_delivery_advertisement(session)
+    assert owner(home, "A") is None
+    assert not session.get("delivery_retirements")
+    assert status(home, "A")["live_session_id"] == sid
+    # A prior finalization whose cleanup failed can retry without another end hook.
+    old = delivery.advertise_session(home, "A", sid)
+    session["delivery_retirements"] = {(old["session_id"], old["lease_id"]): old}
+    assert server._finalize_delivery_advertisement(session) is False
+    assert owner(home, "A") is None
+    assert not session.get("delivery_retirements")
+
+
+@pytest.mark.parametrize("missing", ["pid", "process_start", "profile_home", "live_session_id", "lease_id"])
+def test_malformed_legacy_predecessor_fails_closed_without_raising(runtime, missing):
+    home, _, server = runtime
+    sid, session = open_session(home, server)
+    server._register_open_tui_delivery(sid, session)
+    old = dict(session["delivery_advertisement"])
+    legacy = dict(old)
+    legacy.pop(missing)
+    delivery.atomic_json_write(delivery._advertisement_path(home, "A"), legacy, mode=0o600)
+    new = delivery.advertise_session(home, "B", sid, previous_advertisement=old)
+    assert new["session_id"] == "B"
+    assert new["lease_id"] != old["lease_id"]
+
+
+def test_sustained_deferrals_warn_once_and_reset_after_success(runtime, caplog):
+    _, _, server = runtime
+    sid, session = open_session(None, server)
+    threshold = session_lifecycle._DELIVERY_DEFERRAL_WARN_AFTER
+    with session["history_lock"], caplog.at_level(logging.WARNING):
+        for _ in range(threshold + 2):
+            server._register_open_tui_delivery(sid, session)
+    warnings = [record for record in caplog.records if "registration deferred" in record.message]
+    assert len(warnings) == 1
+    assert f"attempts={threshold}" in warnings[0].message
+    server._register_open_tui_delivery(sid, session)
+    assert "delivery_deferrals" not in session
+    with session["history_lock"], caplog.at_level(logging.WARNING):
+        for _ in range(threshold):
+            server._register_open_tui_delivery(sid, session)
+    assert sum("registration deferred" in record.message for record in caplog.records) == 2

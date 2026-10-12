@@ -139,6 +139,15 @@ def _attach_lease(session: dict, lease) -> None:
     session.pop("_lease_taken_over", None)  # owning again: its finalize ends the row like any owner
 
 
+_DELIVERY_DEFERRAL_WARN_AFTER = 12  # twelve idle attempts: about a minute at the 5s poll cadence
+
+
+def _note_tui_delivery_deferral(sid: str, session: dict, reason: str) -> None:
+    count = session["delivery_deferrals"] = int(session.get("delivery_deferrals", 0)) + 1
+    level = logging.WARNING if count == _DELIVERY_DEFERRAL_WARN_AFTER else logging.DEBUG
+    logger.log(level, "delivery registration deferred sid=%s attempts=%s: %s", sid, count, reason)
+
+
 def _register_open_tui_delivery(sid: str, session: dict) -> None:
     """Publish from unlocked startup/paint/poll paths; busy histories retry at idle."""
     if _session_source(session) != "tui" or session.get("delivery_opt_out"):
@@ -152,7 +161,7 @@ def _register_open_tui_delivery(sid: str, session: dict) -> None:
     # before calling. Warm resume/activate instead refresh inside transport attach:
     # resume_lock -> history_lock -> _refresh_tui_delivery_locked (no global lock).
     if not _sessions_lock.acquire(blocking=False):
-        logger.debug("delivery registration deferred: busy sessions sid=%s", sid)
+        _note_tui_delivery_deferral(sid, session, "busy sessions")
         return
     try:
         active = frozenset(_sessions) if _sessions.get(sid) is session else None
@@ -162,9 +171,10 @@ def _register_open_tui_delivery(sid: str, session: dict) -> None:
         _sessions_lock.release()
     # A concurrent turn must never block a paint/reattach response on publication.
     if not lock.acquire(blocking=False):
-        logger.debug("delivery registration deferred: busy history sid=%s", sid)
+        _note_tui_delivery_deferral(sid, session, "busy history")
         return
     try:
+        session.pop("delivery_deferrals", None)
         _refresh_tui_delivery_locked(sid, session, retired=retired, active=active)
     finally:
         lock.release()
@@ -193,7 +203,7 @@ def _retire_tui_delivery_locked(sid: str, session: dict) -> None:
             # Also retry a status write if revocation succeeded on an earlier pass.
             # The writer refuses to overwrite a different healthy generation.
             write_delivery_reachability(_session_home(session), old["session_id"],
-                                        {"reachable": False, "reason": "session changed", "live_session_id": sid})
+                                        {"reachable": False, "reason": "session changed", "live_session_id": sid or old["live_session_id"]})
         except Exception:
             logger.exception("delivery retirement failed sid=%s session_id=%s", sid, old["session_id"])
         else:
@@ -456,11 +466,11 @@ def _finalize_delivery_advertisement(session: dict | None) -> bool:
     if not session:
         return False
     with (session.get("history_lock") or contextlib.nullcontext()):
+        previous = session.get("delivery_advertisement") or {}
+        _retire_tui_delivery_locked(str(session.get("_sid") or previous.get("live_session_id") or ""), session)
         if session.get("_finalized"):
             return False
         session["_finalized"] = True
-        if previous := session.get("delivery_advertisement"):
-            _retire_tui_delivery_locked(previous["live_session_id"], session)
         if advertisement := session.pop("delivery_advertisement", None):
             from tools.bot_live_delivery import revoke_advertisement, write_delivery_reachability
             revoked = revoke_advertisement(_session_home(session), advertisement)

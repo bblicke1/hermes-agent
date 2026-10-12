@@ -73,7 +73,7 @@ def test_local_work_blocks_mailbox_claim_without_consuming_envelope(monkeypatch,
     owner = {"lease_id": "lease", "live_session_id": "live", "session_id": "chat"}
     author = {"id": "bot:coder", "name": "coder", "is_bot": True}
     pending = [{"id": "receipt", "message": "imported", "author": author}]
-    monkeypatch.setattr(mailbox, "find_canonical_live_owner", lambda home: owner)
+    monkeypatch.setattr(mailbox, "find_session_live_owner", lambda home, key, **kwargs: owner)
     monkeypatch.setattr(mailbox, "claim_pending_delivery", lambda home, pinned: pending.pop(0))
     receipts = []
     monkeypatch.setattr(mailbox, "complete_delivery", lambda *args, **kwargs: receipts.append((args, kwargs)))
@@ -108,7 +108,7 @@ def test_mailbox_poll_skips_owner_lookup_without_a_mailbox(monkeypatch, tmp_path
     """No mailbox directory → no state.db open / registry lock per pass; the lookup runs once one exists."""
     import tools.bot_live_delivery as mailbox
     lookups = []
-    monkeypatch.setattr(mailbox, "find_canonical_live_owner", lambda home: lookups.append(home) or None)
+    monkeypatch.setattr(mailbox, "find_session_live_owner", lambda home, key, **kwargs: lookups.append(home) or None)
     poll = rebind(session_notifications._poll_bot_live_delivery_once, {
         "_session_home": lambda session: tmp_path, "_session_turn_admission": _session_turn_admission})
     session = {"history_lock": threading.RLock(), "agent": object(), "session_key": "chat",
@@ -155,7 +155,7 @@ def test_mailbox_poll_delivers_past_a_schema_damaged_ticket(monkeypatch, tmp_pat
     owner = dict(profile_home=str(tmp_path.resolve()), session_id="chat", lease_id="lease", live_session_id="live")
     queued = mailbox.deliver_to_live_owner(tmp_path, owner, "healthy", delivery_id="d" * 32)
     (mailbox._root(tmp_path) / f"{'a' * 32}.json").write_text("{}", encoding="utf-8")
-    monkeypatch.setattr(mailbox, "find_canonical_live_owner", lambda home: owner)
+    monkeypatch.setattr(mailbox, "find_session_live_owner", lambda home, key, **kwargs: owner)
     submitted = []
     def submit(rid, sid, session, text, **kwargs):
         submitted.append(text)

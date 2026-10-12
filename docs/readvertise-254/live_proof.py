@@ -53,7 +53,7 @@ def main():
     os.environ['HERMES_RUNTIME_DIR'] = str(root / 'tools')
     os.environ['HERMES_DISABLE_LAZY_INSTALLS'] = '1'
     sys.path[:0] = [str(REPO), str(SITES), str(SCRIPTS)]
-    from tools.bot_live_delivery import _advertisement_path, read_delivery_result
+    from tools.bot_live_delivery import _advertisement_path, read_delivery_result, revoke_advertisement
     from utils import atomic_json_write
     from agent_mail import ProducerMail
     # This dependency is an untracked, already-deployed ingress module. Its
@@ -210,8 +210,24 @@ def main():
         evidence.update(first_owner=first, second_owner=second, old_session_id=old, new_session_id=new,
                         same_backend_pid=True, previous_advertisement_retired=True)
         evidence['second_herdr'] = publish_observed(new)
+        # Controlled retirement-failure fixture: the previous owner file remains
+        # beside the real replacement. Only this scratch profile is written.
+        atomic_json_write(_advertisement_path(home, old), first, mode=0o600, fsync_dir=True)
+        assert len(list((home / 'runtime/seat_delivery_owners').glob('*.json'))) == 2
+        route_path = home / 'runtime/seat-routes.json'
+        before_route = route_path.read_bytes()
+        evidence['dual_owner_dry_run'] = refresh.refresh(NAME, profiles=root / 'profiles', dry_run=True)
+        assert evidence['dual_owner_dry_run']['status'] == 'would-update'
+        assert route_path.read_bytes() == before_route, 'dry-run must not publish'
+        evidence['dual_owner_selected'] = refresh.owner(home, new)
+        assert evidence['dual_owner_selected']['lease_id'] == second['lease_id']
         evidence['second_route'] = refresh.refresh(NAME, profiles=root / 'profiles')
         deliver('G254-SECOND-ACK', 'second')
+        assert evidence['second_receipt']['owner']['session_id'] == new
+        assert evidence['second_receipt']['owner']['lease_id'] == second['lease_id']
+        evidence['dual_owner_wake'] = True
+        assert revoke_advertisement(home, first)
+        assert len(list((home / 'runtime/seat_delivery_owners').glob('*.json'))) == 1
         evidence['passed'] = True
     except Exception as exc:
         evidence['error'] = repr(exc)

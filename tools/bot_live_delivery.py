@@ -119,13 +119,13 @@ def advertise_session(profile_home: Path | str, session_id: str, live_session_id
                 previous = _read_advertisement(_advertisement_path(home, previous_advertisement["session_id"]))
                 # Keep already-admitted compression-chain mail claimable. Only a
                 # current, exact same-process/runtime lease may carry its token.
-                if (previous and previous["pid"] == os.getpid()
-                        and previous["process_start"] == start
+                if (previous and previous.get("pid") == os.getpid()
+                        and previous.get("process_start") == start
                         and previous_advertisement.get("process_start") == start
-                        and previous["profile_home"] == str(home)
-                        and previous["live_session_id"] == live_session_id
-                        and previous["lease_id"] == previous_advertisement.get("lease_id")):
-                    token = previous["lease_id"]
+                        and previous.get("profile_home") == str(home)
+                        and previous.get("live_session_id") == live_session_id
+                        and previous.get("lease_id") == previous_advertisement.get("lease_id")):
+                    token = previous.get("lease_id")
             record = dict(profile_home=str(home), session_id=session_id, live_session_id=live_session_id,
                           lease_id=token, pid=os.getpid(), process_start=start)
             atomic_json_write(path, record, mode=0o600, fsync_dir=True)
@@ -152,7 +152,8 @@ def revoke_advertisement(profile_home: Path | str, advertisement: dict) -> bool:
     path = _advertisement_path(Path(profile_home).resolve(), advertisement["session_id"])
     with _FileLock(path.parent / ".lock"):
         current = _read_advertisement(path)
-        if current and current["lease_id"] == advertisement["lease_id"]:
+        if (current and current["lease_id"] == advertisement["lease_id"]
+                and current["live_session_id"] == advertisement["live_session_id"]):
             path.unlink(missing_ok=True)
             return True
     return False
