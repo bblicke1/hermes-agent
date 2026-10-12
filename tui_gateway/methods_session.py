@@ -887,7 +887,6 @@ def _resume_reuse_live_locked(ctx: _Resume, sid: str, session: dict) -> dict:
     payload = _live_session_payload(sid, session, cols=ctx.cols, touch=True, omit_messages=ctx.omit_messages,
                                     transport=current_transport() or _stdio_transport,
                                     inline_images=ctx.inline_images)
-    _register_open_tui_delivery(sid, session)
     payload["resumed"] = ctx.target
     if ctx.defer_history:
         payload.update(messages=[], hydrating=bool(session.get("resume_hydrating")),
@@ -1173,7 +1172,6 @@ def _(rid, params: dict, session: dict) -> dict:
             return refusal
         with session["history_lock"]:
             _rebind_live_transport(sid, session, current_transport() or _stdio_transport)
-    _register_open_tui_delivery(sid, session)
     return _ok(rid, _live_session_payload(
         sid, session, touch=True, omit_messages=is_truthy_value(params.get("omit_messages", False))))
 

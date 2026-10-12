@@ -120,6 +120,8 @@ def advertise_session(profile_home: Path | str, session_id: str, live_session_id
                 # Keep already-admitted compression-chain mail claimable. Only a
                 # current, exact same-process/runtime lease may carry its token.
                 if (previous and previous["pid"] == os.getpid()
+                        and previous["process_start"] == start
+                        and previous_advertisement.get("process_start") == start
                         and previous["profile_home"] == str(home)
                         and previous["live_session_id"] == live_session_id
                         and previous["lease_id"] == previous_advertisement.get("lease_id")):

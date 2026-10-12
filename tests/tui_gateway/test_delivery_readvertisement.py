@@ -49,7 +49,7 @@ def runtime(monkeypatch, tmp_path):
         _response_profile_name=lambda profile: "test",
     )
     for module, names in (
-        (session_lifecycle, ("_refresh_tui_delivery_locked", "_register_open_tui_delivery", "_finalize_delivery_advertisement")),
+        (session_lifecycle, ("_write_tui_delivery_status", "_retire_tui_delivery_locked", "_refresh_tui_delivery_locked", "_register_open_tui_delivery", "_finalize_delivery_advertisement")),
         (session_compression, ("_sync_session_key_after_compress",)),
         (compute_host_bridge, ("_compute_host_adopt_frame_meta",)),
         (methods_session, ("_create_session", "_resume_response",)),
@@ -148,10 +148,15 @@ def test_double_compression_only_final_key_remains(runtime):
 
 @pytest.mark.parametrize("failure", ["refused", "raised"])
 def test_advertise_failure_does_not_break_switch(runtime, monkeypatch, failure):
-    home, _, server = runtime
+    home, db, server = runtime
     sid, session = open_session(home, server)
     old = session["session_key"]
     server._register_open_tui_delivery(sid, session)
+    original = owner(home, old)
+    db.create_session(old, "tui")
+    queued = delivery.deliver_to_live_owner(home, original, "before failed compression")
+    db.end_session(old, "compression")
+    db.create_session("new-key", "tui", parent_session_id=old)
     real_advertise = delivery.advertise_session
     def fail(*args, **kwargs):
         if failure == "raised":
@@ -161,11 +166,16 @@ def test_advertise_failure_does_not_break_switch(runtime, monkeypatch, failure):
     session["agent"] = SimpleNamespace(session_id="new-key")
     server._sync_session_key_after_compress(sid, session)
     assert session["session_key"] == "new-key"
-    assert owner(home, old) is None
+    assert owner(home, old) == original
+    assert session["delivery_advertisement"]["lease_id"] == original["lease_id"]
     assert status(home, "new-key")["reachable"] is False
     monkeypatch.setattr(delivery, "advertise_session", real_advertise)
     server._register_open_tui_delivery(sid, session)
-    assert owner(home, "new-key")["live_session_id"] == sid
+    recovered = owner(home, "new-key")
+    assert recovered["live_session_id"] == sid
+    assert recovered["lease_id"] == original["lease_id"]
+    assert delivery.claim_pending_delivery(home, recovered)["id"] == queued["id"]
+    assert owner(home, old) is None
 
 
 def test_isolated_compression_refreshes_without_reentering_history_lock(runtime):
@@ -189,3 +199,164 @@ def test_readvertisement_cannot_inherit_an_unowned_token(runtime):
     new = delivery.advertise_session(home, "new", sid, previous_advertisement=forged)
     assert new["lease_id"] != forged["lease_id"]
     assert new["lease_id"] != previous["lease_id"]
+
+
+def test_retirement_failure_keeps_new_owner_and_retries_cleanup(runtime, monkeypatch):
+    home, db, server = runtime
+    sid, session = open_session(home, server)
+    server._register_open_tui_delivery(sid, session)
+    previous = owner(home, "A")
+    db.create_session("A", "tui")
+    queued = delivery.deliver_to_live_owner(home, previous, "before compression")
+    db.end_session("A", "compression")
+    db.create_session("B", "tui", parent_session_id="A")
+    real_revoke = delivery.revoke_advertisement
+    monkeypatch.setattr(delivery, "revoke_advertisement", lambda *a: (_ for _ in ()).throw(OSError("retirement failed")))
+    session["agent"] = SimpleNamespace(session_id="B")
+    server._sync_session_key_after_compress(sid, session)
+    current = owner(home, "B")
+    assert session["delivery_advertisement"]["session_id"] == "B"
+    assert status(home, "B")["reachable"] is True
+    assert status(home, "B")["delivery_token"] == current["lease_id"]
+    assert current["lease_id"] == previous["lease_id"]
+    assert len(list((home / "runtime/seat_delivery_owners").glob("*.json"))) == 2
+    # Route refresh uses the observed exact key; wake resolves compression tips.
+    assert delivery.find_session_live_owner(home, "A") == current
+    assert delivery.find_session_live_owner(home, "B") == current
+    fresh = delivery.deliver_to_live_owner(home, current, "after compression")
+    assert delivery.claim_pending_delivery(home, current)["id"] == queued["id"]
+    assert delivery.claim_pending_delivery(home, current)["id"] == fresh["id"]
+    monkeypatch.setattr(delivery, "revoke_advertisement", real_revoke)
+    server._register_open_tui_delivery(sid, session)
+    assert owner(home, "A") is None
+    assert not session.get("delivery_retirements")
+    assert status(home, "A")["reachable"] is False
+    assert owner(home, "B") == current
+
+
+@pytest.mark.parametrize("malformed", ["missing-lock", "empty-sid"])
+def test_resume_registration_skips_malformed_identity(runtime, caplog, malformed):
+    _, _, server = runtime
+    sid, session = open_session(None, server)
+    if malformed == "missing-lock":
+        session.pop("history_lock")
+    else:
+        sid = ""
+    ctx = SimpleNamespace(rid="resume", target="A", omit_messages=False, messages=list)
+    with caplog.at_level(logging.WARNING):
+        response = server._resume_response(ctx, sid, session, info={})
+    assert response["result"]["resumed"] == "A"
+    assert "missing sid/history_lock" in caplog.text
+    assert "delivery_advertisement" not in session
+
+
+def test_isolated_compression_empty_sid_is_fail_open(runtime, caplog):
+    _, _, server = runtime
+    _, session = open_session(None, server)
+    with session["history_lock"], caplog.at_level(logging.WARNING):
+        server._compute_host_adopt_frame_meta(session, {"session_key": "B"})
+    assert session["session_key"] == "B"
+    assert "delivery_advertisement" not in session
+    assert "missing sid/history_lock" in caplog.text
+
+
+def test_resume_paint_does_not_wait_on_busy_registry_and_history(runtime):
+    _, _, server = runtime
+    sid, session = open_session(None, server)
+    ctx = SimpleNamespace(rid="resume", target="A", omit_messages=False, messages=list)
+    done = threading.Event()
+    results = []
+    def resume():
+        try:
+            results.append(server._resume_response(ctx, sid, session, info={}))
+        finally:
+            done.set()
+    # Another gateway operation owns these locks. A paint must not wait for
+    # delivery publication: previous registration blocked on the registry here.
+    with server._sessions_lock, session["history_lock"]:
+        worker = threading.Thread(target=resume, daemon=True)
+        worker.start()
+        completed = done.wait(2)
+    worker.join(timeout=2)
+    assert completed, "resume paint blocked on optional delivery registration"
+    assert results[0]["result"]["session_id"] == sid
+    server._register_open_tui_delivery(sid, session)
+    assert session["delivery_advertisement"]["live_session_id"] == sid
+
+
+def test_registration_with_already_held_history_does_not_self_deadlock(runtime):
+    _, _, server = runtime
+    sid, session = open_session(None, server)
+    done = threading.Event()
+    def attach():
+        with session["history_lock"]:
+            server._register_open_tui_delivery(sid, session)
+        done.set()
+    worker = threading.Thread(target=attach, daemon=True)
+    worker.start()
+    assert done.wait(2), "registration re-acquired a non-reentrant history lock"
+    worker.join(timeout=2)
+
+
+def test_unchanged_advertisement_does_not_write(runtime, monkeypatch):
+    home, _, server = runtime
+    sid, session = open_session(home, server)
+    server._register_open_tui_delivery(sid, session)
+    original = dict(session["delivery_advertisement"])
+    def unexpected_write(*args, **kwargs):
+        pytest.fail("unchanged advertisement caused a durable write")
+    monkeypatch.setattr(delivery, "atomic_json_write", unexpected_write)
+    server._register_open_tui_delivery(sid, session)
+    assert session["delivery_advertisement"] == original
+
+
+def test_carry_forward_requires_current_process_birth(runtime):
+    home, _, server = runtime
+    sid, session = open_session(home, server)
+    server._register_open_tui_delivery(sid, session)
+    previous = dict(session["delivery_advertisement"])
+    previous["process_start"] -= 1
+    current = delivery.advertise_session(home, "B", sid, previous_advertisement=previous)
+    assert current["lease_id"] != previous["lease_id"]
+
+
+def test_compression_races_idle_registration_without_blocking_paint(runtime, monkeypatch):
+    home, _, server = runtime
+    sid, session = open_session(home, server)
+    server._register_open_tui_delivery(sid, session)
+    entered = threading.Event()
+    release = threading.Event()
+    painted = threading.Event()
+    errors = []
+    real_advertise = delivery.advertise_session
+    def paused_advertise(profile_home, key, live_sid, **kwargs):
+        if key == "B":
+            entered.set()
+            assert release.wait(4), "compression publication was never released"
+        return real_advertise(profile_home, key, live_sid, **kwargs)
+    monkeypatch.setattr(delivery, "advertise_session", paused_advertise)
+    session["agent"] = SimpleNamespace(session_id="B")
+    def compress():
+        try:
+            server._sync_session_key_after_compress(sid, session)
+        except BaseException as exc:
+            errors.append(exc)
+    def paint():
+        server._register_open_tui_delivery(sid, session)
+        painted.set()
+    compressor = threading.Thread(target=compress, daemon=True)
+    compressor.start()
+    assert entered.wait(2)
+    painter = threading.Thread(target=paint, daemon=True)
+    painter.start()
+    try:
+        completed = painted.wait(2)
+    finally:
+        release.set()
+        compressor.join(2)
+        painter.join(2)
+    assert completed, "paint registration blocked on the compression history lock"
+    assert not errors
+    assert not compressor.is_alive() and not painter.is_alive()
+    assert owner(home, "A") is None
+    assert owner(home, "B")["live_session_id"] == sid
