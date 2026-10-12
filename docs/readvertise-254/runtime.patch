@@ -1,0 +1,208 @@
+diff --git a/tools/bot_live_delivery.py b/tools/bot_live_delivery.py
+index 691c0082d46..34a82294765 100644
+--- a/tools/bot_live_delivery.py
++++ b/tools/bot_live_delivery.py
+@@ -85,7 +85,8 @@ def _read_advertisement(path: Path) -> dict | None:
+ 
+ def advertise_session(profile_home: Path | str, session_id: str, live_session_id: str,
+                       *, retired_live_ids: frozenset[str] = frozenset(),
+-                      active_live_ids: frozenset[str] | None = None, status: dict | None = None) -> dict | None:
++                      active_live_ids: frozenset[str] | None = None, status: dict | None = None,
++                      previous_advertisement: dict | None = None) -> dict | None:
+     """Reachability without capacity; replace dead processes or explicitly retired local runtimes.
+ 
+     A live foreign process or an attached local competitor always fences acquisition.
+@@ -113,8 +114,18 @@ def advertise_session(profile_home: Path | str, session_id: str, live_session_id
+             start = _own_start_time()
+             if start is None:
+                 return unavailable("process birth time unavailable")
++            token = uuid.uuid4().hex
++            if previous_advertisement:
++                previous = _read_advertisement(_advertisement_path(home, previous_advertisement["session_id"]))
++                # Keep already-admitted compression-chain mail claimable. Only a
++                # current, exact same-process/runtime lease may carry its token.
++                if (previous and previous["pid"] == os.getpid()
++                        and previous["profile_home"] == str(home)
++                        and previous["live_session_id"] == live_session_id
++                        and previous["lease_id"] == previous_advertisement.get("lease_id")):
++                    token = previous["lease_id"]
+             record = dict(profile_home=str(home), session_id=session_id, live_session_id=live_session_id,
+-                          lease_id=uuid.uuid4().hex, pid=os.getpid(), process_start=start)
++                          lease_id=token, pid=os.getpid(), process_start=start)
+             atomic_json_write(path, record, mode=0o600, fsync_dir=True)
+             return record
+     except (OSError, ValueError, TypeError) as exc:
+diff --git a/tui_gateway/compute_host_bridge.py b/tui_gateway/compute_host_bridge.py
+index ffff073d358..99289197404 100644
+--- a/tui_gateway/compute_host_bridge.py
++++ b/tui_gateway/compute_host_bridge.py
+@@ -117,6 +117,7 @@ def _compute_host_adopt_frame_meta(session: dict, frame: dict) -> None:
+             logger.warning("Compression session lease did not re-anchor: sid=%s old_session_id=%s new_session_id=%s",
+                            frame.get("sid"), session.get("session_key"), new_key)
+         session["session_key"] = new_key
++        _refresh_tui_delivery_locked(str(frame.get("sid") or ""), session)
+     if frame.get("history_version") is not None:
+         with contextlib.suppress(Exception):
+             session["history_version"] = max(int(session.get("history_version", 0)),
+diff --git a/tui_gateway/methods_session.py b/tui_gateway/methods_session.py
+index 60f99535a64..f783e0b643c 100644
+--- a/tui_gateway/methods_session.py
++++ b/tui_gateway/methods_session.py
+@@ -451,11 +451,7 @@ def _create_session(rid, params: dict, *, copy_parent_history: bool = False) ->
+                     key, session_model_override["model"], session_model_override.get("provider") or "-",
+                     _session_default_route(_sessions[sid])[0])
+     # No DB row here (drafts left "Untitled" litter): created on the first prompt — except seeded sessions.
+-    # NOTE: we intentionally do NOT persist a DB row here. Every TUI/desktop launch (and every "New agent" /
+-    # draft) opens a session here just to paint the composer, so eagerly creating a row left an "Untitled"
+-    # empty session behind for every launch the user never typed into. The row is now created lazily on the
+-    # first prompt (see _ensure_session_db_row + prompt.submit), and the AIAgent's own INSERT-OR-IGNORE
+-    # persists it on the first turn too. EXCEPTION — seeded branch children (#93959): a desktop branch
++    # Draft rows stay lazy; seeded branch children (#93959) persist immediately. A desktop branch
+     # carries parent_session_id AND a seeded transcript, which is explicit user intent, not an abandoned
+     # draft. The row MUST exist immediately: the renderer's post-create resume re-fetches the child through
+     # REST + defer_history hydration, both of which read the DB — an unpersisted child 404s, the fail-latch
+@@ -475,7 +471,7 @@ def _create_session(rid, params: dict, *, copy_parent_history: bool = False) ->
+         # the row itself (AIAgent INSERT-OR-IGNORE) with cwd=None, and the sidebar then drops it to Home. Local
+         # project drafts stay lazy — their cwd reaches the row on the first prompt (no "Untitled" litter).
+         _ensure_session_db_row(_sessions[sid])
+-    # Return immediately so Ink can paint; the AIAgent builds right after the flush.
++    _register_open_tui_delivery(sid, _sessions[sid])
+     _schedule_agent_build(sid)
+     _schedule_session_cap_enforcement()  # trim detached idle sessions over the cap
+     cwd = _sessions[sid]["cwd"]
+@@ -734,7 +730,8 @@ def _resume_live_unpersisted(ctx: _Resume, live_sid: str, live: dict) -> dict:
+                 _rebind_live_transport(live_sid, live, transport)
+         else:
+             _cancel_ws_orphan_reap(live_sid)
+-    messages = ctx.messages(live.get("history") or [])  # count the wire, as every other resume path does
++    _register_open_tui_delivery(live_sid, live)
++    messages = ctx.messages(live.get("history") or [])
+     # The chat's own pick, not the profile default: a warm reattach that reported `_resolve_model()` flipped the
+     # Desktop picker on every reload while the session was still live, and back once it had been dropped.
+     model, provider = _live_session_identity(live)
+@@ -890,6 +887,7 @@ def _resume_reuse_live_locked(ctx: _Resume, sid: str, session: dict) -> dict:
+     payload = _live_session_payload(sid, session, cols=ctx.cols, touch=True, omit_messages=ctx.omit_messages,
+                                     transport=current_transport() or _stdio_transport,
+                                     inline_images=ctx.inline_images)
++    _register_open_tui_delivery(sid, session)
+     payload["resumed"] = ctx.target
+     if ctx.defer_history:
+         payload.update(messages=[], hydrating=bool(session.get("resume_hydrating")),
+@@ -905,7 +903,8 @@ def _resume_response(
+     messages: list | None = None, message_count: int | None = None, running: bool = False,
+     status: str = "idle", hydrating: bool | None = None, started_at=None, auto_continue=None,
+ ) -> dict:
+-    """Common resume payload; omit_messages counts ``count_source`` (client still learns the stored size)."""
++    """Common resume payload; publish reachability before returning to the client."""
++    _register_open_tui_delivery(sid, record)
+     if messages is None:
+         messages = ctx.messages(display)
+     if message_count is None:
+@@ -1174,6 +1173,7 @@ def _(rid, params: dict, session: dict) -> dict:
+             return refusal
+         with session["history_lock"]:
+             _rebind_live_transport(sid, session, current_transport() or _stdio_transport)
++    _register_open_tui_delivery(sid, session)
+     return _ok(rid, _live_session_payload(
+         sid, session, touch=True, omit_messages=is_truthy_value(params.get("omit_messages", False))))
+ 
+diff --git a/tui_gateway/session_compression.py b/tui_gateway/session_compression.py
+index 6d085882df8..b0b34b40f7b 100644
+--- a/tui_gateway/session_compression.py
++++ b/tui_gateway/session_compression.py
+@@ -329,7 +329,9 @@ def _sync_session_key_after_compress(
+             sid, old_key, new_session_id,
+         )
+     # Even if the approval module fails to import, anchor session_key on the continuation id.
+-    session["session_key"] = new_session_id
++    with session["history_lock"]:
++        session["session_key"] = new_session_id
++        _refresh_tui_delivery_locked(sid, session)
+     with contextlib.suppress(Exception):
+         from tools import approval
+         with contextlib.suppress(Exception):
+diff --git a/tui_gateway/session_lifecycle.py b/tui_gateway/session_lifecycle.py
+index 2ffcdf283a5..ff674c4e389 100644
+--- a/tui_gateway/session_lifecycle.py
++++ b/tui_gateway/session_lifecycle.py
+@@ -141,7 +141,6 @@ def _attach_lease(session: dict, lease) -> None:
+ 
+ def _register_open_tui_delivery(sid: str, session: dict) -> None:
+     """Publish lightweight reachability; writer admission remains lazy and capped."""
+-    from tools.bot_live_delivery import advertise_session, write_delivery_reachability
+     if _session_source(session) != "tui" or session.get("delivery_opt_out"):
+         return
+     # Snapshot first: never acquire _sessions_lock underneath history_lock.
+@@ -150,26 +149,55 @@ def _register_open_tui_delivery(sid: str, session: dict) -> None:
+         retired = frozenset(other_sid for other_sid, other in _sessions.items()
+                             if other.get("_finalized") or other.get("_closing") or other.get("_lease_taken_over"))
+     with session["history_lock"]:
+-        if session.get("_closing") or session.get("_finalized"):
++        _refresh_tui_delivery_locked(sid, session, retired=retired, active=active)
++
++
++def _refresh_tui_delivery_locked(
++    sid: str, session: dict, *, retired: frozenset[str] = frozenset(), active: frozenset[str] | None = None
++) -> None:
++    """Follow the current durable key; caller holds history_lock, never take _sessions_lock here."""
++    from tools.bot_live_delivery import advertise_session, revoke_advertisement, write_delivery_reachability
++    if (_session_source(session) != "tui" or any(session.get(flag) for flag in
++            ("delivery_opt_out", "_closing", "_finalized", "_lease_taken_over"))):
++        return
++    home = _session_home(session)
++    key = str(session.get("session_key") or "")
++    old = session.get("delivery_advertisement")
++    status = {"session_id": key, "live_session_id": sid}
++    try:
++        advertisement = advertise_session(home, key, sid, retired_live_ids=retired,
++                                          active_live_ids=active, status=status, previous_advertisement=old)
++    except Exception as exc:
++        advertisement = None
++        status.update(reachable=False, reason=f"advertisement failed: {exc}")
++        logger.exception("delivery advertisement failed sid=%s session_id=%s", sid, key)
++    # Retire stale routing even when the new key is unavailable. Retain the old
++    # record on retirement failure so the idle poller can retry its exact token.
++    if old and old["session_id"] != key:
++        try:
++            revoked = revoke_advertisement(home, old)
++        except Exception:
++            logger.exception("delivery retirement failed sid=%s session_id=%s", sid, old["session_id"])
+             return
+-        old = session.get("delivery_advertisement")
+-        key = old["session_id"] if old else str(session.get("session_key") or "")
+-        status = {"live_session_id": sid}
+-        advertisement = advertise_session(_session_home(session), key, sid,
+-                                          retired_live_ids=retired, active_live_ids=active, status=status)
+-        if advertisement:
+-            session["delivery_advertisement"] = advertisement
+-            status.update(reachable=True, reason="advertised", delivery_token=advertisement["lease_id"])
+-        else:
+-            session.pop("delivery_advertisement", None)
+-        if status != session.get("delivery_reachability"):
+-            session["delivery_reachability"] = status
+-            if status.get("reachable") is False:
+-                logger.warning("delivery advertisement refused sid=%s: %s", sid, status["reason"])
++        if revoked:
+             try:
+-                write_delivery_reachability(_session_home(session), key, status)
++                write_delivery_reachability(home, old["session_id"],
++                                            {"reachable": False, "reason": "session changed", "live_session_id": sid})
+             except Exception:
+-                logger.exception("delivery reachability status write failed sid=%s", sid)
++                logger.exception("delivery retired status write failed sid=%s", sid)
++    if advertisement:
++        session["delivery_advertisement"] = advertisement
++        status.update(reachable=True, reason="advertised", delivery_token=advertisement["lease_id"])
++    else:
++        session.pop("delivery_advertisement", None)
++    if status != session.get("delivery_reachability"):
++        if status.get("reachable") is False:
++            logger.warning("delivery advertisement refused sid=%s: %s", sid, status.get("reason"))
++        try:
++            write_delivery_reachability(home, key, status)
++            session["delivery_reachability"] = status
++        except Exception:
++            logger.exception("delivery reachability status write failed sid=%s", sid)
+ 
+ 
+ def _detached_lease_holder(session: dict, key: str) -> tuple[str, dict] | None:

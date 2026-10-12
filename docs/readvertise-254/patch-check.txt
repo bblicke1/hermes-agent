@@ -1,0 +1,3 @@
+Forward apply check: PASS
+Forward applied bytes equal worktree: PASS
+Reverse applied bytes equal captured live baseline: PASS

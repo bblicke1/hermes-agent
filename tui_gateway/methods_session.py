@@ -451,11 +451,7 @@ def _create_session(rid, params: dict, *, copy_parent_history: bool = False) -> 
                     key, session_model_override["model"], session_model_override.get("provider") or "-",
                     _session_default_route(_sessions[sid])[0])
     # No DB row here (drafts left "Untitled" litter): created on the first prompt — except seeded sessions.
-    # NOTE: we intentionally do NOT persist a DB row here. Every TUI/desktop launch (and every "New agent" /
-    # draft) opens a session here just to paint the composer, so eagerly creating a row left an "Untitled"
-    # empty session behind for every launch the user never typed into. The row is now created lazily on the
-    # first prompt (see _ensure_session_db_row + prompt.submit), and the AIAgent's own INSERT-OR-IGNORE
-    # persists it on the first turn too. EXCEPTION — seeded branch children (#93959): a desktop branch
+    # Draft rows stay lazy; seeded branch children (#93959) persist immediately. A desktop branch
     # carries parent_session_id AND a seeded transcript, which is explicit user intent, not an abandoned
     # draft. The row MUST exist immediately: the renderer's post-create resume re-fetches the child through
     # REST + defer_history hydration, both of which read the DB — an unpersisted child 404s, the fail-latch
@@ -475,7 +471,7 @@ def _create_session(rid, params: dict, *, copy_parent_history: bool = False) -> 
         # the row itself (AIAgent INSERT-OR-IGNORE) with cwd=None, and the sidebar then drops it to Home. Local
         # project drafts stay lazy — their cwd reaches the row on the first prompt (no "Untitled" litter).
         _ensure_session_db_row(_sessions[sid])
-    # Return immediately so Ink can paint; the AIAgent builds right after the flush.
+    _register_open_tui_delivery(sid, _sessions[sid])
     _schedule_agent_build(sid)
     _schedule_session_cap_enforcement()  # trim detached idle sessions over the cap
     cwd = _sessions[sid]["cwd"]
@@ -734,7 +730,8 @@ def _resume_live_unpersisted(ctx: _Resume, live_sid: str, live: dict) -> dict:
                 _rebind_live_transport(live_sid, live, transport)
         else:
             _cancel_ws_orphan_reap(live_sid)
-    messages = ctx.messages(live.get("history") or [])  # count the wire, as every other resume path does
+    _register_open_tui_delivery(live_sid, live)
+    messages = ctx.messages(live.get("history") or [])
     # The chat's own pick, not the profile default: a warm reattach that reported `_resolve_model()` flipped the
     # Desktop picker on every reload while the session was still live, and back once it had been dropped.
     model, provider = _live_session_identity(live)
@@ -890,6 +887,7 @@ def _resume_reuse_live_locked(ctx: _Resume, sid: str, session: dict) -> dict:
     payload = _live_session_payload(sid, session, cols=ctx.cols, touch=True, omit_messages=ctx.omit_messages,
                                     transport=current_transport() or _stdio_transport,
                                     inline_images=ctx.inline_images)
+    _register_open_tui_delivery(sid, session)
     payload["resumed"] = ctx.target
     if ctx.defer_history:
         payload.update(messages=[], hydrating=bool(session.get("resume_hydrating")),
@@ -905,7 +903,8 @@ def _resume_response(
     messages: list | None = None, message_count: int | None = None, running: bool = False,
     status: str = "idle", hydrating: bool | None = None, started_at=None, auto_continue=None,
 ) -> dict:
-    """Common resume payload; omit_messages counts ``count_source`` (client still learns the stored size)."""
+    """Common resume payload; publish reachability before returning to the client."""
+    _register_open_tui_delivery(sid, record)
     if messages is None:
         messages = ctx.messages(display)
     if message_count is None:
@@ -1174,6 +1173,7 @@ def _(rid, params: dict, session: dict) -> dict:
             return refusal
         with session["history_lock"]:
             _rebind_live_transport(sid, session, current_transport() or _stdio_transport)
+    _register_open_tui_delivery(sid, session)
     return _ok(rid, _live_session_payload(
         sid, session, touch=True, omit_messages=is_truthy_value(params.get("omit_messages", False))))
 

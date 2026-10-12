@@ -1,0 +1,204 @@
+▶ not activated — using HERMES_PYTHON: /home/brad/.hermes/hermes-agent/venv/bin/python
+▶ running per-file parallel test suite via run_tests_parallel.py
+  (TZ=UTC LANG=C.UTF-8 PYTHONHASHSEED=0; clean env)
+▶ pre-compiling bytecode cache
+▶ launching test runner
+Discovered 1 test files (~7 tests) under ['tests/tui_gateway/test_delivery_readvertisement.py']; running with -j 16
+[100.0% |     7/~7 | ✓0 | ✗7] ✗ tests/tui_gateway/test_delivery_readvertisement.py (7✗, 3.7s)
+
+  ╔╍ Failed: tests/tui_gateway/test_delivery_readvertisement.py ╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍
+  ║ E       AssertionError: assert {'profile_home': '/var/tmp/hermes-pytest-1000/r-zh_bnuyx/pytest-of-brad/pytest-0/test_advertise_failure_does_no1', 'session_id': 'A', 'lease_id': 'a11c2f7853a14689b673833c2b7ad7e7', 'live_session_id': 'live-A'} is None
+  ║ E        +  where {'profile_home': '/var/tmp/hermes-pytest-1000/r-zh_bnuyx/pytest-of-brad/pytest-0/test_advertise_failure_does_no1', 'session_id': 'A', 'lease_id': 'a11c2f7853a14689b673833c2b7ad7e7', 'live_session_id': 'live-A'} = owner(PosixPath('/var/tmp/hermes-pytest-1000/r-zh_bnuyx/pytest-of-brad/pytest-0/test_advertise_failure_does_no1'), 'A')
+  ║ 
+  ║ tests/tui_gateway/test_delivery_readvertisement.py:165: AssertionError
+  ║ _____ test_isolated_compression_refreshes_without_reentering_history_lock ______
+  ║ 
+  ║ runtime = (PosixPath('/var/tmp/hermes-pytest-1000/r-zh_bnuyx/pytest-of-brad/pytest-0/test_isolated_compression_refr0'), <hermes_..._session=<function _create_session at 0x7b6a8edf3560>, _resume_response=<function _resume_response at 0x7b6a8edf3600>))
+  ║ 
+  ║     def test_isolated_compression_refreshes_without_reentering_history_lock(runtime):
+  ║         home, _, server = runtime
+  ║         sid, session = open_session(home, server)
+  ║         old = session["session_key"]
+  ║         server._register_open_tui_delivery(sid, session)
+  ║         assert type(session["history_lock"]) is type(threading.Lock())
+  ║         with session["history_lock"]:
+  ║             server._compute_host_adopt_frame_meta(session, {"sid": sid, "session_key": "isolated-child"})
+  ║ >       assert owner(home, old) is None
+  ║ E       AssertionError: assert {'profile_home': '/var/tmp/hermes-pytest-1000/r-zh_bnuyx/pytest-of-brad/pytest-0/test_isolated_compression_refr0', 'session_id': 'A', 'lease_id': '5f2d6f46d15548058a78cb57578542b8', 'live_session_id': 'live-A'} is None
+  ║ E        +  where {'profile_home': '/var/tmp/hermes-pytest-1000/r-zh_bnuyx/pytest-of-brad/pytest-0/test_isolated_compression_refr0', 'session_id': 'A', 'lease_id': '5f2d6f46d15548058a78cb57578542b8', 'live_session_id': 'live-A'} = owner(PosixPath('/var/tmp/hermes-pytest-1000/r-zh_bnuyx/pytest-of-brad/pytest-0/test_isolated_compression_refr0'), 'A')
+  ║ 
+  ║ tests/tui_gateway/test_delivery_readvertisement.py:180: AssertionError
+  ║ =========================== short test summary info ============================
+  ║ FAILED tests/tui_gateway/test_delivery_readvertisement.py::test_compression_readvertises_and_retires_previous_key
+  ║ FAILED tests/tui_gateway/test_delivery_readvertisement.py::test_new_publishes_without_building_an_agent
+  ║ FAILED tests/tui_gateway/test_delivery_readvertisement.py::test_resume_publishes_without_building_an_agent
+  ║ FAILED tests/tui_gateway/test_delivery_readvertisement.py::test_double_compression_only_final_key_remains
+  ║ FAILED tests/tui_gateway/test_delivery_readvertisement.py::test_advertise_failure_does_not_break_switch[refused]
+  ║ FAILED tests/tui_gateway/test_delivery_readvertisement.py::test_advertise_failure_does_not_break_switch[raised]
+  ║ FAILED tests/tui_gateway/test_delivery_readvertisement.py::test_isolated_compression_refreshes_without_reentering_history_lock
+  ║ ======================= 7 failed, 1 deselected in 3.48s ========================
+  ║
+  ║  Repro: python -m pytest tests/tui_gateway/test_delivery_readvertisement.py -k not unowned_token
+  ╚╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍
+
+
+=== Summary: 1 files, 0 tests passed, 7 failed (100% complete) in 3.7s (16 workers) ===
+
+=== Per-file subprocess time distribution ===
+  Files:   1
+  Total subprocess CPU-wall: 3.7s  (runner wall: 3.7s, parallelism: 16x)
+  P50: 3.70s  P90: 3.70s  P95: 3.70s  P99: 3.70s  Max: 3.70s
+  <1s: 0 files (0%)  <2s: 0 files (0%)
+  Top 10 slowest:
+      3.70s  tests/tui_gateway/test_delivery_readvertisement.py
+
+=== Failure output ===
+
+--- tests/tui_gateway/test_delivery_readvertisement.py ---
+============================= test session starts ==============================
+platform linux -- Python 3.11.15, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/brad/worktrees/hermes-agent-readvertise-254
+configfile: pyproject.toml
+plugins: anyio-4.12.1
+collected 8 items / 1 deselected / 7 selected
+
+tests/tui_gateway/test_delivery_readvertisement.py FFFFFFF               [100%]
+
+=================================== FAILURES ===================================
+____________ test_compression_readvertises_and_retires_previous_key ____________
+
+runtime = (PosixPath('/var/tmp/hermes-pytest-1000/r-zh_bnuyx/pytest-of-brad/pytest-0/test_compression_readvertises_0'), <hermes_..._session=<function _create_session at 0x7b6a8f043740>, _resume_response=<function _resume_response at 0x7b6a8f0437e0>))
+
+>   ???
+E   TypeError: 'NoneType' object is not subscriptable
+
+tests/tui_gateway/test_delivery_readvertisement.py:95: TypeError
+_________________ test_new_publishes_without_building_an_agent _________________
+
+runtime = (PosixPath('/var/tmp/hermes-pytest-1000/r-zh_bnuyx/pytest-of-brad/pytest-0/test_new_publishes_without_bui0'), <hermes_..._session=<function _create_session at 0x7b6a8ef6e5c0>, _resume_response=<function _resume_response at 0x7b6a8ef6e660>))
+
+>   ???
+E   TypeError: 'NoneType' object is not subscriptable
+
+tests/tui_gateway/test_delivery_readvertisement.py:117: TypeError
+_______________ test_resume_publishes_without_building_an_agent ________________
+
+runtime = (PosixPath('/var/tmp/hermes-pytest-1000/r-zh_bnuyx/pytest-of-brad/pytest-0/test_resume_publishes_without_0'), <hermes_..._session=<function _create_session at 0x7b6a8ef8c860>, _resume_response=<function _resume_response at 0x7b6a8ef8c900>))
+
+    def test_resume_publishes_without_building_an_agent(runtime):
+        home, db, server = runtime
+        sid, session = open_session(home, server)
+        old = session["session_key"]
+        server._register_open_tui_delivery(sid, session)
+        db.create_session("resume-target", "tui", model="test-model")
+        server._finalize_delivery_advertisement(session)
+        new_sid, new_session = open_session(home, server, "resume-target", "resumed-live")
+        ctx = SimpleNamespace(rid="resume", target="resume-target", omit_messages=False,
+                              messages=lambda display: list(display))
+        resumed = server._resume_response(ctx, new_sid, new_session, info={})["result"]
+        assert owner(home, old) is None
+>       assert owner(home, "resume-target")["live_session_id"] == resumed["session_id"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: 'NoneType' object is not subscriptable
+
+tests/tui_gateway/test_delivery_readvertisement.py:132: TypeError
+________________ test_double_compression_only_final_key_remains ________________
+
+runtime = (PosixPath('/var/tmp/hermes-pytest-1000/r-zh_bnuyx/pytest-of-brad/pytest-0/test_double_compression_only_f0'), <hermes_..._session=<function _create_session at 0x7b6a8ef6db20>, _resume_response=<function _resume_response at 0x7b6a8ef6da80>))
+
+    def test_double_compression_only_final_key_remains(runtime):
+        home, _, server = runtime
+        sid, session = open_session(home, server)
+        old = session["session_key"]
+        server._register_open_tui_delivery(sid, session)
+        for key in ("B", "C"):
+            session["agent"] = SimpleNamespace(session_id=key)
+            server._sync_session_key_after_compress(sid, session)
+>       assert owner(home, old) is None
+E       AssertionError: assert {'profile_home': '/var/tmp/hermes-pytest-1000/r-zh_bnuyx/pytest-of-brad/pytest-0/test_double_compression_only_f0', 'session_id': 'A', 'lease_id': '34125055f61b4c74a71999ad5f42f82a', 'live_session_id': 'live-A'} is None
+E        +  where {'profile_home': '/var/tmp/hermes-pytest-1000/r-zh_bnuyx/pytest-of-brad/pytest-0/test_double_compression_only_f0', 'session_id': 'A', 'lease_id': '34125055f61b4c74a71999ad5f42f82a', 'live_session_id': 'live-A'} = owner(PosixPath('/var/tmp/hermes-pytest-1000/r-zh_bnuyx/pytest-of-brad/pytest-0/test_double_compression_only_f0'), 'A')
+
+tests/tui_gateway/test_delivery_readvertisement.py:143: AssertionError
+____________ test_advertise_failure_does_not_break_switch[refused] _____________
+
+runtime = (PosixPath('/var/tmp/hermes-pytest-1000/r-zh_bnuyx/pytest-of-brad/pytest-0/test_advertise_failure_does_no0'), <hermes_..._session=<function _create_session at 0x7b6a8ef8f9c0>, _resume_response=<function _resume_response at 0x7b6a8ef8fa60>))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7b6a8eedd790>
+failure = 'refused'
+
+    @pytest.mark.parametrize("failure", ["refused", "raised"])
+    def test_advertise_failure_does_not_break_switch(runtime, monkeypatch, failure):
+        home, _, server = runtime
+        sid, session = open_session(home, server)
+        old = session["session_key"]
+        server._register_open_tui_delivery(sid, session)
+        real_advertise = delivery.advertise_session
+        def fail(*args, **kwargs):
+            if failure == "raised":
+                raise OSError("synthetic storage failure")
+            kwargs["status"].update(reachable=False, reason="synthetic refusal")
+            return None
+        monkeypatch.setattr(delivery, "advertise_session", fail)
+        session["agent"] = SimpleNamespace(session_id="new-key")
+        server._sync_session_key_after_compress(sid, session)
+        assert session["session_key"] == "new-key"
+>       assert owner(home, old) is None
+E       AssertionError: assert {'profile_home': '/var/tmp/hermes-pytest-1000/r-zh_bnuyx/pytest-of-brad/pytest-0/test_advertise_failure_does_no0', 'session_id': 'A', 'lease_id': '5cd03a90c915497a8454d3aaa62171ad', 'live_session_id': 'live-A'} is None
+E        +  where {'profile_home': '/var/tmp/hermes-pytest-1000/r-zh_bnuyx/pytest-of-brad/pytest-0/test_advertise_failure_does_no0', 'session_id': 'A', 'lease_id': '5cd03a90c915497a8454d3aaa62171ad', 'live_session_id': 'live-A'} = owner(PosixPath('/var/tmp/hermes-pytest-1000/r-zh_bnuyx/pytest-of-brad/pytest-0/test_advertise_failure_does_no0'), 'A')
+
+tests/tui_gateway/test_delivery_readvertisement.py:165: AssertionError
+_____________ test_advertise_failure_does_not_break_switch[raised] _____________
+
+runtime = (PosixPath('/var/tmp/hermes-pytest-1000/r-zh_bnuyx/pytest-of-brad/pytest-0/test_advertise_failure_does_no1'), <hermes_..._session=<function _create_session at 0x7b6a8edf1300>, _resume_response=<function _resume_response at 0x7b6a8edf13a0>))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7b6a8f449310>
+failure = 'raised'
+
+    @pytest.mark.parametrize("failure", ["refused", "raised"])
+    def test_advertise_failure_does_not_break_switch(runtime, monkeypatch, failure):
+        home, _, server = runtime
+        sid, session = open_session(home, server)
+        old = session["session_key"]
+        server._register_open_tui_delivery(sid, session)
+        real_advertise = delivery.advertise_session
+        def fail(*args, **kwargs):
+            if failure == "raised":
+                raise OSError("synthetic storage failure")
+            kwargs["status"].update(reachable=False, reason="synthetic refusal")
+            return None
+        monkeypatch.setattr(delivery, "advertise_session", fail)
+        session["agent"] = SimpleNamespace(session_id="new-key")
+        server._sync_session_key_after_compress(sid, session)
+        assert session["session_key"] == "new-key"
+>       assert owner(home, old) is None
+E       AssertionError: assert {'profile_home': '/var/tmp/hermes-pytest-1000/r-zh_bnuyx/pytest-of-brad/pytest-0/test_advertise_failure_does_no1', 'session_id': 'A', 'lease_id': 'a11c2f7853a14689b673833c2b7ad7e7', 'live_session_id': 'live-A'} is None
+E        +  where {'profile_home': '/var/tmp/hermes-pytest-1000/r-zh_bnuyx/pytest-of-brad/pytest-0/test_advertise_failure_does_no1', 'session_id': 'A', 'lease_id': 'a11c2f7853a14689b673833c2b7ad7e7', 'live_session_id': 'live-A'} = owner(PosixPath('/var/tmp/hermes-pytest-1000/r-zh_bnuyx/pytest-of-brad/pytest-0/test_advertise_failure_does_no1'), 'A')
+
+tests/tui_gateway/test_delivery_readvertisement.py:165: AssertionError
+_____ test_isolated_compression_refreshes_without_reentering_history_lock ______
+
+runtime = (PosixPath('/var/tmp/hermes-pytest-1000/r-zh_bnuyx/pytest-of-brad/pytest-0/test_isolated_compression_refr0'), <hermes_..._session=<function _create_session at 0x7b6a8edf3560>, _resume_response=<function _resume_response at 0x7b6a8edf3600>))
+
+    def test_isolated_compression_refreshes_without_reentering_history_lock(runtime):
+        home, _, server = runtime
+        sid, session = open_session(home, server)
+        old = session["session_key"]
+        server._register_open_tui_delivery(sid, session)
+        assert type(session["history_lock"]) is type(threading.Lock())
+        with session["history_lock"]:
+            server._compute_host_adopt_frame_meta(session, {"sid": sid, "session_key": "isolated-child"})
+>       assert owner(home, old) is None
+E       AssertionError: assert {'profile_home': '/var/tmp/hermes-pytest-1000/r-zh_bnuyx/pytest-of-brad/pytest-0/test_isolated_compression_refr0', 'session_id': 'A', 'lease_id': '5f2d6f46d15548058a78cb57578542b8', 'live_session_id': 'live-A'} is None
+E        +  where {'profile_home': '/var/tmp/hermes-pytest-1000/r-zh_bnuyx/pytest-of-brad/pytest-0/test_isolated_compression_refr0', 'session_id': 'A', 'lease_id': '5f2d6f46d15548058a78cb57578542b8', 'live_session_id': 'live-A'} = owner(PosixPath('/var/tmp/hermes-pytest-1000/r-zh_bnuyx/pytest-of-brad/pytest-0/test_isolated_compression_refr0'), 'A')
+
+tests/tui_gateway/test_delivery_readvertisement.py:180: AssertionError
+=========================== short test summary info ============================
+FAILED tests/tui_gateway/test_delivery_readvertisement.py::test_compression_readvertises_and_retires_previous_key
+FAILED tests/tui_gateway/test_delivery_readvertisement.py::test_new_publishes_without_building_an_agent
+FAILED tests/tui_gateway/test_delivery_readvertisement.py::test_resume_publishes_without_building_an_agent
+FAILED tests/tui_gateway/test_delivery_readvertisement.py::test_double_compression_only_final_key_remains
+FAILED tests/tui_gateway/test_delivery_readvertisement.py::test_advertise_failure_does_not_break_switch[refused]
+FAILED tests/tui_gateway/test_delivery_readvertisement.py::test_advertise_failure_does_not_break_switch[raised]
+FAILED tests/tui_gateway/test_delivery_readvertisement.py::test_isolated_compression_refreshes_without_reentering_history_lock
+======================= 7 failed, 1 deselected in 3.48s ========================
+
+=== 1 file with test failures (7 tests failed) ===
+  tests/tui_gateway/test_delivery_readvertisement.py  (7 tests failed)

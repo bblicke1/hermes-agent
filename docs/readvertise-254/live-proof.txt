@@ -1,0 +1,27 @@
+LIVE PROOF BLOCKED BEFORE LAUNCH
+Contract interpreter: /home/brad/.hermes/hermes-agent/venv/bin/python
+Worktree source: /home/brad/worktrees/hermes-agent-readvertise-254
+Scratch HERMES_HOME: /tmp/seat-test-254-2d4q0iy9
+Preflight: import tui_gateway.server
+Exit: 1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/brad/worktrees/hermes-agent-readvertise-254/tui_gateway/server.py", line 40, in <module>
+    from agent.conversation_loop import INTERRUPT_WAITING_FOR_MODEL_PREFIX
+  File "/home/brad/worktrees/hermes-agent-readvertise-254/agent/conversation_loop.py", line 40, in <module>
+    from agent.turn_scripted_prelude import Prelude, play_prelude
+  File "/home/brad/worktrees/hermes-agent-readvertise-254/agent/turn_scripted_prelude.py", line 24, in <module>
+    Prelude = Generator[tuple[str, str, dict], Optional[str]]
+              ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/typing.py", line 379, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/typing.py", line 1592, in __getitem__
+    _check_generic(self, params, self._nparams)
+  File "/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/typing.py", line 293, in _check_generic
+    raise TypeError(f"Too {'many' if alen > elen else 'few'} arguments for {cls};"
+TypeError: Too few arguments for typing.Generator; actual 2, expected 3
+
+No Herdr tab/profile/route/mail was created. No live seat or gateway was edited or restarted. Scratch home removed.
+An existing Python 3.14 test environment is available; permission to depart from the contract interpreter is pending.
+This is blocker evidence, not live /new or seat_wake acceptance.

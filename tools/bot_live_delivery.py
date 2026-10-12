@@ -85,7 +85,8 @@ def _read_advertisement(path: Path) -> dict | None:
 
 def advertise_session(profile_home: Path | str, session_id: str, live_session_id: str,
                       *, retired_live_ids: frozenset[str] = frozenset(),
-                      active_live_ids: frozenset[str] | None = None, status: dict | None = None) -> dict | None:
+                      active_live_ids: frozenset[str] | None = None, status: dict | None = None,
+                      previous_advertisement: dict | None = None) -> dict | None:
     """Reachability without capacity; replace dead processes or explicitly retired local runtimes.
 
     A live foreign process or an attached local competitor always fences acquisition.
@@ -113,8 +114,18 @@ def advertise_session(profile_home: Path | str, session_id: str, live_session_id
             start = _own_start_time()
             if start is None:
                 return unavailable("process birth time unavailable")
+            token = uuid.uuid4().hex
+            if previous_advertisement:
+                previous = _read_advertisement(_advertisement_path(home, previous_advertisement["session_id"]))
+                # Keep already-admitted compression-chain mail claimable. Only a
+                # current, exact same-process/runtime lease may carry its token.
+                if (previous and previous["pid"] == os.getpid()
+                        and previous["profile_home"] == str(home)
+                        and previous["live_session_id"] == live_session_id
+                        and previous["lease_id"] == previous_advertisement.get("lease_id")):
+                    token = previous["lease_id"]
             record = dict(profile_home=str(home), session_id=session_id, live_session_id=live_session_id,
-                          lease_id=uuid.uuid4().hex, pid=os.getpid(), process_start=start)
+                          lease_id=token, pid=os.getpid(), process_start=start)
             atomic_json_write(path, record, mode=0o600, fsync_dir=True)
             return record
     except (OSError, ValueError, TypeError) as exc:

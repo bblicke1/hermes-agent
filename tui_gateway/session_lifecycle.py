@@ -141,7 +141,6 @@ def _attach_lease(session: dict, lease) -> None:
 
 def _register_open_tui_delivery(sid: str, session: dict) -> None:
     """Publish lightweight reachability; writer admission remains lazy and capped."""
-    from tools.bot_live_delivery import advertise_session, write_delivery_reachability
     if _session_source(session) != "tui" or session.get("delivery_opt_out"):
         return
     # Snapshot first: never acquire _sessions_lock underneath history_lock.
@@ -150,26 +149,55 @@ def _register_open_tui_delivery(sid: str, session: dict) -> None:
         retired = frozenset(other_sid for other_sid, other in _sessions.items()
                             if other.get("_finalized") or other.get("_closing") or other.get("_lease_taken_over"))
     with session["history_lock"]:
-        if session.get("_closing") or session.get("_finalized"):
+        _refresh_tui_delivery_locked(sid, session, retired=retired, active=active)
+
+
+def _refresh_tui_delivery_locked(
+    sid: str, session: dict, *, retired: frozenset[str] = frozenset(), active: frozenset[str] | None = None
+) -> None:
+    """Follow the current durable key; caller holds history_lock, never take _sessions_lock here."""
+    from tools.bot_live_delivery import advertise_session, revoke_advertisement, write_delivery_reachability
+    if (_session_source(session) != "tui" or any(session.get(flag) for flag in
+            ("delivery_opt_out", "_closing", "_finalized", "_lease_taken_over"))):
+        return
+    home = _session_home(session)
+    key = str(session.get("session_key") or "")
+    old = session.get("delivery_advertisement")
+    status = {"session_id": key, "live_session_id": sid}
+    try:
+        advertisement = advertise_session(home, key, sid, retired_live_ids=retired,
+                                          active_live_ids=active, status=status, previous_advertisement=old)
+    except Exception as exc:
+        advertisement = None
+        status.update(reachable=False, reason=f"advertisement failed: {exc}")
+        logger.exception("delivery advertisement failed sid=%s session_id=%s", sid, key)
+    # Retire stale routing even when the new key is unavailable. Retain the old
+    # record on retirement failure so the idle poller can retry its exact token.
+    if old and old["session_id"] != key:
+        try:
+            revoked = revoke_advertisement(home, old)
+        except Exception:
+            logger.exception("delivery retirement failed sid=%s session_id=%s", sid, old["session_id"])
             return
-        old = session.get("delivery_advertisement")
-        key = old["session_id"] if old else str(session.get("session_key") or "")
-        status = {"live_session_id": sid}
-        advertisement = advertise_session(_session_home(session), key, sid,
-                                          retired_live_ids=retired, active_live_ids=active, status=status)
-        if advertisement:
-            session["delivery_advertisement"] = advertisement
-            status.update(reachable=True, reason="advertised", delivery_token=advertisement["lease_id"])
-        else:
-            session.pop("delivery_advertisement", None)
-        if status != session.get("delivery_reachability"):
-            session["delivery_reachability"] = status
-            if status.get("reachable") is False:
-                logger.warning("delivery advertisement refused sid=%s: %s", sid, status["reason"])
+        if revoked:
             try:
-                write_delivery_reachability(_session_home(session), key, status)
+                write_delivery_reachability(home, old["session_id"],
+                                            {"reachable": False, "reason": "session changed", "live_session_id": sid})
             except Exception:
-                logger.exception("delivery reachability status write failed sid=%s", sid)
+                logger.exception("delivery retired status write failed sid=%s", sid)
+    if advertisement:
+        session["delivery_advertisement"] = advertisement
+        status.update(reachable=True, reason="advertised", delivery_token=advertisement["lease_id"])
+    else:
+        session.pop("delivery_advertisement", None)
+    if status != session.get("delivery_reachability"):
+        if status.get("reachable") is False:
+            logger.warning("delivery advertisement refused sid=%s: %s", sid, status.get("reason"))
+        try:
+            write_delivery_reachability(home, key, status)
+            session["delivery_reachability"] = status
+        except Exception:
+            logger.exception("delivery reachability status write failed sid=%s", sid)
 
 
 def _detached_lease_holder(session: dict, key: str) -> tuple[str, dict] | None:

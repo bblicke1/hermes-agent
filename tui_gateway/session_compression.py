@@ -329,7 +329,9 @@ def _sync_session_key_after_compress(
             sid, old_key, new_session_id,
         )
     # Even if the approval module fails to import, anchor session_key on the continuation id.
-    session["session_key"] = new_session_id
+    with session["history_lock"]:
+        session["session_key"] = new_session_id
+        _refresh_tui_delivery_locked(sid, session)
     with contextlib.suppress(Exception):
         from tools import approval
         with contextlib.suppress(Exception):
