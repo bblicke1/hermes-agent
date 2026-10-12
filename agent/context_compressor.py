@@ -42,6 +42,7 @@ from agent.model_metadata import (
     strip_opaque_replay_items,
 )
 from agent.redact import redact_sensitive_text
+from agent.turn_author import is_bot_delivery, transcript_author_label
 from agent.turn_context import drop_stale_api_content
 from tools.todo_tool import TODO_INJECTION_HEADER
 
@@ -3610,7 +3611,7 @@ class ContextCompressor(SummaryDispatchMixin, PreLlmSkipMixin, MicroCompactionMi
                 continue
             if role == "assistant" and msg.get("tool_calls", []):
                 content += "\n[Tool calls:\n" + "\n".join(map(self._render_tool_call_for_summary, msg["tool_calls"])) + "\n]"
-            parts.append(f"[{role.upper()}]: {content}")
+            parts.append(f"[{transcript_author_label(msg)}]: {content}")
         return parts
 
     def _serialize_for_summary(self, turns: list[dict[str, Any]]) -> str:
@@ -3618,7 +3619,7 @@ class ContextCompressor(SummaryDispatchMixin, PreLlmSkipMixin, MicroCompactionMi
         return "\n\n".join(self._serialize_records_for_summary(turns))
 
     def _fallback_anchors(self, turns_to_summarize: list[dict[str, Any]]) -> dict[str, list[str]]:
-        """Locally extractable anchors: user asks, actions, files, blockers, last dropped turns."""
+        """Locally extractable anchors, with bot deliveries excluded from human asks."""
         user_asks: list[str] = []
         assistant_actions: list[str] = []
         tool_actions: list[str] = []
@@ -3651,7 +3652,7 @@ class ContextCompressor(SummaryDispatchMixin, PreLlmSkipMixin, MicroCompactionMi
             if tool_names:
                 prefix = "tool calls: " + ", ".join(tool_names[:6])
                 turn_text = f"{prefix}; {turn_text}" if turn_text else prefix
-            turn_label = "INTERNAL CONTEXT" if synthetic_user else str(role).upper()
+            turn_label = transcript_author_label(msg) if is_bot_delivery(msg) else ("INTERNAL CONTEXT" if synthetic_user else str(role).upper())
             if turn_text.strip():
                 last_dropped_turns.append(f"{turn_label}: {turn_text.strip()}")
                 del last_dropped_turns[:-8]
@@ -4428,10 +4429,10 @@ Write only the summary body. Do not include any preamble or prefix."""
 
     @classmethod
     def _is_synthetic_compression_user_turn(cls, message: Any) -> bool:
-        """Recognize internal user-role rows by content marker (SessionDB drops metadata)."""
+        """Recognize bot provenance and internal user-role scaffolding."""
         if not isinstance(message, dict) or message.get("role") != "user":
             return False
-        if cls._is_context_summary_message(message):
+        if is_bot_delivery(message) or cls._is_context_summary_message(message):
             return True
         text = _content_text_for_contains(message.get("content")).strip()
         # Recovery nudges are scaffolding, not human turns; lazy import avoids an import cycle.
@@ -4499,9 +4500,8 @@ Write only the summary body. Do not include any preamble or prefix."""
         """Return whether *message* contains user input worth anchoring."""
         if not isinstance(message, dict) or message.get("role") != "user":
             return False
-        # display_kind rows (internal notifications, hidden scaffolding) are not human input
-        # and must not anchor the tail or seed auto-focus. Mirrors is_user_originated_turn.
-        # A /steer row is typed for the renderer and the alternation repair, but it IS human input.
+        # Internal display_kind rows cannot anchor human input; /steer is the typed human exception.
+        # Bot authors are excluded by _is_synthetic_compression_user_turn.
         display_kind = message.get("display_kind")
         if (display_kind and display_kind != STEER_DISPLAY_KIND) or cls._is_context_summary_message(message):
             return False
@@ -5839,7 +5839,7 @@ def split_user_originated_turn(message: Any) -> tuple[Optional[dict[str, Any]], 
         candidate = None if display_kind and display_kind != "hidden" else ContextCompressor._strip_context_summary_handoff_message(message)
         if candidate is None:
             return handoff, None
-    elif message.get("display_kind") and message.get("display_kind") != STEER_DISPLAY_KIND:
+    elif is_bot_delivery(message) or (message.get("display_kind") and message.get("display_kind") != STEER_DISPLAY_KIND):
         return None, None
     else:
         candidate = message.copy()  # includes a typed /steer row: full user authority

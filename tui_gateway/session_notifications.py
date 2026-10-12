@@ -624,8 +624,12 @@ def _notif_handle_ready(sid, session, events, emitted, registry, fmt, deferred, 
 
 def _poll_bot_live_delivery_once(sid: str, session: dict) -> bool:
     """Run one durable envelope only after local FIFO/continuations yield the idle boundary."""
-    from tools.bot_live_delivery import claim_pending_delivery, complete_delivery, find_canonical_live_owner, has_mailbox
+    from tools.bot_live_delivery import claim_pending_delivery, complete_delivery, find_session_live_owner, has_mailbox
 
+    from tui_gateway import server
+    if session.get("source") == "tui" and not any(
+            session.get(key) for key in ("running", "_closing", "_finalized", "_lease_taken_over")):
+        server._register_open_tui_delivery(sid, session)
     home = _session_home(session)
     # Most profiles never receive a delivery: without a mailbox there is nothing to claim, and the owner
     # lookup below costs a state.db open plus the exclusive active-session registry lock every pass (#111719).
@@ -638,17 +642,37 @@ def _poll_bot_live_delivery_once(sid: str, session: dict) -> bool:
                 "running", "_closing", "_finalized", "queued_prompt", "queued_prompts",
                 "_auto_continue_scheduled")) or session.get("agent") is None:
             return False
-        lease = session.get("active_session_lease")
-        if lease is None or getattr(lease, "released", False):
+        key = str(session.get("session_key") or "")
+        if not key:
             return False
-        owner = find_canonical_live_owner(home)
-        if (not owner or owner.get("lease_id") != lease.lease_id
-                or owner.get("live_session_id") != sid
-                or owner.get("session_id") != session.get("session_key")):
+        owner = find_session_live_owner(home, key, resolve_tip=False)
+        advertisement = session.get("delivery_advertisement")
+        lease = session.get("active_session_lease")
+        token = advertisement.get("lease_id") if advertisement else getattr(lease, "lease_id", None)
+        if (not owner or owner.get("lease_id") != token
+                or owner.get("live_session_id") != sid or owner.get("session_id") != key):
+            return False
+        acquired_slot = False
+        # Acquiring capacity here cannot starve startup; refusal leaves tickets queued.
+        if advertisement:
+            if claim_pending_delivery(home, owner, claim=False) is None:
+                return False
+            had_slot = lease is not None and not getattr(lease, "released", False)
+            if server._ensure_active_session_slot(sid, session):
+                return False
+            acquired_slot = not had_slot
+        elif lease is None or getattr(lease, "released", False):
             return False
         # The mailbox matches each envelope to this pinned lease/live id and compression lineage.
-        claimed = claim_pending_delivery(home, owner)
+        try:
+            claimed = claim_pending_delivery(home, owner)
+        except Exception:
+            if acquired_slot:
+                server._release_active_session_slot(session)
+            raise
         if claimed is None:
+            if acquired_slot:
+                server._release_active_session_slot(session)
             return False
         session["running"] = True
 
@@ -670,14 +694,19 @@ def _poll_bot_live_delivery_once(sid: str, session: dict) -> bool:
         started = _run_prompt_submit(f"__bot_dm__{delivery_id}", sid, session, claimed["message"],
                                      image_paths=[], terminal_callback=terminal_receipt,
                                      turn_author=claimed.get("author") or None,
-                                     **({"display_metadata": {"notification_category": "diagnostic"}}
-                                        if claimed.get("notification_category") == "diagnostic" else {}))
+                                     display_metadata={"delivery_id": delivery_id,
+                                         **({"notification_category": "diagnostic"}
+                                            if claimed.get("notification_category") == "diagnostic" else {})})
     except Exception as exc:
         _notif_release_turn(session)
+        if acquired_slot:
+            server._release_active_session_slot(session)
         terminal_receipt({"status": "failed", "error": str(exc)})
         raise
     if not started:
         _notif_release_turn(session)
+        if acquired_slot:
+            server._release_active_session_slot(session)
         terminal_receipt({"status": "failed", "error": "live session owner could not start the delivery turn"})
     return started
 

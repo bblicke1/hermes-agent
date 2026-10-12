@@ -129,7 +129,7 @@ def _abs_completion_prefix_exists(path_part: str) -> bool:
 
 
 _DETAILS_SECTIONS = ("thinking", "tools", "subagents", "activity")
-_DETAILS_MODES = ("hidden", "collapsed", "expanded")
+_DETAILS_MODES = ("hidden", "collapsed", "expanded", "live")
 
 
 def _details_root_meta(candidate: str) -> str:

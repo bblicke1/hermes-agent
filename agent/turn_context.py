@@ -30,7 +30,7 @@ from agent.model_metadata import (
 )
 from agent.image_token_cost import bind_image_token_cost
 from agent.usage_anchor import anchored_context_tokens, restore_usage_anchor
-from agent.turn_author import parse_turn_author
+from agent.turn_author import delivery_content, delivery_display, is_bot_delivery, parse_turn_author
 
 logger = logging.getLogger(__name__)
 
@@ -689,6 +689,12 @@ def _stage_turn_user_message(
         user_msg["display_kind"] = persist_user_display_kind
     if persist_user_display_metadata:
         user_msg["display_metadata"] = persist_user_display_metadata
+    kind, metadata = delivery_display(getattr(agent, "_turn_author", None),
+                                      user_msg.get("display_kind"), user_msg.get("display_metadata"))
+    if kind:
+        user_msg["display_kind"] = kind
+    if metadata:
+        user_msg["display_metadata"] = metadata
     # The platform message id survives the turn-start flush; restart drain-window
     # recovery dedups via ``has_platform_message_id`` against this row.
     if persist_user_platform_id is not None:
@@ -1293,6 +1299,11 @@ def build_api_messages(
             # prefix stays byte-stable. User rows carry the injection sidecar; user
             # and assistant rows may carry a sanitize-divergence sidecar.
             api_msg["content"] = _api_content
+
+        # Use the durable author even when replaying an api_content sidecar. This
+        # deterministic wire-only prefix keeps live/reopened bot turns identical.
+        if is_bot_delivery(msg):
+            api_msg["content"] = delivery_content(msg, api_msg.get("content"))
 
         # Pass reasoning back to the API for ALL assistant messages so multi-turn
         # reasoning context is preserved.

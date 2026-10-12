@@ -197,7 +197,7 @@ describe('createGatewayEventHandler', () => {
     expect(getUiState().info?.stored_session_id).toBe('durable-2')
   })
 
-  it('archives incomplete todos into transcript flow at end of turn so they scroll up', () => {
+  it('retains incomplete todos in the composer dock at end of turn', () => {
     const appended: Msg[] = []
 
     const todos = [
@@ -218,11 +218,8 @@ describe('createGatewayEventHandler', () => {
     const finalText = appended.find(msg => msg.role === 'assistant' && msg.text === 'Started a todo list.')
 
     expect(finalText).toBeDefined()
-    expect(trail).toMatchObject({ kind: 'trail', role: 'system', todos, todoIncomplete: true })
-    // Todo archive must sit ABOVE the final assistant text so the panel
-    // doesn't visibly jump across the final answer at end-of-turn.
-    expect(appended.indexOf(trail!)).toBeLessThan(appended.indexOf(finalText!))
-    expect(getTurnState().todos).toEqual([])
+    expect(trail).toBeUndefined()
+    expect(getTurnState().todos).toEqual(todos)
   })
 
   it('opens a billing confirm dialog routing Nous to /topup', () => {
@@ -777,144 +774,52 @@ describe('createGatewayEventHandler', () => {
     expect(answerIdx).toBe(appended.length - 1)
   })
 
-  it('anchors inline_diff as its own segment where the edit happened', () => {
-    const appended: Msg[] = []
-    const onEvent = createGatewayEventHandler(buildCtx(appended))
-    const diff = '\u001b[31m--- a/foo.ts\u001b[0m\n\u001b[32m+++ b/foo.ts\u001b[0m\n@@\n-old\n+new'
-    const cleaned = '--- a/foo.ts\n+++ b/foo.ts\n@@\n-old\n+new'
-    const block = `\`\`\`diff\n${cleaned}\n\`\`\``
-
-    // Narration → tool → tool-complete → more narration → message-complete.
-    // The diff MUST land between the two narration segments, not tacked
-    // onto the final one.
-    onEvent({ payload: { text: 'Editing the file' }, type: 'message.delta' } as any)
-    onEvent({ payload: { context: 'foo.ts', name: 'patch', tool_id: 'tool-1' }, type: 'tool.start' } as any)
-    onEvent({ payload: { inline_diff: diff, summary: 'patched', tool_id: 'tool-1' }, type: 'tool.complete' } as any)
-
-    // Diff is already committed to segmentMessages as its own segment.
-    expect(appended).toHaveLength(0)
-    expect(turnController.segmentMessages).toEqual([
-      { role: 'assistant', text: 'Editing the file' },
-      {
-        kind: 'diff',
-        role: 'assistant',
-        text: block,
-        tools: [expect.stringContaining('foo.ts')]
-      }
-    ])
-
-    onEvent({ payload: { text: 'patch applied' }, type: 'message.complete' } as any)
-
-    expect(appended).toHaveLength(4)
-    expect(appended[0]?.text).toBe('Editing the file')
-    expect(appended[1]).toMatchObject({ kind: 'diff', text: block })
-    expect(appended[3]?.text).toBe('patch applied')
-    expect(appended[3]?.text).not.toContain('```diff')
-  })
-
-  it('keeps verbose result text on inline_diff tool completions', () => {
+  it('anchors a diff inside its tool shelf between narration segments', () => {
     const appended: Msg[] = []
     const onEvent = createGatewayEventHandler(buildCtx(appended))
     const diff = '--- a/foo.ts\n+++ b/foo.ts\n@@\n-old\n+new'
-
+    onEvent({ payload: { text: 'Before edit. ' }, type: 'message.delta' } as any)
     onEvent({
-      payload: { args_text: '{ "path": "foo.ts" }', context: 'foo.ts', name: 'patch', tool_id: 'tool-1' },
+      payload: { context: 'foo.ts', name: 'patch', tool_id: 'tool-1', args_text: 'foo args' },
       type: 'tool.start'
     } as any)
     onEvent({
-      payload: { inline_diff: diff, result_text: 'patched result', tool_id: 'tool-1' },
+      payload: { inline_diff: `  ┊ review diff\n${diff}`, result_text: 'patched result', tool_id: 'tool-1' },
       type: 'tool.complete'
     } as any)
-
-    expect(turnController.segmentMessages[0]).toMatchObject({ kind: 'diff' })
-    expect(turnController.segmentMessages[0]?.tools?.[0]).toContain('{ "path": "foo.ts" }')
-    expect(turnController.segmentMessages[0]?.tools?.[0]).toContain('patched result')
-  })
-
-  it('keeps full final responses from duplicating flushed pre-diff narration', () => {
-    const appended: Msg[] = []
-    const onEvent = createGatewayEventHandler(buildCtx(appended))
-    const diff = '--- a/foo.ts\n+++ b/foo.ts\n@@\n-old\n+new'
-    const block = `\`\`\`diff\n${diff}\n\`\`\``
-
-    onEvent({ payload: { text: 'Before edit. ' }, type: 'message.delta' } as any)
-    onEvent({ payload: { context: 'foo.ts', name: 'patch', tool_id: 'tool-1' }, type: 'tool.start' } as any)
-    onEvent({ payload: { inline_diff: diff, summary: 'patched', tool_id: 'tool-1' }, type: 'tool.complete' } as any)
+    expect(turnController.segmentMessages[1]).toMatchObject({
+      kind: 'trail',
+      text: '',
+      inlineDiffs: [{ toolIndex: 0, body: diff }]
+    })
+    expect(turnController.segmentMessages[1]?.tools?.[0]).toContain('foo args')
+    expect(turnController.segmentMessages[1]?.tools?.[0]).toContain('patched result')
     onEvent({ payload: { text: 'After edit.' }, type: 'message.delta' } as any)
     onEvent({ payload: { text: 'Before edit. After edit.' }, type: 'message.complete' } as any)
-
-    expect(appended.map(msg => msg.text.trim()).filter(Boolean)).toEqual(['Before edit.', block, 'After edit.'])
+    expect(appended.map(msg => msg.text.trim()).filter(Boolean)).toEqual(['Before edit.', 'After edit.'])
+    expect(appended.find(msg => msg.inlineDiffs?.length)?.inlineDiffs?.[0]?.body).toBe(diff)
+    expect(appended.some(msg => msg.kind === 'diff')).toBe(false)
   })
 
-  it('drops the diff segment when the final assistant text narrates the same diff', () => {
+  it.each([
+    "Done. Here's the patch:\n```diff\n--- a/foo.ts\n+++ b/foo.ts\n@@\n-old\n+new\n```",
+    'Done. Clean swap:\n```diff\n-old\n+new\n```'
+  ])('dedupes a narrated patch while preserving its tool result', assistantText => {
     const appended: Msg[] = []
     const onEvent = createGatewayEventHandler(buildCtx(appended))
-    const cleaned = '--- a/foo.ts\n+++ b/foo.ts\n@@\n-old\n+new'
-    const assistantText = `Done. Here's the inline diff:\n\n\`\`\`diff\n${cleaned}\n\`\`\``
-
-    onEvent({ payload: { inline_diff: cleaned, summary: 'patched', tool_id: 'tool-1' }, type: 'tool.complete' } as any)
-    onEvent({ payload: { text: assistantText }, type: 'message.complete' } as any)
-
-    // Only the final message — diff-only segment dropped so we don't
-    // render two stacked copies of the same patch.
-    expect(appended).toHaveLength(1)
-    expect(appended[0]?.text).toBe(assistantText)
-    expect((appended[0]?.text.match(/```diff/g) ?? []).length).toBe(1)
-  })
-
-  it('strips the CLI "┊ review diff" header from inline diff segments', () => {
-    const appended: Msg[] = []
-    const onEvent = createGatewayEventHandler(buildCtx(appended))
-    const raw = '  \u001b[33m┊ review diff\u001b[0m\n--- a/foo.ts\n+++ b/foo.ts\n@@\n-old\n+new'
-
-    onEvent({ payload: { inline_diff: raw, summary: 'patched', tool_id: 'tool-1' }, type: 'tool.complete' } as any)
-    onEvent({ payload: { text: 'done' }, type: 'message.complete' } as any)
-
-    // Tool trail first, then diff segment (kind='diff'), then final narration.
-    expect(appended).toHaveLength(2)
-    expect(appended[0]?.kind).toBe('diff')
-    expect(appended[0]?.text).not.toContain('┊ review diff')
-    expect(appended[0]?.text).toContain('--- a/foo.ts')
-    expect(appended[1]?.text).toBe('done')
-  })
-
-  it('drops the diff segment when assistant writes its own ```diff fence', () => {
-    const appended: Msg[] = []
-    const onEvent = createGatewayEventHandler(buildCtx(appended))
-    const inlineDiff = '--- a/foo.ts\n+++ b/foo.ts\n@@\n-old\n+new'
-    const assistantText = 'Done. Clean swap:\n\n```diff\n-old\n+new\n```'
-
+    onEvent({ payload: { context: 'foo.ts', name: 'patch', tool_id: 'tool-1' }, type: 'tool.start' } as any)
     onEvent({
-      payload: { inline_diff: inlineDiff, summary: 'patched', tool_id: 'tool-1' },
+      payload: {
+        inline_diff: '--- a/foo.ts\n+++ b/foo.ts\n@@\n-old\n+new',
+        result_text: 'patched result',
+        tool_id: 'tool-1'
+      },
       type: 'tool.complete'
     } as any)
     onEvent({ payload: { text: assistantText }, type: 'message.complete' } as any)
-
-    expect(appended).toHaveLength(1)
-    expect(appended[0]?.text).toBe(assistantText)
-    expect((appended[0]?.text.match(/```diff/g) ?? []).length).toBe(1)
-  })
-
-  it('keeps tool trail terse when inline_diff is present', () => {
-    const appended: Msg[] = []
-    const onEvent = createGatewayEventHandler(buildCtx(appended))
-    const diff = '--- a/foo.ts\n+++ b/foo.ts\n@@\n-old\n+new'
-
-    onEvent({
-      payload: { inline_diff: diff, name: 'review_diff', summary: diff, tool_id: 'tool-1' },
-      type: 'tool.complete'
-    } as any)
-    onEvent({ payload: { text: 'done' }, type: 'message.complete' } as any)
-
-    // Tool row is now placed before the diff, so telemetry does not render
-    // below the patch that came from that tool.
-    expect(appended).toHaveLength(2)
-    expect(appended[0]?.kind).toBe('diff')
-    expect(appended[0]?.text).toContain('```diff')
-    expect(appended[0]?.tools).toHaveLength(1)
-    expect(appended[0]?.tools?.[0]).not.toContain('--- a/foo.ts')
-    expect(appended[1]?.text).toBe('done')
-    expect(appended[1]?.tools ?? []).toEqual([])
+    expect(appended.flatMap(msg => msg.inlineDiffs ?? [])).toEqual([])
+    expect(appended.flatMap(msg => msg.tools ?? []).join('\n')).toContain('patched result')
+    expect(appended.at(-1)?.text).toBe(assistantText)
   })
 
   it('shows setup panel for missing provider startup error', () => {

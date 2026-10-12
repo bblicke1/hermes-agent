@@ -49,14 +49,15 @@ export const archiveTodosAtTurnEnd = () => {
     return []
   }
 
-  const done = isTodoDone(state.todos)
+  // Unfinished work remains pinned between turns until completed or replaced.
+  if (!isTodoDone(state.todos)) return []
 
   const msg: Msg = {
     kind: 'trail',
     role: 'system',
     text: '',
     todos: state.todos,
-    ...(done ? { todoCollapsedByDefault: true } : { todoIncomplete: true })
+    todoCollapsedByDefault: true
   }
 
   patchTurnState({ todoCollapsed: false, todos: [] })

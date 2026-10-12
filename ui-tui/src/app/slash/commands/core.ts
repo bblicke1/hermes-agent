@@ -99,8 +99,8 @@ export const coreCommands: SlashCommand[] = [
       sections.push(
         {
           rows: [
-            ['/details [hidden|collapsed|expanded|cycle]', t('slashCmd.core.help.detailsGlobal')],
-            ['/details <section> [hidden|collapsed|expanded|reset]', t('slashCmd.core.help.detailsSection')],
+            ['/details [hidden|collapsed|expanded|live|cycle]', t('slashCmd.core.help.detailsGlobal')],
+            ['/details <section> [hidden|collapsed|expanded|live|reset]', t('slashCmd.core.help.detailsSection')],
             ['/fortune [random|daily]', t('slashCmd.core.help.fortune')],
             ['/grid-test [cols]x[rows]', t('slashCmd.core.help.gridTest')],
             ['/dialog-test [zone]', t('slashCmd.core.help.dialogTest')]

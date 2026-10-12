@@ -389,7 +389,7 @@ export function useMainApp(gw: GatewayClient) {
   const toolsDetailsVisible = toolsDetailsMode !== 'hidden'
 
   const historyThinkingExpanded =
-    thinkingDetailsVisible && (ui.detailsModeCommandOverride || ui.sections.thinking === 'expanded')
+    thinkingDetailsMode === 'expanded' && (ui.detailsModeCommandOverride || ui.sections.thinking === 'expanded')
 
   const detailsVisible = thinkingDetailsVisible || toolsDetailsVisible
   const userPromptWidth = composerPromptWidth(ui.theme.brand.prompt)
@@ -431,6 +431,7 @@ export function useMainApp(gw: GatewayClient) {
         thinkingExpanded: historyThinkingExpanded,
         thinkingVisible: thinkingDetailsVisible,
         toolsVisible: toolsDetailsVisible,
+        toolsExpanded: toolsDetailsMode === 'expanded',
         userPrompt: ui.theme.brand.prompt,
         withSeparator: virtualRows[index]!.msg.role === 'user' && firstUserIdx >= 0 && index > firstUserIdx
       }),
@@ -441,6 +442,7 @@ export function useMainApp(gw: GatewayClient) {
       historyThinkingExpanded,
       thinkingDetailsVisible,
       toolsDetailsVisible,
+      toolsDetailsMode,
       ui.compact,
       ui.detailsMode,
       ui.detailsModeCommandOverride,

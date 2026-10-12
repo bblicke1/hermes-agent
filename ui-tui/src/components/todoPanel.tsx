@@ -3,7 +3,7 @@ import { memo, useState } from 'react'
 
 import { useT } from '../i18n/useT.js'
 import { countPendingTodos } from '../lib/liveProgress.js'
-import { todoGlyph, todoTone, todoTree } from '../lib/todo.js'
+import { todoGlyph, todoPanelRows, todoTone, todoTree } from '../lib/todo.js'
 import type { Theme } from '../theme.js'
 import type { TodoItem } from '../types.js'
 
@@ -18,6 +18,7 @@ export const TodoPanel = memo(function TodoPanel({
   defaultCollapsed = false,
   incomplete = false,
   onToggle,
+  maxRows,
   t,
   todos
 }: {
@@ -25,6 +26,7 @@ export const TodoPanel = memo(function TodoPanel({
   defaultCollapsed?: boolean
   incomplete?: boolean
   onToggle?: () => void
+  maxRows?: number
   t: Theme
   todos: TodoItem[]
 }) {
@@ -55,8 +57,12 @@ export const TodoPanel = memo(function TodoPanel({
   const done = todos.filter(todo => todo.status === 'completed').length
   const pending = countPendingTodos(todos)
 
+  const tree = todoTree(todos)
+  const bodyRows = todoPanelRows(todos, false, maxRows) - 2
+  const shown = tree.length > bodyRows ? Math.max(0, bodyRows - 1) : tree.length
+
   return (
-    <Box flexDirection="column" marginBottom={1}>
+    <Box flexDirection="column" flexShrink={0} marginBottom={1}>
       <Box onClick={handleToggle}>
         <Text color={t.color.muted}>
           <Text color={t.color.accent}>{effectiveCollapsed ? '▸ ' : '▾ '}</Text>
@@ -77,19 +83,24 @@ export const TodoPanel = memo(function TodoPanel({
 
       {!effectiveCollapsed && (
         <Box flexDirection="column" marginLeft={2}>
-          {todoTree(todos).map(([todo, depth]) => {
+          {tree.slice(0, shown).map(([todo, depth]) => {
             const tone = todoTone(todo.status)
             const color = rowColor(t, todo.status)
 
             return (
               <Box key={todo.id} marginLeft={Math.min(depth, 4) * 2}>
-                <Text color={color} dim={tone === 'dim'}>
+                <Text color={color} dim={tone === 'dim'} wrap={maxRows === undefined ? 'wrap' : 'truncate-end'}>
                   <Text color={color}>{todoGlyph(todo.status)} </Text>
                   {todo.content}
                 </Text>
               </Box>
             )
           })}
+          {shown < tree.length && (
+            <Text color={t.color.muted} dim>
+              +{tree.length - shown} more
+            </Text>
+          )}
         </Box>
       )}
     </Box>

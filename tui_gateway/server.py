@@ -162,7 +162,7 @@ _WS_ORPHAN_INTERRUPT_REAP_POLL_S = 1.0
 _WS_ORPHAN_INTERRUPT_REAP_MAX_POLLS = 60
 _TURN_SETTLE_BEFORE_CLOSE_SECONDS = 5.0
 _DETAIL_SECTION_NAMES = ("thinking", "tools", "subagents", "activity")
-_DETAIL_MODES = frozenset({"hidden", "collapsed", "expanded"})
+_DETAIL_MODES = frozenset({"hidden", "collapsed", "expanded", "live"})
 
 # ── Async RPC dispatch: slow handlers (seconds to minutes) would leave approval.respond and
 # session.interrupt unread in the stdin pipe, so only THESE go to a small thread pool; everything else
@@ -1065,6 +1065,7 @@ def _wire_session_agent(sid: str, key: str, agent) -> bool:
 
 def _start_session_services(sid: str, key: str, current: dict) -> None:
     """Start the notification poller and fire the session-reset boundary hook."""
+    _register_open_tui_delivery(sid, current)
     with _sessions_lock:
         if (rec := _sessions.get(sid)) is not None:
             rec["_notif_stop"] = _start_notification_poller(sid, rec)

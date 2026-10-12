@@ -1,7 +1,7 @@
-"""Durable, at-most-once handoff to an existing Bot Chat owner.
+"""Durable, at-most-once handoff to an advertised live session owner.
 
-Adapted from FalconOrtiz's live-owner mailbox (#101564). A single private
-record advances queued -> claimed -> terminal under a process-shared lock.
+Adapted from FalconOrtiz's live-owner mailbox (#101564). Each delivery has a private record advancing queued -> claimed -> terminal.
+A process-shared lock serializes admission sequences and claims across targets.
 Claims never expire: a crashed consumer leaves an inspectable unknown outcome,
 not permission to execute the same input again. Receipts are permanent.
 """
@@ -58,6 +58,142 @@ def find_canonical_live_owner(profile_home: Path | str) -> dict[str, Any] | None
     if entry and meta.get("bot_live_delivery_consumer") is True and meta.get("live_session_id"):
         return {key: entry[key] for key in ("profile_home", "session_id", "lease_id")} | {
             "live_session_id": meta["live_session_id"]}
+    return None
+
+
+def _advertisement_path(home: Path, session_id: str) -> Path:
+    import hashlib
+    return home / "runtime" / "seat_delivery_owners" / (hashlib.sha256(session_id.encode()).hexdigest() + ".json")
+
+
+def _read_advertisement(path: Path) -> dict | None:
+    """Caller holds the advertisement directory lock, including fenced-dead cleanup."""
+    from hermes_cli.active_sessions import _process_start_time
+    try:
+        record = json.loads(path.read_text(encoding="utf-8-sig"))
+        if (not isinstance(record, dict)
+                or not all(isinstance(record.get(key), str) and record[key] for key in _OWNER_KEYS)
+                or not record.get("process_start")):
+            return None
+        if _process_start_time(record.get("pid")) != record["process_start"]:
+            path.unlink(missing_ok=True)
+            return None
+        return record
+    except (OSError, ValueError, TypeError):
+        return None
+
+
+def advertise_session(profile_home: Path | str, session_id: str, live_session_id: str,
+                      *, retired_live_ids: frozenset[str] = frozenset(),
+                      active_live_ids: frozenset[str] | None = None, status: dict | None = None) -> dict | None:
+    """Reachability without capacity; replace dead processes or explicitly retired local runtimes.
+
+    A live foreign process or an attached local competitor always fences acquisition.
+    """
+    from hermes_cli.active_sessions import _own_start_time
+
+    def unavailable(reason):
+        if status is not None:
+            status.update(reachable=False, reason=reason)
+
+    if not session_id or not live_session_id:
+        return unavailable("empty session key or live session id")
+    home = Path(profile_home).resolve()
+    path = _advertisement_path(home, session_id)
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        with _FileLock(path.parent / ".lock"):
+            old = _read_advertisement(path)
+            if old:
+                if old["pid"] == os.getpid() and old["live_session_id"] == live_session_id:
+                    return old
+                if old["pid"] != os.getpid() or (old["live_session_id"] not in retired_live_ids
+                        and (active_live_ids is None or old["live_session_id"] in active_live_ids)):
+                    return unavailable("conflicting live advertisement")
+            start = _own_start_time()
+            if start is None:
+                return unavailable("process birth time unavailable")
+            record = dict(profile_home=str(home), session_id=session_id, live_session_id=live_session_id,
+                          lease_id=uuid.uuid4().hex, pid=os.getpid(), process_start=start)
+            atomic_json_write(path, record, mode=0o600, fsync_dir=True)
+            return record
+    except (OSError, ValueError, TypeError) as exc:
+        return unavailable(f"advertisement storage failure: {type(exc).__name__}: {exc}")
+
+
+def write_delivery_reachability(profile_home: Path | str, session_id: str, status: dict) -> None:
+    """Metadata-only status projection for mail_status/Shop, separate from owner records."""
+    home = Path(profile_home).resolve()
+    path = home / "runtime" / "seat_delivery_status" / _advertisement_path(home, session_id).name
+    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    owner_path = _advertisement_path(home, session_id)
+    owner_path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    with _FileLock(owner_path.parent / ".lock"):
+        # A losing or retiring generation cannot overwrite a healthy owner.
+        if status.get("reachable") is False and _read_advertisement(owner_path):
+            return
+        atomic_json_write(path, {"session_id": session_id, **status}, mode=0o600, fsync_dir=True)
+
+
+def revoke_advertisement(profile_home: Path | str, advertisement: dict) -> bool:
+    path = _advertisement_path(Path(profile_home).resolve(), advertisement["session_id"])
+    with _FileLock(path.parent / ".lock"):
+        current = _read_advertisement(path)
+        if current and current["lease_id"] == advertisement["lease_id"]:
+            path.unlink(missing_ok=True)
+            return True
+    return False
+
+
+def find_session_live_owner(
+    profile_home: Path | str, session_id: str, *, resolve_tip: bool = True,
+) -> dict[str, Any] | None:
+    """Resolve exact reachability; consumer lookups skip SQLite entirely.
+
+    A competing real writer fences an advertisement. No title/default guessing.
+    Empty draft keys are unavailable, not poller errors.
+    """
+    from hermes_cli.active_sessions import active_session_registry_snapshot
+    from hermes_state import SessionDB
+    import sqlite3
+
+    home = Path(profile_home).resolve()
+    if not isinstance(session_id, str) or not session_id:
+        return None
+    tip = session_id
+    if resolve_tip and (home / "state.db").is_file():
+        try:
+            db = SessionDB(db_path=home / "state.db", read_only=True)
+            try:
+                tip = db.get_compression_tip(session_id) or session_id
+            finally:
+                db.close()
+        except (OSError, sqlite3.Error):
+            return None
+    entries = [entry for entry in active_session_registry_snapshot(registry_home=home)
+               if entry.get("session_id") == tip]
+    path = _advertisement_path(home, tip)
+    advertisement = None
+    if path.parent.is_dir():
+        with _FileLock(path.parent / ".lock"):
+            advertisement = _read_advertisement(path)
+            if not advertisement and entries:
+                live_ids = {(entry.get("metadata") or {}).get("live_session_id") for entry in entries}
+                for candidate in path.parent.glob("*.json"):
+                    record = _read_advertisement(candidate)
+                    if record and record.get("live_session_id") in live_ids:
+                        advertisement = record
+                        break
+    if advertisement and not any(
+            (entry.get("metadata") or {}).get("live_session_id") != advertisement["live_session_id"]
+            for entry in entries):
+        return {key: advertisement[key] for key in _OWNER_KEYS} | {"session_id": tip}
+    for entry in entries:
+        meta = entry.get("metadata") or {}
+        if (meta.get("bot_live_delivery_consumer") is True and meta.get("live_session_id")
+                and entry.get("lease_id")):
+            return {"profile_home": str(home), "session_id": tip, "lease_id": entry["lease_id"],
+                    "live_session_id": meta["live_session_id"]}
     return None
 
 
@@ -247,7 +383,7 @@ def owner_holds_delivery(profile_home: Path | str, record: dict) -> bool:
 
 
 def claim_pending_delivery(
-    profile_home: Path | str, owner: dict[str, Any],
+    profile_home: Path | str, owner: dict[str, Any], *, claim: bool = True,
 ) -> dict[str, Any] | None:
     """Claim oldest matching input exactly once; caller supplies its current lease.
 
@@ -268,6 +404,8 @@ def claim_pending_delivery(
             return None
         record = min(pending, key=lambda item: (
             item.get("sequence", item["created_at"]), item["delivery_id"]))
+        if not claim:
+            return record
         record.update(status="claimed", claimed_at=time.time_ns())
         _write(root / f"{record['delivery_id']}.json", record)
         return record

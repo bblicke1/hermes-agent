@@ -231,3 +231,35 @@ def test_onepassword_backend_env_forwards_config_directory(monkeypatch):
     backend = OnePasswordLoginBackend({"enabled": True})
 
     assert backend._env(None)["OP_CONFIG_DIR"] == "/tmp/op-config"
+
+
+def test_onepassword_service_account_get_passes_item_vault():
+    """Service accounts reject `op item get <id>` without --vault; resolve must pass the item's vault."""
+    from agent.vault_backends.onepassword import OnePasswordLoginBackend
+
+    backend = OnePasswordLoginBackend({"enabled": True})
+    backend._service_token = "ops_test"
+    items_json = json.dumps([{"id": "abc", "title": "google.com", "vault": {"id": "V123", "name": "Personal"},
+                              "urls": [{"href": "https://accounts.google.com"}],
+                              "additional_information": "brad@example.com"}])
+    calls = []
+
+    def fake_run(*args):
+        calls.append(args)
+        return items_json if args[:2] == ("item", "list") else "pw\n"
+
+    with patch.object(backend, "_run", side_effect=fake_run):
+        assert backend.resolve_password("op:abc") == "pw"
+    get = [c for c in calls if c[:2] == ("item", "get")][0]
+    assert get[2:5] == ("abc", "--vault", "V123")
+
+
+def test_onepassword_session_get_omits_vault():
+    """Interactive (session) auth keeps the original call shape: no list round-trip, no --vault."""
+    from agent.vault_backends.onepassword import OnePasswordLoginBackend
+
+    backend = OnePasswordLoginBackend({"enabled": True})
+    backend._service_token = ""
+    with patch.object(backend, "_run", return_value="pw\n") as run:
+        assert backend.resolve_password("op:abc") == "pw"
+    run.assert_called_once_with("item", "get", "abc", "--fields", "label=password", "--reveal")

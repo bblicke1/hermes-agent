@@ -62,7 +62,7 @@ _AUTOMATIC_SESSION_END_REASONS = frozenset({"ws_orphan_reap", "ws_disconnect", "
 
 def _lease_metadata(live_session_id: str) -> dict:
     """Writer identity for a lease: ``live_session_id`` is half of ``_is_same_writer``; the delivery flag is
-    what Bot Chat gates live delivery on (session_notifications)."""
+    what the mailbox poller gates live delivery on (session_notifications)."""
     return {"live_session_id": live_session_id, "bot_live_delivery_consumer": True}
 
 
@@ -119,10 +119,7 @@ def _install_borrowed_lease(sid: str, session: dict, frame: dict) -> None:
 
 
 def _ensure_active_session_slot(sid: str, session: dict) -> str | None:
-    """Claim this session's cap slot on its first real turn; None when ok. session.create/resume deliberately
-    do NOT claim: tile paints, reconnect-resumes and abandoned drafts would hold invisible slots (no DB row)
-    that starve the messaging gateway sharing the cap. Anything holding a slot must be user-visible. An
-    inert borrowed token (see _install_borrowed_lease) also lands here: present = slot held upstream."""
+    """Claim lazily at the first turn; open drafts never consume the shared cap."""
     if session.get("active_session_lease") is not None:
         return None
     key = str(session.get("session_key") or "")
@@ -140,6 +137,39 @@ def _ensure_active_session_slot(sid: str, session: dict) -> str | None:
 def _attach_lease(session: dict, lease) -> None:
     session["active_session_lease"] = lease
     session.pop("_lease_taken_over", None)  # owning again: its finalize ends the row like any owner
+
+
+def _register_open_tui_delivery(sid: str, session: dict) -> None:
+    """Publish lightweight reachability; writer admission remains lazy and capped."""
+    from tools.bot_live_delivery import advertise_session, write_delivery_reachability
+    if _session_source(session) != "tui" or session.get("delivery_opt_out"):
+        return
+    # Snapshot first: never acquire _sessions_lock underneath history_lock.
+    with _sessions_lock:
+        active = frozenset(_sessions) if _sessions.get(sid) is session else None
+        retired = frozenset(other_sid for other_sid, other in _sessions.items()
+                            if other.get("_finalized") or other.get("_closing") or other.get("_lease_taken_over"))
+    with session["history_lock"]:
+        if session.get("_closing") or session.get("_finalized"):
+            return
+        old = session.get("delivery_advertisement")
+        key = old["session_id"] if old else str(session.get("session_key") or "")
+        status = {"live_session_id": sid}
+        advertisement = advertise_session(_session_home(session), key, sid,
+                                          retired_live_ids=retired, active_live_ids=active, status=status)
+        if advertisement:
+            session["delivery_advertisement"] = advertisement
+            status.update(reachable=True, reason="advertised", delivery_token=advertisement["lease_id"])
+        else:
+            session.pop("delivery_advertisement", None)
+        if status != session.get("delivery_reachability"):
+            session["delivery_reachability"] = status
+            if status.get("reachable") is False:
+                logger.warning("delivery advertisement refused sid=%s: %s", sid, status["reason"])
+            try:
+                write_delivery_reachability(_session_home(session), key, status)
+            except Exception:
+                logger.exception("delivery reachability status write failed sid=%s", sid)
 
 
 def _detached_lease_holder(session: dict, key: str) -> tuple[str, dict] | None:
@@ -350,12 +380,31 @@ def _lock_vault_managers(session: dict) -> None:
         logging.getLogger(__name__).debug("vault manager lock on session end failed", exc_info=True)
 
 
+def _finalize_delivery_advertisement(session: dict | None) -> bool:
+    """Serialize finalized state and advertisement retirement with registration."""
+    if not session:
+        return False
+    with (session.get("history_lock") or contextlib.nullcontext()):
+        if session.get("_finalized"):
+            return False
+        session["_finalized"] = True
+        if advertisement := session.pop("delivery_advertisement", None):
+            from tools.bot_live_delivery import revoke_advertisement, write_delivery_reachability
+            revoked = revoke_advertisement(_session_home(session), advertisement)
+            session["delivery_reachability"] = {"reachable": False, "reason": "finalized"}
+            try:
+                if revoked:
+                    write_delivery_reachability(_session_home(session), advertisement["session_id"],
+                                                session["delivery_reachability"])
+            except Exception:
+                logger.exception("delivery finalization status write failed")
+    return True
+
+
 def _finalize_session(session: dict | None, end_reason: str = "tui_close") -> None:
-    """Best-effort finalize hook + memory commit; mirrors the CLI exit path so a force-quit mid-turn (double
-    Ctrl-C, terminal close, SIGHUP) loses nothing."""
-    if not session or session.get("_finalized"):
+    """Best-effort finalize hook + memory commit; mirrors the CLI exit path."""
+    if not _finalize_delivery_advertisement(session):
         return
-    session["_finalized"] = True
     _lock_vault_managers(session)
     if (history_ready := session.get("resume_history_ready")) is not None and not history_ready.is_set():
         session["resume_history_error"] = "session resume cancelled"

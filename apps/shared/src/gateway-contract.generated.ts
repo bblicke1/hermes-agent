@@ -4658,6 +4658,17 @@ export interface ErrorPayload {
 export interface NoticePayload {
   message: string
 }
+/** Admitted attributed input, projected for display before the reply starts. */
+export interface MessageDeliveryPayload {
+  text: string
+  author: DeliveryAuthor
+  delivery_id: string
+}
+export interface DeliveryAuthor {
+  id: string | null
+  name: string | null
+  is_bot: boolean
+}
 /** ``prompt_turn._invoke_agent._stream`` (message.delta: ``text`` + optional ``rendered``), ``agent_callbacks._agent_cbs`` (reasoning.delta / thinking.delta), ``tool_progress._progress_reasoning`` (reasoning.available). ``verbose`` rides only when the session's verbose reasoning mode is on. */
 export interface StreamDeltaPayload {
   text: string
@@ -5864,6 +5875,8 @@ export interface BackendGatewayEventMap {
   'layout.apply': LayoutApplyPayload
   /** The turn ended: final text, usage and outcome. */
   'message.complete': MessageCompletePayload
+  /** An attributed queued input began execution on the owning session transport. */
+  'message.delivery': MessageDeliveryPayload
   /** One streamed chunk of the assistant reply. */
   'message.delta': StreamDeltaPayload
   /** Interim assistant commentary (text beside tool calls) sealed as its own segment. */
@@ -6000,6 +6013,7 @@ export const GATEWAY_EVENT_TYPES = [
   'gateway.ready',
   'layout.apply',
   'message.complete',
+  'message.delivery',
   'message.delta',
   'message.interim',
   'message.reaction',

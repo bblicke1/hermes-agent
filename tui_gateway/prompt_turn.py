@@ -243,14 +243,16 @@ def _route_turn_images(agent, prompt: Any, images: list[str]) -> Any:
 
 
 def _start_turn_voice() -> tuple[Any, bool]:
-    """Arm voice-mode turn audio; ``(tts_queue, thinking_started)``.  ``_tts_stream_begin``
-    goes first: cutting a still-speaking previous turn IS this turn's barge-in, so it must
-    latch before the caller consumes the latch."""
+    """Start turn speech audio; ``(tts_queue, thinking_started)``.
+
+    ``_tts_stream_begin`` runs first so a still-speaking previous turn is cut
+    before this turn consumes that latch. The microphone is armed there, and
+    in ``_speak_text_with_barge``, only when speech output actually starts.
+    A typed turn with speech output off must not open it.
+    """
     tts_queue = _tts_stream_begin()
     if not _voice_mode_enabled():
         return tts_queue, False
-    if _voice_cfg_dict().get("barge_in", True):
-        _arm_full_duplex_listener()
     try:
         from tools.voice_mode import is_audio_output_active, start_thinking_sound
 
@@ -1132,6 +1134,15 @@ def _run_prompt_submit(
         logger.warning(
             "prompt dispatch: session store unavailable for %s — this turn may not persist",
             session.get("session_key") or sid)
+    from agent.turn_author import delivery_author, delivery_display
+    # Internal compute-host frames already carry trusted transport provenance in metadata.
+    turn_author = turn_author or delivery_author({"role": "user", "display_metadata": display_metadata})
+    display_kind, display_metadata = delivery_display(turn_author, display_kind, display_metadata)
+    delivery_id = None
+    if turn_author:
+        delivery_id = (display_metadata or {}).get("delivery_id", rid)
+        if not isinstance(delivery_id, str) or not delivery_id.strip():
+            raise ValueError("bot delivery requires a non-empty delivery_id")
     admitted = _admit_prompt_turn(
         sid, session, text, image_paths, queued_prompt_generation, display_kind, display_metadata)
     if admitted is None:
@@ -1158,8 +1169,6 @@ def _run_prompt_submit(
         "kind=%s chars=%s images=%d",
         sid, session.get("session_key") or "", getattr(agent, "session_id", "") or "",
         display_kind or "user", len(text) if isinstance(text, str) else "-", len(images))
-    if not muted:
-        _emit("message.start", sid)
 
     def run_body():
         # RPC-dispatcher ContextVars do not follow onto this thread: rebind the transport
@@ -1182,6 +1191,16 @@ def _run_prompt_submit(
                     st.receipt_committed = True
                 return
             prompt, run_message, cols, streamer = prepared
+
+            if not muted:
+                from agent.turn_author import delivery_author, delivery_author_name, is_bot_delivery
+                incoming = {"role": "user", "display_metadata": display_metadata}
+                if is_bot_delivery(incoming):
+                    _emit("message.delivery", sid, {"text": text,
+                                                  "author": {**delivery_author(incoming), "name": delivery_author_name(incoming)},
+                                                  "delivery_id": delivery_id})
+                _emit("message.start", sid)
+
             _invoke_agent(
                 sid, session, st, prompt, run_message, streamer, images, display_kind,
                 display_metadata, turn_author, text)

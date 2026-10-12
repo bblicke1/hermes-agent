@@ -12448,6 +12448,44 @@
         "title": "DelegationStatusResult",
         "type": "object"
       },
+      "DeliveryAuthor": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "is_bot": {
+            "title": "Is Bot",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "is_bot"
+        ],
+        "title": "DeliveryAuthor",
+        "type": "object"
+      },
       "DiagnosticsShareNousParams": {
         "additionalProperties": false,
         "properties": {
@@ -18957,6 +18995,32 @@
           }
         },
         "title": "MessageCompletePayload",
+        "type": "object"
+      },
+      "MessageDeliveryPayload": {
+        "additionalProperties": false,
+        "description": "Admitted attributed input, projected for display before the reply starts.",
+        "properties": {
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "author": {
+            "$ref": "#/components/schemas/DeliveryAuthor"
+          },
+          "delivery_id": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Delivery Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "author",
+          "delivery_id"
+        ],
+        "title": "MessageDeliveryPayload",
         "type": "object"
       },
       "MessageInterimPayload": {
@@ -40539,6 +40603,18 @@
           "name": "payload",
           "schema": {
             "$ref": "#/components/schemas/MessageCompletePayload"
+          }
+        }
+      ]
+    },
+    {
+      "name": "message.delivery",
+      "summary": "An attributed queued input began execution on the owning session transport.",
+      "params": [
+        {
+          "name": "payload",
+          "schema": {
+            "$ref": "#/components/schemas/MessageDeliveryPayload"
           }
         }
       ]

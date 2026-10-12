@@ -624,11 +624,15 @@ def stop_harness_daemons() -> None:
             _run_cli_killing_process_group([*cmd, "--reload"], "", {**env, "BU_NAME": name}, 15)
 
 
-def browser_exec(code: str, session: str = "", timeout_s: int = _DEFAULT_TIMEOUT_S,
-                 task_id: Optional[str] = None, local: bool = False):
+def browser_exec(code: str = "", session: str = "", timeout_s: int = _DEFAULT_TIMEOUT_S,
+                 task_id: Optional[str] = None, local: bool = False, target: Optional[str] = None, release: bool = False):
     """Run Python code through the browser-use CLI, and return its output"""
     from agent.redact import redact_sensitive_text
     from tools.registry import tool_error, tool_result
+    from tools.browser_use_targets import session_request
+    request_result = session_request(session, release, target)
+    if request_result:
+        return request_result
     if not code or not code.strip():
         return tool_error("No code provided. Pass Python that uses the pre-imported helpers, e.g. new_tab(\"https://example.com\") then print(page_info()).")
 
@@ -643,13 +647,12 @@ def browser_exec(code: str, session: str = "", timeout_s: int = _DEFAULT_TIMEOUT
 
     env = _base_subprocess_env()
     if session:
-        if not _SESSION_RE.match(session):
-            return tool_error(f"Invalid session name {session!r}: use 1-64 letters, digits, "
-                              "dashes, or underscores (e.g. 'r7k2').")
         env["BU_NAME"] = session
-    route_err = _route_backend(env, session, task_id, bool(local))
-    if route_err:
-        return tool_error(route_err)
+    from tools.browser_use_targets import prepare_route, session_key
+    targeted, route_error = prepare_route(env, session, target, _read_browser_cfg(),
+                                          lambda: _route_backend(env, session, task_id, bool(local)), task_id=task_id, local=bool(local))
+    if route_error:
+        return route_error
     bot_desktop_browser = bool(env.pop(_BOT_DESKTOP_BROWSER_SENTINEL, None))
 
     # SHARED browser (/browser connect CDP override): pin each named session to its own tab (see
@@ -664,14 +667,14 @@ def browser_exec(code: str, session: str = "", timeout_s: int = _DEFAULT_TIMEOUT
 
     # BU_AUTOSPAWN makes the CLI start a Browser Use cloud browser when no local
     # Chrome/CDP endpoint is reachable (their API key authenticates it)
-    if "BU_AUTOSPAWN" not in env and is_legacy_browser_use_cloud_config(_read_browser_cfg()):
+    if not targeted and "BU_AUTOSPAWN" not in env and is_legacy_browser_use_cloud_config(_read_browser_cfg()):
         env["BU_AUTOSPAWN"] = "1"
 
     timeout = _clamp_timeout(timeout_s)
     started = time.time()
 
     def dispatch() -> dict[str, Any]:
-        _attach_vault_supervisor(env, task_id)
+        _attach_vault_supervisor(env, session_key(session) if targeted else task_id)
         with _driven_daemons_lock:
             _driven_daemons.add(env.get("BU_NAME", "default"))
         try:
@@ -812,10 +815,12 @@ BROWSER_EXEC_SCHEMA = {
         "properties": {
             "code": {"type": "string", "description": "Python code to execute using the pre-imported browser helpers. Use print(...) for any data you need back."},
             "session": {"type": "string", "description": "Named isolated browser session — its own daemon and (on cloud backends) own browser, so concurrent tasks don't share tabs. Reuse the same name on every related call; omit for the shared default session."},
+            "target": {"type": "string", "description": "Allowlisted browser.targets name or default; requires session and binds it to this browser for later exec and vault calls."},
+            "release": {"type": "boolean", "description": "Release this named target binding and stop its daemon/supervisor; code is not required or executed."},
             "timeout_s": {"type": "integer", "default": _DEFAULT_TIMEOUT_S,
                           "description": f"Max seconds to wait for the code to finish (default {_DEFAULT_TIMEOUT_S}, max {_MAX_TIMEOUT_S})."},
         },
-        "required": ["code"],
+        "required": [],
     },
 }
 
@@ -832,7 +837,7 @@ registry.register(
     handler=lambda args, **kw: browser_exec(
         code=args.get("code", ""), session=args.get("session", "") or "",
         timeout_s=args.get("timeout_s", _DEFAULT_TIMEOUT_S), task_id=kw.get("task_id"),
-        local=bool(args.get("local", False)),
+        local=bool(args.get("local", False)), target=args.get("target"), release=bool(args.get("release", False)),
     ),
     check_fn=is_browser_use_cli_mode,
     dynamic_schema_overrides=_dynamic_schema_overrides,

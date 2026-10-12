@@ -38,6 +38,7 @@ import { flashGoodVibes, flashPet } from './petFlashStore.js'
 import { forgetServerRequest } from './serverRequestStore.js'
 import { reportStartupLatency } from './startupLatency.js'
 import { markNextSubmitVoice } from './submissionCore.js'
+import { deliveryReplayIds, handleTurnOpeningEvent } from './turnOpeningEvents.js'
 import { turnController } from './turnController.js'
 import { getTurnState } from './turnStore.js'
 import { getUiState, patchUiState } from './uiStore.js'
@@ -459,6 +460,7 @@ export function createGatewayEventHandler(ctx: GatewayEventHandlerContext): (ev:
   const { submitLiteralRef, submitRef } = ctx.submission
   const { setProcessing: setVoiceProcessing, setRecording: setVoiceRecording, setVoiceEnabled } = ctx.voice
 
+  const seenDeliveries = deliveryReplayIds(ctx.gateway.gw)
   let pendingThinkingStatus = ''
   let thinkingStatusTimer: null | ReturnType<typeof setTimeout> = null
   let startupPromptSubmitted = false
@@ -807,6 +809,10 @@ export function createGatewayEventHandler(ctx: GatewayEventHandlerContext): (ev:
       return
     }
 
+    if (handleTurnOpeningEvent(ev, appendMessage, resetAgentsNudgeTurnState, seenDeliveries)) {
+      return
+    }
+
     switch (ev.type) {
       case 'connection.request':
         if (ev.payload) {
@@ -917,11 +923,6 @@ export function createGatewayEventHandler(ctx: GatewayEventHandlerContext): (ev:
 
         return
 
-      case 'message.start':
-        resetAgentsNudgeTurnState()
-        turnController.startMessage()
-
-        return
       case 'status.update': {
         const p = ev.payload
 

@@ -99,6 +99,8 @@ export const MessageLine = memo(function MessageLine({
     return shouldShowThinkingTrail(msg, thinkingMode, toolsMode, activityMode) ? (
       <Box flexDirection="column" marginTop={leadGap ? 1 : 0}>
         <ToolTrail
+          turnRunning={liveDetails}
+          inlineDiffs={msg.inlineDiffs}
           commandOverride={detailsModeCommandOverride}
           detailsMode={detailsMode}
           preferExpandedThinking={liveDetails}
@@ -271,6 +273,8 @@ export const MessageLine = memo(function MessageLine({
       {showDetails && (
         <Box flexDirection="column" marginBottom={1}>
           <ToolTrail
+            turnRunning={liveDetails}
+            inlineDiffs={msg.inlineDiffs}
             commandOverride={detailsModeCommandOverride}
             detailsMode={detailsMode}
             preferExpandedThinking={liveDetails}
@@ -296,6 +300,11 @@ export const MessageLine = memo(function MessageLine({
         </Box>
       )}
 
+      {msg.steered && msg.role === 'user' && (
+        <Text color={t.color.muted} dim>
+          ↪ steered
+        </Text>
+      )}
       {stamp && (
         <Box>
           <NoSelect flexShrink={0} fromLeftEdge width={gutterWidth}>

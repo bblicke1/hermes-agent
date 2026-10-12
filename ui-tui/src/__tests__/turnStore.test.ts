@@ -34,7 +34,7 @@ describe('turnStore live progress helpers', () => {
     expect(getTurnState().todos).toEqual([])
   })
 
-  it('archives incomplete todos with an incomplete flag so the hint renders', () => {
+  it('keeps incomplete todos pinned between turns', () => {
     patchTurnState({
       todos: [
         { content: 'cook', id: 'cook', status: 'completed' },
@@ -44,10 +44,8 @@ describe('turnStore live progress helpers', () => {
     })
 
     const archived = archiveTodosAtTurnEnd()
-    expect(archived).toHaveLength(1)
-    expect(archived[0]!.todoIncomplete).toBe(true)
-    expect(archived[0]!.todos?.map(t => t.id)).toEqual(['cook', 'serve', 'eat'])
-    expect(getTurnState().todos).toEqual([])
+    expect(archived).toEqual([])
+    expect(getTurnState().todos.map(t => t.id)).toEqual(['cook', 'serve', 'eat'])
   })
 
   it('returns nothing when there are no todos at turn end', () => {

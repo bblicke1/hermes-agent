@@ -113,6 +113,24 @@ event("notice", NoticePayload, doc="Informational one-liner for the session (cap
 event("message.start", None, doc="A turn began streaming; no payload.")
 
 
+class DeliveryAuthor(Payload):
+    id: str | None
+    name: str | None
+    is_bot: bool
+
+
+class MessageDeliveryPayload(Payload):
+    """Admitted attributed input, projected for display before the reply starts."""
+
+    text: str
+    author: DeliveryAuthor
+    delivery_id: str = Field(min_length=1, pattern=r"\S")
+
+
+event("message.delivery", MessageDeliveryPayload,
+      doc="An attributed queued input began execution on the owning session transport.")
+
+
 class StreamDeltaPayload(Payload):
     """``prompt_turn._invoke_agent._stream`` (message.delta: ``text`` + optional ``rendered``),
     ``agent_callbacks._agent_cbs`` (reasoning.delta / thinking.delta), ``tool_progress._progress_reasoning``

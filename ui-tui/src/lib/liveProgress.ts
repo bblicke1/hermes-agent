@@ -12,10 +12,17 @@ export const isToolShelfMessage = (msg: Msg | undefined) =>
 export const canHoldToolShelf = (msg: Msg | undefined) =>
   Boolean(msg?.kind === 'trail' && !msg.text && (msg.thinking?.trim() || msg.tools?.length))
 
-export const mergeToolShelfInto = (target: Msg, source: Msg): Msg => ({
-  ...target,
-  tools: [...(target.tools ?? []), ...(source.tools ?? [])]
-})
+export const mergeToolShelfInto = (target: Msg, source: Msg): Msg => {
+  const inlineDiffs = [
+    ...(target.inlineDiffs ?? []),
+    ...(source.inlineDiffs ?? []).map(diff => ({ ...diff, toolIndex: diff.toolIndex + (target.tools?.length ?? 0) }))
+  ]
+  return {
+    ...target,
+    tools: [...(target.tools ?? []), ...(source.tools ?? [])],
+    ...(inlineDiffs.length ? { inlineDiffs } : {})
+  }
+}
 
 const isBarrierMessage = (msg: Msg | undefined) => {
   if (!msg) {

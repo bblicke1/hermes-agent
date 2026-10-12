@@ -1,6 +1,6 @@
 import type { DetailsMode, SectionName, SectionVisibility } from '../types.js'
 
-const MODES = ['hidden', 'collapsed', 'expanded'] as const
+const MODES = ['hidden', 'collapsed', 'expanded', 'live'] as const
 
 export const SECTION_NAMES = ['thinking', 'tools', 'subagents', 'activity'] as const
 
@@ -71,6 +71,11 @@ export const sectionMode = (
   global: DetailsMode,
   sections?: SectionVisibility,
   commandOverride = false
-): DetailsMode => sections?.[name] ?? (commandOverride ? global : (SECTION_DEFAULTS[name] ?? global))
+): DetailsMode =>
+  sections?.[name] ?? (commandOverride || global === 'live' ? global : (SECTION_DEFAULTS[name] ?? global))
 
 export const nextDetailsMode = (m: DetailsMode): DetailsMode => MODES[(MODES.indexOf(m) + 1) % MODES.length]!
+
+// Resolve turn-scoped auto visibility separately from the stored preference.
+export const effectiveDetailsMode = (mode: DetailsMode, running: boolean): Exclude<DetailsMode, 'live'> =>
+  mode === 'live' ? (running ? 'expanded' : 'collapsed') : mode

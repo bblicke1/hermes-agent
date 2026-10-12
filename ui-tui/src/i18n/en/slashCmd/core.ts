@@ -58,8 +58,8 @@ export const slashCmdCoreEn = {
     },
     details: {
       usage:
-        'usage: /details [hidden|collapsed|expanded|cycle]  or  /details <section> [hidden|collapsed|expanded|reset]',
-      sectionUsage: 'usage: /details <section> [hidden|collapsed|expanded|reset]',
+        'usage: /details [hidden|collapsed|expanded|live|cycle]  or  /details <section> [hidden|collapsed|expanded|live|reset]',
+      sectionUsage: 'usage: /details <section> [hidden|collapsed|expanded|live|reset]',
       // {0}=mode, {1}=overrides summary ('' or '  (a=b c=d)')
       current: (mode: string, overrides: string) => `details: ${mode}${overrides}`,
       // {0}=section, {1}=mode or 'reset'

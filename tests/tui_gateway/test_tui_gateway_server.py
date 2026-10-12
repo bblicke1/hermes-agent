@@ -21298,6 +21298,21 @@ def test_tts_stream_stop_after_natural_finish_does_not_latch(monkeypatch):
     assert ts.take_speech_interrupted() is False
 
 
+def test_typed_turn_with_voice_mode_does_not_open_mic(monkeypatch):
+    """Voice mode alone must not arm the mic. Speech paths arm it when audio starts."""
+    armed = []
+    monkeypatch.setattr(server, "_arm_full_duplex_listener", lambda: armed.append("arm"))
+    monkeypatch.setattr(server, "_tts_stream_begin", lambda: None)
+    monkeypatch.setenv("HERMES_VOICE", "1")
+    monkeypatch.setattr("tools.voice_mode.start_thinking_sound", lambda should_play=None: False)
+
+    queue, started = server._start_turn_voice()
+
+    assert queue is None
+    assert started is False
+    assert armed == []
+
+
 def test_tts_stream_vad_barge_in_cuts_pipeline_and_submits_capture(monkeypatch, tmp_path):
     """User speech during playback cuts TTS at the moment of detection
     (voice.interrupted), then the captured interruption is transcribed and

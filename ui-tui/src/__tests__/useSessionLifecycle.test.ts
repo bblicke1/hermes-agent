@@ -10,6 +10,7 @@ import { patchUiState, resetUiState } from '../app/uiStore.js'
 import {
   hydrateLiveSessionInflight,
   liveSessionInflightMessages,
+  resumedTranscriptMessages,
   signalFreshSessionBoundary,
   writeActiveSessionFile
 } from '../app/useSessionLifecycle.js'
@@ -92,5 +93,40 @@ describe('live session activation in-flight state', () => {
 
     expect(turnController.bufRef).toBe('')
     expect(getTurnState().streaming).toBe('')
+  })
+})
+
+describe('steer history recovery', () => {
+  it('rehydrates delivered steering as a tagged user row without duplicating the in-flight copy', () => {
+    const rows = [
+      { role: 'user', text: 'original' },
+      { role: 'user', text: 'correction', display_kind: 'steer' },
+      { role: 'assistant', text: 'correction' }
+    ]
+    expect(
+      resumedTranscriptMessages(rows, {
+        user: 'original',
+        assistant: 'partial',
+        streaming: true,
+        corrections: ['correction']
+      })
+    ).toEqual([
+      { role: 'user', text: 'original' },
+      { role: 'user', text: 'correction', steered: true },
+      { role: 'assistant', text: 'correction' }
+    ])
+  })
+  it('keeps an undelivered correction visible and preserves repeated identical sends', () => {
+    const rows = [
+      { role: 'user', text: 'original' },
+      { role: 'user', text: 'correction', display_kind: 'steer' }
+    ]
+    const result = resumedTranscriptMessages(rows, {
+      user: 'original',
+      assistant: '',
+      streaming: true,
+      corrections: ['correction', 'correction', 'second']
+    })
+    expect(result.filter(msg => msg.steered).map(msg => msg.text)).toEqual(['correction', 'correction', 'second'])
   })
 })

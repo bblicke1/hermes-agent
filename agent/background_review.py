@@ -16,6 +16,7 @@ from contextlib import contextmanager, suppress
 from dataclasses import dataclass, field
 from typing import Any, Dict, Iterator, List, Optional, Tuple
 
+from agent.turn_author import transcript_author_label
 from agent.i18n import t
 from agent.prompt_cache_scope import resolve_prompt_cache_scope_safe
 from agent.thread_scoped_output import thread_scoped_silence
@@ -339,7 +340,7 @@ def _digest_history(messages_snapshot: list[dict], tail: int = 24) -> list[dict]
             continue
         role, text = m.get("role"), _msg_text(m).replace("\n", " ")
         if role == "user" and text:
-            lines.append(f"USER: {text[:300]}")
+            lines.append(f"{transcript_author_label(m)}: {text[:300]}")
         elif role == "assistant":
             if m.get("tool_calls"):
                 names = [(tc.get("function") or {}).get("name", "?") for tc in m["tool_calls"] if isinstance(tc, dict)]
