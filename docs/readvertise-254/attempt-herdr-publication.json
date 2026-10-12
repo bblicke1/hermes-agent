@@ -1,0 +1,121 @@
+{
+  "profile": "seat-test-254",
+  "scratch_root": "/tmp/hermes-readvertise-254-ehl041cp",
+  "interpreter": "/home/brad/.hermes/tools/python-3.14.7+20260901-linux-x64/bin/python3",
+  "backend_source": "/home/brad/worktrees/hermes-agent-readvertise-254",
+  "dependency_sites": "/home/brad/.hermes/installs/51181f1e9b6ad302/environments/b1b23c0085f246d39ba483c1c50d7e26/venv/lib/python3.14/site-packages",
+  "renderer": "/home/brad/.hermes/hermes-agent/ui-tui/dist/entry.js",
+  "tab": "wN:tEA",
+  "pane": "wN:pEG",
+  "first_herdr": {
+    "agent": "hermes",
+    "agent_session": {
+      "agent": "hermes",
+      "kind": "id",
+      "source": "herdr:hermes",
+      "value": "20261012_161302_1f2d85"
+    },
+    "agent_status": "unknown",
+    "cwd": "/tmp/hermes-readvertise-254-ehl041cp",
+    "focused": false,
+    "foreground_cwd": "/tmp/hermes-readvertise-254-ehl041cp",
+    "name": "seat-test-254",
+    "pane_id": "wN:pEG",
+    "revision": 3,
+    "state_change_seq": 0,
+    "tab_id": "wN:tEA",
+    "terminal_id": "term_65daa53151813113",
+    "terminal_title": "\u2713 gb10-balanced \u00b7 \u2026eadvertise-254-ehl041cp",
+    "terminal_title_stripped": "\u2713 gb10-balanced \u00b7 \u2026eadvertise-254-ehl041cp",
+    "workspace_id": "wN"
+  },
+  "first_route": {
+    "seat": "seat-test-254",
+    "status": "updated"
+  },
+  "first_admission": {
+    "delivery_id": "914edfc8257343898ec6d5db474651e3",
+    "id": "914edfc8257343898ec6d5db474651e3",
+    "owner": {
+      "profile_home": "/tmp/hermes-readvertise-254-ehl041cp/profiles/seat-test-254",
+      "session_id": "20261012_161302_1f2d85",
+      "lease_id": "01eb12e50e1f40c4bbea39e38e0f99d9",
+      "live_session_id": "37491410"
+    },
+    "profile_home": "/tmp/hermes-readvertise-254-ehl041cp/profiles/seat-test-254",
+    "session_id": "20261012_161302_1f2d85",
+    "lease_id": "01eb12e50e1f40c4bbea39e38e0f99d9",
+    "live_session_id": "37491410",
+    "message": "Read /tmp/hermes-readvertise-254-ehl041cp/run-state/mail/seat-test-254/20261012T201302528794Z-proof-914edfc8257343898ec6d5db474651e3.json; then run `/usr/bin/python3 /home/brad/.hermes/scripts/agent_mail.py --root /tmp/hermes-readvertise-254-ehl041cp/run-state/mail ack /tmp/hermes-readvertise-254-ehl041cp/run-state/mail/seat-test-254/20261012T201302528794Z-proof-914edfc8257343898ec6d5db474651e3.json`. Follow the envelope's authorized work order.",
+    "status": "queued",
+    "created_at": 1791835982786191036,
+    "sequence": 1,
+    "author": {
+      "id": "bot:proof-254",
+      "name": "proof-254",
+      "is_bot": true
+    }
+  },
+  "first_receipt": {
+    "author": {
+      "id": "bot:proof-254",
+      "is_bot": true,
+      "name": "proof-254"
+    },
+    "claimed_at": 1791835983104529509,
+    "completed_at": 1791835996656827573,
+    "created_at": 1791835982786191036,
+    "delivery_id": "914edfc8257343898ec6d5db474651e3",
+    "error": "",
+    "id": "914edfc8257343898ec6d5db474651e3",
+    "lease_id": "01eb12e50e1f40c4bbea39e38e0f99d9",
+    "live_session_id": "37491410",
+    "message": "Read /tmp/hermes-readvertise-254-ehl041cp/run-state/mail/seat-test-254/20261012T201302528794Z-proof-914edfc8257343898ec6d5db474651e3.json; then run `/usr/bin/python3 /home/brad/.hermes/scripts/agent_mail.py --root /tmp/hermes-readvertise-254-ehl041cp/run-state/mail ack /tmp/hermes-readvertise-254-ehl041cp/run-state/mail/seat-test-254/20261012T201302528794Z-proof-914edfc8257343898ec6d5db474651e3.json`. Follow the envelope's authorized work order.",
+    "owner": {
+      "lease_id": "01eb12e50e1f40c4bbea39e38e0f99d9",
+      "live_session_id": "37491410",
+      "profile_home": "/tmp/hermes-readvertise-254-ehl041cp/profiles/seat-test-254",
+      "session_id": "20261012_161302_1f2d85"
+    },
+    "profile_home": "/tmp/hermes-readvertise-254-ehl041cp/profiles/seat-test-254",
+    "reason": "",
+    "reply": "G254-FIRST-ACK",
+    "sequence": 1,
+    "session_id": "20261012_161302_1f2d85",
+    "status": "settled"
+  },
+  "first_read_ack": {
+    "reader": "seat-test-254",
+    "ts": "2026-10-12T20:13:15.050541+00:00"
+  },
+  "new_confirmation": "   \u251c\u2500 \u25cf Terminal(\"cat /tmp/hermes-readvertise-254-ehl041cp/run-state/mail/seat-te\u2026\")\n      (0.0s)\n   \u2514\u2500 \u25cf Terminal(\"/usr/bin/python3 /home/brad/.hermes/scripts/agent_mail.py --roo\u2026\")\n      (0.1s)\n\n \u250a  G254-FIRST-ACK\n\n \u00b7  /new\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n \u2554\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2557\n \u2551 \u26a0 Start a new session?                                                                \u2551\u2551\n \u2551  This ends the current conversation and clears the transcript.                         \u2551\n \u2551 \u25b8 No, keep going                                                                       \u2551\n \u2551   Yes, start a new session                                                             \u2551\n \u2551 \u2191/\u2193 select \u00b7 Enter confirm \u00b7 Y/N quick \u00b7 Esc cancel                                    \u2551\n \u255a\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u255d\n\n\n\n \u2500 ready \u2502 gb10 balanced none \u2502 3.6k/25 \u2500  Read /tmp/hermes-readvertise-254-ehl041cp/run-s\u2026",
+  "first_owner": {
+    "profile_home": "/tmp/hermes-readvertise-254-ehl041cp/profiles/seat-test-254",
+    "session_id": "20261012_161302_1f2d85",
+    "live_session_id": "37491410",
+    "lease_id": "01eb12e50e1f40c4bbea39e38e0f99d9",
+    "pid": 3827924,
+    "process_start": 1791835980.35
+  },
+  "second_owner": {
+    "profile_home": "/tmp/hermes-readvertise-254-ehl041cp/profiles/seat-test-254",
+    "session_id": "20261012_161317_318864",
+    "live_session_id": "fb8c7c66",
+    "lease_id": "d2afeebd245446149e2f14d58e6c389b",
+    "pid": 3827924,
+    "process_start": 1791835980.35
+  },
+  "old_session_id": "20261012_161302_1f2d85",
+  "new_session_id": "20261012_161317_318864",
+  "same_backend_pid": true,
+  "previous_advertisement_retired": true,
+  "error": "RuntimeError('proof deadline expired')",
+  "cleanup": {
+    "tabs_closed": [
+      "wN:tEA"
+    ],
+    "profile_removed": true,
+    "scratch_root_removed": true,
+    "owner_pids_exited": true
+  }
+}

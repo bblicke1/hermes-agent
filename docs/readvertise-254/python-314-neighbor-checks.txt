@@ -1,0 +1,176 @@
+▶ not activated — using HERMES_PYTHON: /home/brad/.hermes/installs/66cef3827c817e6e/test-environment/gen-0d5891f1091642ea909f2ee4a8cf4321/venv/bin/python
+▶ running per-file parallel test suite via run_tests_parallel.py
+  (TZ=UTC LANG=C.UTF-8 PYTHONHASHSEED=0; clean env)
+▶ pre-compiling bytecode cache
+▶ launching test runner
+Discovered 3 test files (~23 tests) under ['tests/tui_gateway/test_delivery_readvertisement.py', 'tests/tui_gateway/test_bot_live_owner_delivery.py', 'tests/tools/test_bot_live_owner_delivery.py']; running with -j 16
+[ 26.1% |     6/~23 | ✓3 | ✗3] ✗ tests/tui_gateway/test_bot_live_owner_delivery.py (3✓ 3✗, 1.5s)
+
+  ╔╍ Failed: tests/tui_gateway/test_bot_live_owner_delivery.py ╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍
+  ║     def test_mailbox_poll_delivers_past_a_schema_damaged_ticket(monkeypatch, tmp_path):
+  ║         """A `{}` ticket beside a healthy envelope must not wedge the live poller's claim (real mailbox on disk)."""
+  ║         import tools.bot_live_delivery as mailbox
+  ║         owner = dict(profile_home=str(tmp_path.resolve()), session_id="chat", lease_id="lease", live_session_id="live")
+  ║         queued = mailbox.deliver_to_live_owner(tmp_path, owner, "healthy", delivery_id="d" * 32)
+  ║         (mailbox._root(tmp_path) / f"{'a' * 32}.json").write_text("{}", encoding="utf-8")
+  ║         monkeypatch.setattr(mailbox, "find_canonical_live_owner", lambda home: owner)
+  ║         submitted = []
+  ║         def submit(rid, sid, session, text, **kwargs):
+  ║             submitted.append(text)
+  ║             kwargs["terminal_callback"]({"status": "settled", "text": "reply"})
+  ║             return True
+  ║         poll = rebind(session_notifications._poll_bot_live_delivery_once, {
+  ║             "_session_home": lambda session: tmp_path,
+  ║             "_session_turn_admission": _session_turn_admission,
+  ║             "_run_prompt_submit": submit,
+  ║             "_notif_release_turn": lambda session: session.update(running=False),
+  ║         })
+  ║         session = {"history_lock": threading.RLock(), "agent": object(), "session_key": "chat",
+  ║                    "active_session_lease": SimpleNamespace(lease_id="lease", released=False)}
+  ║ >       assert poll("live", session) is True
+  ║ E       AssertionError: assert False is True
+  ║ E        +  where False = <function _poll_bot_live_delivery_once at 0x6ffc355b2980>('live', {'history_lock': <unlocked _thread.RLock object owner=0 count=0 at 0x6ffc355c0280>, 'agent': <object object at 0x6ffc35cb4900>, 'session_key': 'chat', 'active_session_lease': namespace(lease_id='lease', released=False)})
+  ║ 
+  ║ tests/tui_gateway/test_bot_live_owner_delivery.py:172: AssertionError
+  ║ =========================== short test summary info ============================
+  ║ FAILED tests/tui_gateway/test_bot_live_owner_delivery.py::test_local_work_blocks_mailbox_claim_without_consuming_envelope
+  ║ FAILED tests/tui_gateway/test_bot_live_owner_delivery.py::test_mailbox_poll_skips_owner_lookup_without_a_mailbox
+  ║ FAILED tests/tui_gateway/test_bot_live_owner_delivery.py::test_mailbox_poll_delivers_past_a_schema_damaged_ticket
+  ║ ========================= 3 failed, 3 passed in 0.94s ==========================
+  ║
+  ║  Repro: python -m pytest tests/tui_gateway/test_bot_live_owner_delivery.py
+  ╚╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍
+
+[ 56.5% |    13/~23 | ✓11 | ✗ 3] ✓ tests/tui_gateway/test_delivery_readvertisement.py (8✓, 5.7s)
+[100.0% |    23/~23 | ✓26 | ✗ 3] ✓ tests/tools/test_bot_live_owner_delivery.py (15✓, 6.1s)
+
+=== Summary: 3 files, 26 tests passed, 3 failed (100% complete) in 6.1s (16 workers) ===
+  Durations cached to test_durations.json (2 files)
+
+=== Per-file subprocess time distribution ===
+  Files:   3
+  Total subprocess CPU-wall: 13.2s  (runner wall: 6.1s, parallelism: 16x)
+  P50: 5.65s  P90: 6.08s  P95: 6.08s  P99: 6.08s  Max: 6.08s
+  <1s: 0 files (0%)  <2s: 1 files (33%)
+  Top 10 slowest:
+      6.08s  tests/tools/test_bot_live_owner_delivery.py
+      5.65s  tests/tui_gateway/test_delivery_readvertisement.py
+      1.50s  tests/tui_gateway/test_bot_live_owner_delivery.py
+
+=== Failure output ===
+
+--- tests/tui_gateway/test_bot_live_owner_delivery.py ---
+============================= test session starts ==============================
+platform linux -- Python 3.14.7, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/brad/worktrees/hermes-agent-readvertise-254
+configfile: pyproject.toml
+plugins: asyncio-1.3.0, anyio-4.14.2
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 6 items
+
+tests/tui_gateway/test_bot_live_owner_delivery.py ..FF.F                 [100%]
+
+=================================== FAILURES ===================================
+_______ test_local_work_blocks_mailbox_claim_without_consuming_envelope ________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x6ffc37d2a9f0>
+tmp_path = PosixPath('/var/tmp/hermes-pytest-1000/r-hq80_7sz/pytest-of-brad/pytest-0/test_local_work_blocks_mailbox0')
+
+    def test_local_work_blocks_mailbox_claim_without_consuming_envelope(monkeypatch, tmp_path):
+        import tools.bot_live_delivery as mailbox
+        owner = {"lease_id": "lease", "live_session_id": "live", "session_id": "chat"}
+        author = {"id": "bot:coder", "name": "coder", "is_bot": True}
+        pending = [{"id": "receipt", "message": "imported", "author": author}]
+        monkeypatch.setattr(mailbox, "find_canonical_live_owner", lambda home: owner)
+        monkeypatch.setattr(mailbox, "claim_pending_delivery", lambda home, pinned: pending.pop(0))
+        receipts = []
+        monkeypatch.setattr(mailbox, "complete_delivery", lambda *args, **kwargs: receipts.append((args, kwargs)))
+        submitted = []
+        def submit(rid, sid, session, text, **kwargs):
+            submitted.append((text, kwargs.get("turn_author")))
+            kwargs["terminal_callback"]({"status": "settled", "text": "reply"})
+            return True
+        poll = rebind(session_notifications._poll_bot_live_delivery_once, {
+            "_session_home": lambda session: tmp_path,
+            "_session_turn_admission": _session_turn_admission,
+            "_run_prompt_submit": submit,
+            "_notif_release_turn": lambda session: session.update(running=False),
+        })
+        mailbox._root(tmp_path).mkdir(parents=True)  # a delivery was admitted for this profile
+        session = {"history_lock": threading.RLock(), "agent": object(), "session_key": "chat",
+                   "active_session_lease": SimpleNamespace(lease_id="lease", released=False)}
+        for blocker in ("running", "queued_prompt", "queued_prompts", "_auto_continue_scheduled"):
+            session[blocker] = True
+            assert poll("live", session) is False
+            assert pending and not submitted
+            session.pop(blocker)
+        assert poll("other-live", session) is False
+        assert pending
+>       assert poll("live", session) is True
+E       AssertionError: assert False is True
+E        +  where False = <function _poll_bot_live_delivery_once at 0x6ffc37c0f270>('live', {'history_lock': <unlocked _thread.RLock object owner=0 count=0 at 0x6ffc37c09540>, 'agent': <object object at 0x6ffc3a8f29d0>, 'session_key': 'chat', 'active_session_lease': namespace(lease_id='lease', released=False)})
+
+tests/tui_gateway/test_bot_live_owner_delivery.py:101: AssertionError
+____________ test_mailbox_poll_skips_owner_lookup_without_a_mailbox ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x6ffc356ea580>
+tmp_path = PosixPath('/var/tmp/hermes-pytest-1000/r-hq80_7sz/pytest-of-brad/pytest-0/test_mailbox_poll_skips_owner_0')
+
+    def test_mailbox_poll_skips_owner_lookup_without_a_mailbox(monkeypatch, tmp_path):
+        """No mailbox directory → no state.db open / registry lock per pass; the lookup runs once one exists."""
+        import tools.bot_live_delivery as mailbox
+        lookups = []
+        monkeypatch.setattr(mailbox, "find_canonical_live_owner", lambda home: lookups.append(home) or None)
+        poll = rebind(session_notifications._poll_bot_live_delivery_once, {
+            "_session_home": lambda session: tmp_path, "_session_turn_admission": _session_turn_admission})
+        session = {"history_lock": threading.RLock(), "agent": object(), "session_key": "chat",
+                   "active_session_lease": SimpleNamespace(lease_id="lease", released=False)}
+        assert poll("live", session) is False
+        assert lookups == []
+        mailbox._root(tmp_path).mkdir(parents=True)
+        assert poll("live", session) is False
+>       assert lookups == [tmp_path]
+E       AssertionError: assert [] == [PosixPath('/...ips_owner_0')]
+E         
+E         Right contains one more item: PosixPath('/var/tmp/hermes-pytest-1000/r-hq80_7sz/pytest-of-brad/pytest-0/test_mailbox_poll_skips_owner_0')
+E         Use -v to get more diff
+
+tests/tui_gateway/test_bot_live_owner_delivery.py:120: AssertionError
+___________ test_mailbox_poll_delivers_past_a_schema_damaged_ticket ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x6ffc35575650>
+tmp_path = PosixPath('/var/tmp/hermes-pytest-1000/r-hq80_7sz/pytest-of-brad/pytest-0/test_mailbox_poll_delivers_pas0')
+
+    def test_mailbox_poll_delivers_past_a_schema_damaged_ticket(monkeypatch, tmp_path):
+        """A `{}` ticket beside a healthy envelope must not wedge the live poller's claim (real mailbox on disk)."""
+        import tools.bot_live_delivery as mailbox
+        owner = dict(profile_home=str(tmp_path.resolve()), session_id="chat", lease_id="lease", live_session_id="live")
+        queued = mailbox.deliver_to_live_owner(tmp_path, owner, "healthy", delivery_id="d" * 32)
+        (mailbox._root(tmp_path) / f"{'a' * 32}.json").write_text("{}", encoding="utf-8")
+        monkeypatch.setattr(mailbox, "find_canonical_live_owner", lambda home: owner)
+        submitted = []
+        def submit(rid, sid, session, text, **kwargs):
+            submitted.append(text)
+            kwargs["terminal_callback"]({"status": "settled", "text": "reply"})
+            return True
+        poll = rebind(session_notifications._poll_bot_live_delivery_once, {
+            "_session_home": lambda session: tmp_path,
+            "_session_turn_admission": _session_turn_admission,
+            "_run_prompt_submit": submit,
+            "_notif_release_turn": lambda session: session.update(running=False),
+        })
+        session = {"history_lock": threading.RLock(), "agent": object(), "session_key": "chat",
+                   "active_session_lease": SimpleNamespace(lease_id="lease", released=False)}
+>       assert poll("live", session) is True
+E       AssertionError: assert False is True
+E        +  where False = <function _poll_bot_live_delivery_once at 0x6ffc355b2980>('live', {'history_lock': <unlocked _thread.RLock object owner=0 count=0 at 0x6ffc355c0280>, 'agent': <object object at 0x6ffc35cb4900>, 'session_key': 'chat', 'active_session_lease': namespace(lease_id='lease', released=False)})
+
+tests/tui_gateway/test_bot_live_owner_delivery.py:172: AssertionError
+=========================== short test summary info ============================
+FAILED tests/tui_gateway/test_bot_live_owner_delivery.py::test_local_work_blocks_mailbox_claim_without_consuming_envelope
+FAILED tests/tui_gateway/test_bot_live_owner_delivery.py::test_mailbox_poll_skips_owner_lookup_without_a_mailbox
+FAILED tests/tui_gateway/test_bot_live_owner_delivery.py::test_mailbox_poll_delivers_past_a_schema_damaged_ticket
+========================= 3 failed, 3 passed in 0.94s ==========================
+
+=== 1 file with test failures (3 tests failed) ===
+  tests/tui_gateway/test_bot_live_owner_delivery.py  (3 tests failed)

@@ -1,0 +1,10 @@
+{
+  "profile": "seat-test-254",
+  "scratch_root": "/tmp/hermes-readvertise-254-qt_n4i2u",
+  "interpreter": "/home/brad/.hermes/tools/python-3.14.7+20260901-linux-x64/bin/python3",
+  "backend_source": "/home/brad/worktrees/hermes-agent-readvertise-254",
+  "dependency_sites": "/home/brad/.hermes/installs/51181f1e9b6ad302/environments/b1b23c0085f246d39ba483c1c50d7e26/venv/lib/python3.14/site-packages",
+  "renderer": "/home/brad/.hermes/hermes-agent/ui-tui/dist/entry.js",
+  "tab": "wN:tED",
+  "pane": "wN:pEK"
+}
