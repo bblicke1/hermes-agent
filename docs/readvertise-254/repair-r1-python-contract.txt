@@ -1,0 +1,942 @@
+▶ not activated — using HERMES_PYTHON: /home/brad/.hermes/hermes-agent/venv/bin/python
+▶ running per-file parallel test suite via run_tests_parallel.py
+  (TZ=UTC LANG=C.UTF-8 PYTHONHASHSEED=0; clean env)
+▶ pre-compiling bytecode cache
+▶ launching test runner
+Discovered 3 test files (~26 tests) under ['tests/tui_gateway/test_delivery_readvertisement.py', 'tests/tools/test_bot_live_owner_delivery.py', 'tests/tui_gateway/test_delivery_transition_integration.py']; running with -j 16
+[  3.8% |     1/~26 | ✓0 | ✗1] ✗ tests/tui_gateway/test_delivery_transition_integration.py (1✗, 1.7s)
+
+  ╔╍ Failed: tests/tui_gateway/test_delivery_transition_integration.py ╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍
+  ║ ______________ test_real_resume_attach_new_handlers_and_idle_tick ______________
+  ║ 
+  ║ tmp_path = PosixPath('/var/tmp/hermes-pytest-1000/r-1y03xxo_/pytest-of-brad/pytest-0/test_real_resume_attach_new_ha0')
+  ║ 
+  ║ >   ???
+  ║ E   AssertionError: Traceback (most recent call last):
+  ║ E       File "<string>", line 8, in <module>
+  ║ E       File "/home/brad/worktrees/hermes-agent-readvertise-254/tui_gateway/server.py", line 40, in <module>
+  ║ E         from agent.conversation_loop import INTERRUPT_WAITING_FOR_MODEL_PREFIX
+  ║ E       File "/home/brad/worktrees/hermes-agent-readvertise-254/agent/conversation_loop.py", line 40, in <module>
+  ║ E         from agent.turn_scripted_prelude import Prelude, play_prelude
+  ║ E       File "/home/brad/worktrees/hermes-agent-readvertise-254/agent/turn_scripted_prelude.py", line 24, in <module>
+  ║ E         Prelude = Generator[tuple[str, str, dict], Optional[str]]
+  ║ E                   ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ║ E       File "/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/typing.py", line 379, in inner
+  ║ E         return func(*args, **kwds)
+  ║ E                ^^^^^^^^^^^^^^^^^^^
+  ║ E       File "/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/typing.py", line 1592, in __getitem__
+  ║ E         _check_generic(self, params, self._nparams)
+  ║ E       File "/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/typing.py", line 293, in _check_generic
+  ║ E         raise TypeError(f"Too {'many' if alen > elen else 'few'} arguments for {cls};"
+  ║ E     TypeError: Too few arguments for typing.Generator; actual 2, expected 3
+  ║ E     
+  ║ E   assert 1 == 0
+  ║ E    +  where 1 = CompletedProcess(args=['/home/brad/.hermes/hermes-agent/venv/bin/python', '-c', '\nimport json\nimport os\nfrom pathli...> elen else \'few\'} arguments for {cls};"\nTypeError: Too few arguments for typing.Generator; actual 2, expected 3\n').returncode
+  ║ 
+  ║ tests/tui_gateway/test_delivery_transition_integration.py:124: AssertionError
+  ║ =========================== short test summary info ============================
+  ║ FAILED tests/tui_gateway/test_delivery_transition_integration.py::test_real_resume_attach_new_handlers_and_idle_tick
+  ║ ============================== 1 failed in 1.43s ===============================
+  ║
+  ║  Repro: python -m pytest tests/tui_gateway/test_delivery_transition_integration.py
+  ╚╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍
+
+[ 42.3% |    11/~26 | ✓0 | ✗1] ✗ tests/tools/test_bot_live_owner_delivery.py (15e, 2.7s)
+
+  ╔╍ Failed: tests/tools/test_bot_live_owner_delivery.py ╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍
+  ║ 
+  ║ value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
+  ║ 
+  ║     @staticmethod
+  ║     def refuse(value):
+  ║ >       raise AssertionError(
+  ║             f"TEST BUG: file I/O against the REAL hermes home: {value}\n"
+  ║             "Use the isolated HERMES_HOME or a temporary fixture instead."
+  ║         )
+  ║ E       AssertionError: TEST BUG: file I/O against the REAL hermes home: /home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu
+  ║ E       Use the isolated HERMES_HOME or a temporary fixture instead.
+  ║ 
+  ║ tests/home_io_guard.py:140: AssertionError
+  ║ =========================== short test summary info ============================
+  ║ ERROR tests/tools/test_bot_live_owner_delivery.py::test_delivery_is_idempotent_fenced_and_permanent[settled]
+  ║ ERROR tests/tools/test_bot_live_owner_delivery.py::test_delivery_is_idempotent_fenced_and_permanent[failed]
+  ║ ERROR tests/tools/test_bot_live_owner_delivery.py::test_delivery_is_idempotent_fenced_and_permanent[cancelled]
+  ║ ERROR tests/tools/test_bot_live_owner_delivery.py::test_cancel_queued_delivery_fences_claim_and_preserves_terminal_result
+  ║ ERROR tests/tools/test_bot_live_owner_delivery.py::test_live_dm_bom_readers_preserve_pinned_intent[new]
+  ║ ERROR tests/tools/test_bot_live_owner_delivery.py::test_live_dm_bom_readers_preserve_pinned_intent[existing]
+  ║ ERROR tests/tools/test_bot_live_owner_delivery.py::test_live_dm_bom_readers_preserve_pinned_intent[raced]
+  ║ ERROR tests/tools/test_bot_live_owner_delivery.py::test_fifo_survives_clock_rollback
+  ║ ERROR tests/tools/test_bot_live_owner_delivery.py::test_only_canonical_capable_owner_receives_across_compression[True]
+  ║ ERROR tests/tools/test_bot_live_owner_delivery.py::test_only_canonical_capable_owner_receives_across_compression[False]
+  ║ ERROR tests/tools/test_bot_live_owner_delivery.py::test_delivery_keeps_the_sender_and_refuses_a_different_one_under_the_same_id
+  ║ ERROR tests/tools/test_bot_live_owner_delivery.py::test_unreadable_ticket_does_not_wedge_bulk_scans
+  ║ ERROR tests/tools/test_bot_live_owner_delivery.py::test_unreadable_ticket_keeps_exact_id_reads_fail_closed
+  ║ ERROR tests/tools/test_bot_live_owner_delivery.py::test_non_dict_ticket_is_skipped_by_scans_and_fails_exact_id_reads_closed
+  ║ ERROR tests/tools/test_bot_live_owner_delivery.py::test_schema_damaged_ticket_does_not_wedge_bulk_scans
+  ║ ============================== 15 errors in 2.54s ==============================
+  ║
+  ║  Repro: python -m pytest tests/tools/test_bot_live_owner_delivery.py
+  ╚╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍
+
+[100.0% |    26/~26 | ✓17 | ✗ 1] ✓ tests/tui_gateway/test_delivery_readvertisement.py (17✓, 8.5s)
+
+=== Summary: 3 files, 17 tests passed, 1 failed (100% complete) in 8.6s (16 workers) ===
+  Durations cached to test_durations.json (1 files)
+
+=== Per-file subprocess time distribution ===
+  Files:   3
+  Total subprocess CPU-wall: 12.9s  (runner wall: 8.6s, parallelism: 16x)
+  P50: 2.73s  P90: 8.53s  P95: 8.53s  P99: 8.53s  Max: 8.53s
+  <1s: 0 files (0%)  <2s: 1 files (33%)
+  Top 10 slowest:
+      8.53s  tests/tui_gateway/test_delivery_readvertisement.py
+      2.73s  tests/tools/test_bot_live_owner_delivery.py
+      1.67s  tests/tui_gateway/test_delivery_transition_integration.py
+
+=== Failure output ===
+
+--- tests/tui_gateway/test_delivery_transition_integration.py ---
+============================= test session starts ==============================
+platform linux -- Python 3.11.15, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/brad/worktrees/hermes-agent-readvertise-254
+configfile: pyproject.toml
+plugins: anyio-4.12.1
+collected 1 item
+
+tests/tui_gateway/test_delivery_transition_integration.py F              [100%]
+
+=================================== FAILURES ===================================
+______________ test_real_resume_attach_new_handlers_and_idle_tick ______________
+
+tmp_path = PosixPath('/var/tmp/hermes-pytest-1000/r-1y03xxo_/pytest-of-brad/pytest-0/test_real_resume_attach_new_ha0')
+
+>   ???
+E   AssertionError: Traceback (most recent call last):
+E       File "<string>", line 8, in <module>
+E       File "/home/brad/worktrees/hermes-agent-readvertise-254/tui_gateway/server.py", line 40, in <module>
+E         from agent.conversation_loop import INTERRUPT_WAITING_FOR_MODEL_PREFIX
+E       File "/home/brad/worktrees/hermes-agent-readvertise-254/agent/conversation_loop.py", line 40, in <module>
+E         from agent.turn_scripted_prelude import Prelude, play_prelude
+E       File "/home/brad/worktrees/hermes-agent-readvertise-254/agent/turn_scripted_prelude.py", line 24, in <module>
+E         Prelude = Generator[tuple[str, str, dict], Optional[str]]
+E                   ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       File "/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/typing.py", line 379, in inner
+E         return func(*args, **kwds)
+E                ^^^^^^^^^^^^^^^^^^^
+E       File "/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/typing.py", line 1592, in __getitem__
+E         _check_generic(self, params, self._nparams)
+E       File "/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/typing.py", line 293, in _check_generic
+E         raise TypeError(f"Too {'many' if alen > elen else 'few'} arguments for {cls};"
+E     TypeError: Too few arguments for typing.Generator; actual 2, expected 3
+E     
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['/home/brad/.hermes/hermes-agent/venv/bin/python', '-c', '\nimport json\nimport os\nfrom pathli...> elen else \'few\'} arguments for {cls};"\nTypeError: Too few arguments for typing.Generator; actual 2, expected 3\n').returncode
+
+tests/tui_gateway/test_delivery_transition_integration.py:124: AssertionError
+=========================== short test summary info ============================
+FAILED tests/tui_gateway/test_delivery_transition_integration.py::test_real_resume_attach_new_handlers_and_idle_tick
+============================== 1 failed in 1.43s ===============================
+
+--- tests/tools/test_bot_live_owner_delivery.py ---
+============================= test session starts ==============================
+platform linux -- Python 3.11.15, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/brad/worktrees/hermes-agent-readvertise-254
+configfile: pyproject.toml
+plugins: anyio-4.12.1
+collected 15 items
+
+tests/tools/test_bot_live_owner_delivery.py EEEEEEEEEEEEEEE              [100%]
+
+==================================== ERRORS ====================================
+_ ERROR at setup of test_delivery_is_idempotent_fenced_and_permanent[settled] __
+
+>   ???
+
+tests/conftest.py:1336: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+agent/moa_loop.py:23: in <module>
+    ???
+agent/auxiliary_client.py:127: in <module>
+    from agent.auxiliary_unavailable import (
+agent/auxiliary_unavailable.py:17: in <module>
+    from hermes_time import safe_strftime
+hermes_time.py:15: in <module>
+    from zoneinfo import ZoneInfo
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/__init__.py:10: in <module>
+    from . import _tzpath
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/_tzpath.py:2: in <module>
+    import sysconfig
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:192: in <module>
+    _PROJECT_BASE = os.path.dirname(_safe_realpath(sys.executable))
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:187: in _safe_realpath
+    return realpath(path)
+           ^^^^^^^^^^^^^^
+tests/home_io_guard.py:167: in guarded
+    self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
+tests/home_io_guard.py:107: in check
+    self.refuse(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
+
+    @staticmethod
+    def refuse(value):
+>       raise AssertionError(
+            f"TEST BUG: file I/O against the REAL hermes home: {value}\n"
+            "Use the isolated HERMES_HOME or a temporary fixture instead."
+        )
+E       AssertionError: TEST BUG: file I/O against the REAL hermes home: /home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu
+E       Use the isolated HERMES_HOME or a temporary fixture instead.
+
+tests/home_io_guard.py:140: AssertionError
+__ ERROR at setup of test_delivery_is_idempotent_fenced_and_permanent[failed] __
+
+    @pytest.fixture(autouse=True)
+    def _moa_caches_isolated():
+        """Clear module-level MoA cold-start caches before each test.
+    
+        ``agent.moa_loop`` caches the resolved preset and each slot's provider
+        runtime at module level (keyed on config mtime / provider+model) so the
+        tool loop doesn't re-resolve them serially on every iteration. Tests
+        monkeypatch resolvers and config paths, so a cache entry leaked from one
+        test would poison the next. Clear both around every test.
+        """
+>       import agent.moa_loop as moa
+
+tests/conftest.py:1336: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+agent/moa_loop.py:23: in <module>
+    from agent.auxiliary_client import call_llm
+agent/auxiliary_client.py:127: in <module>
+    from agent.auxiliary_unavailable import (
+agent/auxiliary_unavailable.py:17: in <module>
+    from hermes_time import safe_strftime
+hermes_time.py:15: in <module>
+    from zoneinfo import ZoneInfo
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/__init__.py:10: in <module>
+    from . import _tzpath
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/_tzpath.py:2: in <module>
+    import sysconfig
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:192: in <module>
+    _PROJECT_BASE = os.path.dirname(_safe_realpath(sys.executable))
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:187: in _safe_realpath
+    return realpath(path)
+           ^^^^^^^^^^^^^^
+tests/home_io_guard.py:167: in guarded
+    self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
+tests/home_io_guard.py:107: in check
+    self.refuse(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
+
+    @staticmethod
+    def refuse(value):
+>       raise AssertionError(
+            f"TEST BUG: file I/O against the REAL hermes home: {value}\n"
+            "Use the isolated HERMES_HOME or a temporary fixture instead."
+        )
+E       AssertionError: TEST BUG: file I/O against the REAL hermes home: /home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu
+E       Use the isolated HERMES_HOME or a temporary fixture instead.
+
+tests/home_io_guard.py:140: AssertionError
+_ ERROR at setup of test_delivery_is_idempotent_fenced_and_permanent[cancelled] _
+
+    @pytest.fixture(autouse=True)
+    def _moa_caches_isolated():
+        """Clear module-level MoA cold-start caches before each test.
+    
+        ``agent.moa_loop`` caches the resolved preset and each slot's provider
+        runtime at module level (keyed on config mtime / provider+model) so the
+        tool loop doesn't re-resolve them serially on every iteration. Tests
+        monkeypatch resolvers and config paths, so a cache entry leaked from one
+        test would poison the next. Clear both around every test.
+        """
+>       import agent.moa_loop as moa
+
+tests/conftest.py:1336: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+agent/moa_loop.py:23: in <module>
+    from agent.auxiliary_client import call_llm
+agent/auxiliary_client.py:127: in <module>
+    from agent.auxiliary_unavailable import (
+agent/auxiliary_unavailable.py:17: in <module>
+    from hermes_time import safe_strftime
+hermes_time.py:15: in <module>
+    from zoneinfo import ZoneInfo
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/__init__.py:10: in <module>
+    from . import _tzpath
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/_tzpath.py:2: in <module>
+    import sysconfig
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:192: in <module>
+    _PROJECT_BASE = os.path.dirname(_safe_realpath(sys.executable))
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:187: in _safe_realpath
+    return realpath(path)
+           ^^^^^^^^^^^^^^
+tests/home_io_guard.py:167: in guarded
+    self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
+tests/home_io_guard.py:107: in check
+    self.refuse(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
+
+    @staticmethod
+    def refuse(value):
+>       raise AssertionError(
+            f"TEST BUG: file I/O against the REAL hermes home: {value}\n"
+            "Use the isolated HERMES_HOME or a temporary fixture instead."
+        )
+E       AssertionError: TEST BUG: file I/O against the REAL hermes home: /home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu
+E       Use the isolated HERMES_HOME or a temporary fixture instead.
+
+tests/home_io_guard.py:140: AssertionError
+_ ERROR at setup of test_cancel_queued_delivery_fences_claim_and_preserves_terminal_result _
+
+    @pytest.fixture(autouse=True)
+    def _moa_caches_isolated():
+        """Clear module-level MoA cold-start caches before each test.
+    
+        ``agent.moa_loop`` caches the resolved preset and each slot's provider
+        runtime at module level (keyed on config mtime / provider+model) so the
+        tool loop doesn't re-resolve them serially on every iteration. Tests
+        monkeypatch resolvers and config paths, so a cache entry leaked from one
+        test would poison the next. Clear both around every test.
+        """
+>       import agent.moa_loop as moa
+
+tests/conftest.py:1336: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+agent/moa_loop.py:23: in <module>
+    from agent.auxiliary_client import call_llm
+agent/auxiliary_client.py:127: in <module>
+    from agent.auxiliary_unavailable import (
+agent/auxiliary_unavailable.py:17: in <module>
+    from hermes_time import safe_strftime
+hermes_time.py:15: in <module>
+    from zoneinfo import ZoneInfo
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/__init__.py:10: in <module>
+    from . import _tzpath
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/_tzpath.py:2: in <module>
+    import sysconfig
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:192: in <module>
+    _PROJECT_BASE = os.path.dirname(_safe_realpath(sys.executable))
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:187: in _safe_realpath
+    return realpath(path)
+           ^^^^^^^^^^^^^^
+tests/home_io_guard.py:167: in guarded
+    self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
+tests/home_io_guard.py:107: in check
+    self.refuse(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
+
+    @staticmethod
+    def refuse(value):
+>       raise AssertionError(
+            f"TEST BUG: file I/O against the REAL hermes home: {value}\n"
+            "Use the isolated HERMES_HOME or a temporary fixture instead."
+        )
+E       AssertionError: TEST BUG: file I/O against the REAL hermes home: /home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu
+E       Use the isolated HERMES_HOME or a temporary fixture instead.
+
+tests/home_io_guard.py:140: AssertionError
+____ ERROR at setup of test_live_dm_bom_readers_preserve_pinned_intent[new] ____
+
+    @pytest.fixture(autouse=True)
+    def _moa_caches_isolated():
+        """Clear module-level MoA cold-start caches before each test.
+    
+        ``agent.moa_loop`` caches the resolved preset and each slot's provider
+        runtime at module level (keyed on config mtime / provider+model) so the
+        tool loop doesn't re-resolve them serially on every iteration. Tests
+        monkeypatch resolvers and config paths, so a cache entry leaked from one
+        test would poison the next. Clear both around every test.
+        """
+>       import agent.moa_loop as moa
+
+tests/conftest.py:1336: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+agent/moa_loop.py:23: in <module>
+    from agent.auxiliary_client import call_llm
+agent/auxiliary_client.py:127: in <module>
+    from agent.auxiliary_unavailable import (
+agent/auxiliary_unavailable.py:17: in <module>
+    from hermes_time import safe_strftime
+hermes_time.py:15: in <module>
+    from zoneinfo import ZoneInfo
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/__init__.py:10: in <module>
+    from . import _tzpath
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/_tzpath.py:2: in <module>
+    import sysconfig
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:192: in <module>
+    _PROJECT_BASE = os.path.dirname(_safe_realpath(sys.executable))
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:187: in _safe_realpath
+    return realpath(path)
+           ^^^^^^^^^^^^^^
+tests/home_io_guard.py:167: in guarded
+    self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
+tests/home_io_guard.py:107: in check
+    self.refuse(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
+
+    @staticmethod
+    def refuse(value):
+>       raise AssertionError(
+            f"TEST BUG: file I/O against the REAL hermes home: {value}\n"
+            "Use the isolated HERMES_HOME or a temporary fixture instead."
+        )
+E       AssertionError: TEST BUG: file I/O against the REAL hermes home: /home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu
+E       Use the isolated HERMES_HOME or a temporary fixture instead.
+
+tests/home_io_guard.py:140: AssertionError
+_ ERROR at setup of test_live_dm_bom_readers_preserve_pinned_intent[existing] __
+
+    @pytest.fixture(autouse=True)
+    def _moa_caches_isolated():
+        """Clear module-level MoA cold-start caches before each test.
+    
+        ``agent.moa_loop`` caches the resolved preset and each slot's provider
+        runtime at module level (keyed on config mtime / provider+model) so the
+        tool loop doesn't re-resolve them serially on every iteration. Tests
+        monkeypatch resolvers and config paths, so a cache entry leaked from one
+        test would poison the next. Clear both around every test.
+        """
+>       import agent.moa_loop as moa
+
+tests/conftest.py:1336: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+agent/moa_loop.py:23: in <module>
+    from agent.auxiliary_client import call_llm
+agent/auxiliary_client.py:127: in <module>
+    from agent.auxiliary_unavailable import (
+agent/auxiliary_unavailable.py:17: in <module>
+    from hermes_time import safe_strftime
+hermes_time.py:15: in <module>
+    from zoneinfo import ZoneInfo
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/__init__.py:10: in <module>
+    from . import _tzpath
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/_tzpath.py:2: in <module>
+    import sysconfig
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:192: in <module>
+    _PROJECT_BASE = os.path.dirname(_safe_realpath(sys.executable))
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:187: in _safe_realpath
+    return realpath(path)
+           ^^^^^^^^^^^^^^
+tests/home_io_guard.py:167: in guarded
+    self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
+tests/home_io_guard.py:107: in check
+    self.refuse(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
+
+    @staticmethod
+    def refuse(value):
+>       raise AssertionError(
+            f"TEST BUG: file I/O against the REAL hermes home: {value}\n"
+            "Use the isolated HERMES_HOME or a temporary fixture instead."
+        )
+E       AssertionError: TEST BUG: file I/O against the REAL hermes home: /home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu
+E       Use the isolated HERMES_HOME or a temporary fixture instead.
+
+tests/home_io_guard.py:140: AssertionError
+___ ERROR at setup of test_live_dm_bom_readers_preserve_pinned_intent[raced] ___
+
+    @pytest.fixture(autouse=True)
+    def _moa_caches_isolated():
+        """Clear module-level MoA cold-start caches before each test.
+    
+        ``agent.moa_loop`` caches the resolved preset and each slot's provider
+        runtime at module level (keyed on config mtime / provider+model) so the
+        tool loop doesn't re-resolve them serially on every iteration. Tests
+        monkeypatch resolvers and config paths, so a cache entry leaked from one
+        test would poison the next. Clear both around every test.
+        """
+>       import agent.moa_loop as moa
+
+tests/conftest.py:1336: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+agent/moa_loop.py:23: in <module>
+    from agent.auxiliary_client import call_llm
+agent/auxiliary_client.py:127: in <module>
+    from agent.auxiliary_unavailable import (
+agent/auxiliary_unavailable.py:17: in <module>
+    from hermes_time import safe_strftime
+hermes_time.py:15: in <module>
+    from zoneinfo import ZoneInfo
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/__init__.py:10: in <module>
+    from . import _tzpath
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/_tzpath.py:2: in <module>
+    import sysconfig
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:192: in <module>
+    _PROJECT_BASE = os.path.dirname(_safe_realpath(sys.executable))
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:187: in _safe_realpath
+    return realpath(path)
+           ^^^^^^^^^^^^^^
+tests/home_io_guard.py:167: in guarded
+    self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
+tests/home_io_guard.py:107: in check
+    self.refuse(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
+
+    @staticmethod
+    def refuse(value):
+>       raise AssertionError(
+            f"TEST BUG: file I/O against the REAL hermes home: {value}\n"
+            "Use the isolated HERMES_HOME or a temporary fixture instead."
+        )
+E       AssertionError: TEST BUG: file I/O against the REAL hermes home: /home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu
+E       Use the isolated HERMES_HOME or a temporary fixture instead.
+
+tests/home_io_guard.py:140: AssertionError
+_____________ ERROR at setup of test_fifo_survives_clock_rollback ______________
+
+    @pytest.fixture(autouse=True)
+    def _moa_caches_isolated():
+        """Clear module-level MoA cold-start caches before each test.
+    
+        ``agent.moa_loop`` caches the resolved preset and each slot's provider
+        runtime at module level (keyed on config mtime / provider+model) so the
+        tool loop doesn't re-resolve them serially on every iteration. Tests
+        monkeypatch resolvers and config paths, so a cache entry leaked from one
+        test would poison the next. Clear both around every test.
+        """
+>       import agent.moa_loop as moa
+
+tests/conftest.py:1336: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+agent/moa_loop.py:23: in <module>
+    from agent.auxiliary_client import call_llm
+agent/auxiliary_client.py:127: in <module>
+    from agent.auxiliary_unavailable import (
+agent/auxiliary_unavailable.py:17: in <module>
+    from hermes_time import safe_strftime
+hermes_time.py:15: in <module>
+    from zoneinfo import ZoneInfo
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/__init__.py:10: in <module>
+    from . import _tzpath
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/_tzpath.py:2: in <module>
+    import sysconfig
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:192: in <module>
+    _PROJECT_BASE = os.path.dirname(_safe_realpath(sys.executable))
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:187: in _safe_realpath
+    return realpath(path)
+           ^^^^^^^^^^^^^^
+tests/home_io_guard.py:167: in guarded
+    self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
+tests/home_io_guard.py:107: in check
+    self.refuse(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
+
+    @staticmethod
+    def refuse(value):
+>       raise AssertionError(
+            f"TEST BUG: file I/O against the REAL hermes home: {value}\n"
+            "Use the isolated HERMES_HOME or a temporary fixture instead."
+        )
+E       AssertionError: TEST BUG: file I/O against the REAL hermes home: /home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu
+E       Use the isolated HERMES_HOME or a temporary fixture instead.
+
+tests/home_io_guard.py:140: AssertionError
+_ ERROR at setup of test_only_canonical_capable_owner_receives_across_compression[True] _
+
+    @pytest.fixture(autouse=True)
+    def _moa_caches_isolated():
+        """Clear module-level MoA cold-start caches before each test.
+    
+        ``agent.moa_loop`` caches the resolved preset and each slot's provider
+        runtime at module level (keyed on config mtime / provider+model) so the
+        tool loop doesn't re-resolve them serially on every iteration. Tests
+        monkeypatch resolvers and config paths, so a cache entry leaked from one
+        test would poison the next. Clear both around every test.
+        """
+>       import agent.moa_loop as moa
+
+tests/conftest.py:1336: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+agent/moa_loop.py:23: in <module>
+    from agent.auxiliary_client import call_llm
+agent/auxiliary_client.py:127: in <module>
+    from agent.auxiliary_unavailable import (
+agent/auxiliary_unavailable.py:17: in <module>
+    from hermes_time import safe_strftime
+hermes_time.py:15: in <module>
+    from zoneinfo import ZoneInfo
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/__init__.py:10: in <module>
+    from . import _tzpath
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/_tzpath.py:2: in <module>
+    import sysconfig
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:192: in <module>
+    _PROJECT_BASE = os.path.dirname(_safe_realpath(sys.executable))
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:187: in _safe_realpath
+    return realpath(path)
+           ^^^^^^^^^^^^^^
+tests/home_io_guard.py:167: in guarded
+    self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
+tests/home_io_guard.py:107: in check
+    self.refuse(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
+
+    @staticmethod
+    def refuse(value):
+>       raise AssertionError(
+            f"TEST BUG: file I/O against the REAL hermes home: {value}\n"
+            "Use the isolated HERMES_HOME or a temporary fixture instead."
+        )
+E       AssertionError: TEST BUG: file I/O against the REAL hermes home: /home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu
+E       Use the isolated HERMES_HOME or a temporary fixture instead.
+
+tests/home_io_guard.py:140: AssertionError
+_ ERROR at setup of test_only_canonical_capable_owner_receives_across_compression[False] _
+
+    @pytest.fixture(autouse=True)
+    def _moa_caches_isolated():
+        """Clear module-level MoA cold-start caches before each test.
+    
+        ``agent.moa_loop`` caches the resolved preset and each slot's provider
+        runtime at module level (keyed on config mtime / provider+model) so the
+        tool loop doesn't re-resolve them serially on every iteration. Tests
+        monkeypatch resolvers and config paths, so a cache entry leaked from one
+        test would poison the next. Clear both around every test.
+        """
+>       import agent.moa_loop as moa
+
+tests/conftest.py:1336: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+agent/moa_loop.py:23: in <module>
+    from agent.auxiliary_client import call_llm
+agent/auxiliary_client.py:127: in <module>
+    from agent.auxiliary_unavailable import (
+agent/auxiliary_unavailable.py:17: in <module>
+    from hermes_time import safe_strftime
+hermes_time.py:15: in <module>
+    from zoneinfo import ZoneInfo
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/__init__.py:10: in <module>
+    from . import _tzpath
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/_tzpath.py:2: in <module>
+    import sysconfig
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:192: in <module>
+    _PROJECT_BASE = os.path.dirname(_safe_realpath(sys.executable))
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:187: in _safe_realpath
+    return realpath(path)
+           ^^^^^^^^^^^^^^
+tests/home_io_guard.py:167: in guarded
+    self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
+tests/home_io_guard.py:107: in check
+    self.refuse(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
+
+    @staticmethod
+    def refuse(value):
+>       raise AssertionError(
+            f"TEST BUG: file I/O against the REAL hermes home: {value}\n"
+            "Use the isolated HERMES_HOME or a temporary fixture instead."
+        )
+E       AssertionError: TEST BUG: file I/O against the REAL hermes home: /home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu
+E       Use the isolated HERMES_HOME or a temporary fixture instead.
+
+tests/home_io_guard.py:140: AssertionError
+_ ERROR at setup of test_delivery_keeps_the_sender_and_refuses_a_different_one_under_the_same_id _
+
+    @pytest.fixture(autouse=True)
+    def _moa_caches_isolated():
+        """Clear module-level MoA cold-start caches before each test.
+    
+        ``agent.moa_loop`` caches the resolved preset and each slot's provider
+        runtime at module level (keyed on config mtime / provider+model) so the
+        tool loop doesn't re-resolve them serially on every iteration. Tests
+        monkeypatch resolvers and config paths, so a cache entry leaked from one
+        test would poison the next. Clear both around every test.
+        """
+>       import agent.moa_loop as moa
+
+tests/conftest.py:1336: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+agent/moa_loop.py:23: in <module>
+    from agent.auxiliary_client import call_llm
+agent/auxiliary_client.py:127: in <module>
+    from agent.auxiliary_unavailable import (
+agent/auxiliary_unavailable.py:17: in <module>
+    from hermes_time import safe_strftime
+hermes_time.py:15: in <module>
+    from zoneinfo import ZoneInfo
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/__init__.py:10: in <module>
+    from . import _tzpath
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/_tzpath.py:2: in <module>
+    import sysconfig
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:192: in <module>
+    _PROJECT_BASE = os.path.dirname(_safe_realpath(sys.executable))
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:187: in _safe_realpath
+    return realpath(path)
+           ^^^^^^^^^^^^^^
+tests/home_io_guard.py:167: in guarded
+    self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
+tests/home_io_guard.py:107: in check
+    self.refuse(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
+
+    @staticmethod
+    def refuse(value):
+>       raise AssertionError(
+            f"TEST BUG: file I/O against the REAL hermes home: {value}\n"
+            "Use the isolated HERMES_HOME or a temporary fixture instead."
+        )
+E       AssertionError: TEST BUG: file I/O against the REAL hermes home: /home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu
+E       Use the isolated HERMES_HOME or a temporary fixture instead.
+
+tests/home_io_guard.py:140: AssertionError
+______ ERROR at setup of test_unreadable_ticket_does_not_wedge_bulk_scans ______
+
+    @pytest.fixture(autouse=True)
+    def _moa_caches_isolated():
+        """Clear module-level MoA cold-start caches before each test.
+    
+        ``agent.moa_loop`` caches the resolved preset and each slot's provider
+        runtime at module level (keyed on config mtime / provider+model) so the
+        tool loop doesn't re-resolve them serially on every iteration. Tests
+        monkeypatch resolvers and config paths, so a cache entry leaked from one
+        test would poison the next. Clear both around every test.
+        """
+>       import agent.moa_loop as moa
+
+tests/conftest.py:1336: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+agent/moa_loop.py:23: in <module>
+    from agent.auxiliary_client import call_llm
+agent/auxiliary_client.py:127: in <module>
+    from agent.auxiliary_unavailable import (
+agent/auxiliary_unavailable.py:17: in <module>
+    from hermes_time import safe_strftime
+hermes_time.py:15: in <module>
+    from zoneinfo import ZoneInfo
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/__init__.py:10: in <module>
+    from . import _tzpath
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/_tzpath.py:2: in <module>
+    import sysconfig
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:192: in <module>
+    _PROJECT_BASE = os.path.dirname(_safe_realpath(sys.executable))
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:187: in _safe_realpath
+    return realpath(path)
+           ^^^^^^^^^^^^^^
+tests/home_io_guard.py:167: in guarded
+    self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
+tests/home_io_guard.py:107: in check
+    self.refuse(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
+
+    @staticmethod
+    def refuse(value):
+>       raise AssertionError(
+            f"TEST BUG: file I/O against the REAL hermes home: {value}\n"
+            "Use the isolated HERMES_HOME or a temporary fixture instead."
+        )
+E       AssertionError: TEST BUG: file I/O against the REAL hermes home: /home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu
+E       Use the isolated HERMES_HOME or a temporary fixture instead.
+
+tests/home_io_guard.py:140: AssertionError
+__ ERROR at setup of test_unreadable_ticket_keeps_exact_id_reads_fail_closed ___
+
+    @pytest.fixture(autouse=True)
+    def _moa_caches_isolated():
+        """Clear module-level MoA cold-start caches before each test.
+    
+        ``agent.moa_loop`` caches the resolved preset and each slot's provider
+        runtime at module level (keyed on config mtime / provider+model) so the
+        tool loop doesn't re-resolve them serially on every iteration. Tests
+        monkeypatch resolvers and config paths, so a cache entry leaked from one
+        test would poison the next. Clear both around every test.
+        """
+>       import agent.moa_loop as moa
+
+tests/conftest.py:1336: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+agent/moa_loop.py:23: in <module>
+    from agent.auxiliary_client import call_llm
+agent/auxiliary_client.py:127: in <module>
+    from agent.auxiliary_unavailable import (
+agent/auxiliary_unavailable.py:17: in <module>
+    from hermes_time import safe_strftime
+hermes_time.py:15: in <module>
+    from zoneinfo import ZoneInfo
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/__init__.py:10: in <module>
+    from . import _tzpath
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/_tzpath.py:2: in <module>
+    import sysconfig
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:192: in <module>
+    _PROJECT_BASE = os.path.dirname(_safe_realpath(sys.executable))
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:187: in _safe_realpath
+    return realpath(path)
+           ^^^^^^^^^^^^^^
+tests/home_io_guard.py:167: in guarded
+    self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
+tests/home_io_guard.py:107: in check
+    self.refuse(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
+
+    @staticmethod
+    def refuse(value):
+>       raise AssertionError(
+            f"TEST BUG: file I/O against the REAL hermes home: {value}\n"
+            "Use the isolated HERMES_HOME or a temporary fixture instead."
+        )
+E       AssertionError: TEST BUG: file I/O against the REAL hermes home: /home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu
+E       Use the isolated HERMES_HOME or a temporary fixture instead.
+
+tests/home_io_guard.py:140: AssertionError
+_ ERROR at setup of test_non_dict_ticket_is_skipped_by_scans_and_fails_exact_id_reads_closed _
+
+    @pytest.fixture(autouse=True)
+    def _moa_caches_isolated():
+        """Clear module-level MoA cold-start caches before each test.
+    
+        ``agent.moa_loop`` caches the resolved preset and each slot's provider
+        runtime at module level (keyed on config mtime / provider+model) so the
+        tool loop doesn't re-resolve them serially on every iteration. Tests
+        monkeypatch resolvers and config paths, so a cache entry leaked from one
+        test would poison the next. Clear both around every test.
+        """
+>       import agent.moa_loop as moa
+
+tests/conftest.py:1336: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+agent/moa_loop.py:23: in <module>
+    from agent.auxiliary_client import call_llm
+agent/auxiliary_client.py:127: in <module>
+    from agent.auxiliary_unavailable import (
+agent/auxiliary_unavailable.py:17: in <module>
+    from hermes_time import safe_strftime
+hermes_time.py:15: in <module>
+    from zoneinfo import ZoneInfo
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/__init__.py:10: in <module>
+    from . import _tzpath
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/_tzpath.py:2: in <module>
+    import sysconfig
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:192: in <module>
+    _PROJECT_BASE = os.path.dirname(_safe_realpath(sys.executable))
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:187: in _safe_realpath
+    return realpath(path)
+           ^^^^^^^^^^^^^^
+tests/home_io_guard.py:167: in guarded
+    self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
+tests/home_io_guard.py:107: in check
+    self.refuse(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
+
+    @staticmethod
+    def refuse(value):
+>       raise AssertionError(
+            f"TEST BUG: file I/O against the REAL hermes home: {value}\n"
+            "Use the isolated HERMES_HOME or a temporary fixture instead."
+        )
+E       AssertionError: TEST BUG: file I/O against the REAL hermes home: /home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu
+E       Use the isolated HERMES_HOME or a temporary fixture instead.
+
+tests/home_io_guard.py:140: AssertionError
+____ ERROR at setup of test_schema_damaged_ticket_does_not_wedge_bulk_scans ____
+
+    @pytest.fixture(autouse=True)
+    def _moa_caches_isolated():
+        """Clear module-level MoA cold-start caches before each test.
+    
+        ``agent.moa_loop`` caches the resolved preset and each slot's provider
+        runtime at module level (keyed on config mtime / provider+model) so the
+        tool loop doesn't re-resolve them serially on every iteration. Tests
+        monkeypatch resolvers and config paths, so a cache entry leaked from one
+        test would poison the next. Clear both around every test.
+        """
+>       import agent.moa_loop as moa
+
+tests/conftest.py:1336: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+agent/moa_loop.py:23: in <module>
+    from agent.auxiliary_client import call_llm
+agent/auxiliary_client.py:127: in <module>
+    from agent.auxiliary_unavailable import (
+agent/auxiliary_unavailable.py:17: in <module>
+    from hermes_time import safe_strftime
+hermes_time.py:15: in <module>
+    from zoneinfo import ZoneInfo
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/__init__.py:10: in <module>
+    from . import _tzpath
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/zoneinfo/_tzpath.py:2: in <module>
+    import sysconfig
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:192: in <module>
+    _PROJECT_BASE = os.path.dirname(_safe_realpath(sys.executable))
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/sysconfig.py:187: in _safe_realpath
+    return realpath(path)
+           ^^^^^^^^^^^^^^
+tests/home_io_guard.py:167: in guarded
+    self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
+tests/home_io_guard.py:107: in check
+    self.refuse(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
+
+    @staticmethod
+    def refuse(value):
+>       raise AssertionError(
+            f"TEST BUG: file I/O against the REAL hermes home: {value}\n"
+            "Use the isolated HERMES_HOME or a temporary fixture instead."
+        )
+E       AssertionError: TEST BUG: file I/O against the REAL hermes home: /home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu
+E       Use the isolated HERMES_HOME or a temporary fixture instead.
+
+tests/home_io_guard.py:140: AssertionError
+=========================== short test summary info ============================
+ERROR tests/tools/test_bot_live_owner_delivery.py::test_delivery_is_idempotent_fenced_and_permanent[settled]
+ERROR tests/tools/test_bot_live_owner_delivery.py::test_delivery_is_idempotent_fenced_and_permanent[failed]
+ERROR tests/tools/test_bot_live_owner_delivery.py::test_delivery_is_idempotent_fenced_and_permanent[cancelled]
+ERROR tests/tools/test_bot_live_owner_delivery.py::test_cancel_queued_delivery_fences_claim_and_preserves_terminal_result
+ERROR tests/tools/test_bot_live_owner_delivery.py::test_live_dm_bom_readers_preserve_pinned_intent[new]
+ERROR tests/tools/test_bot_live_owner_delivery.py::test_live_dm_bom_readers_preserve_pinned_intent[existing]
+ERROR tests/tools/test_bot_live_owner_delivery.py::test_live_dm_bom_readers_preserve_pinned_intent[raced]
+ERROR tests/tools/test_bot_live_owner_delivery.py::test_fifo_survives_clock_rollback
+ERROR tests/tools/test_bot_live_owner_delivery.py::test_only_canonical_capable_owner_receives_across_compression[True]
+ERROR tests/tools/test_bot_live_owner_delivery.py::test_only_canonical_capable_owner_receives_across_compression[False]
+ERROR tests/tools/test_bot_live_owner_delivery.py::test_delivery_keeps_the_sender_and_refuses_a_different_one_under_the_same_id
+ERROR tests/tools/test_bot_live_owner_delivery.py::test_unreadable_ticket_does_not_wedge_bulk_scans
+ERROR tests/tools/test_bot_live_owner_delivery.py::test_unreadable_ticket_keeps_exact_id_reads_fail_closed
+ERROR tests/tools/test_bot_live_owner_delivery.py::test_non_dict_ticket_is_skipped_by_scans_and_fails_exact_id_reads_closed
+ERROR tests/tools/test_bot_live_owner_delivery.py::test_schema_damaged_ticket_does_not_wedge_bulk_scans
+============================== 15 errors in 2.54s ==============================
+
+=== 1 file with test failures (1 test failed) ===
+  tests/tui_gateway/test_delivery_transition_integration.py  (1 test failed)
+=== 1 file where no tests ran (collection/import error, timeout before collection, etc.) ===
+  tests/tools/test_bot_live_owner_delivery.py

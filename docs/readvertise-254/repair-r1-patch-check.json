@@ -1,0 +1,10 @@
+{
+  "runtime_source_commit": "63ac68b5e0ed9bca35715bc1d04918c6c8c94075",
+  "captured_baseline_commit": "5c52da9f5ca2c73d04bf3b43113fd5f427b3757b",
+  "patch_sha256": "2c598e447e417088c29fe196d23c1d94c8fa5fc0deda56c640e2bb678009f5b4",
+  "current_live_HEAD": "1e0c7730d791f5ce855c5c78935cfea6fb1e43a9",
+  "current_live_apply_check": "PASS (check only; not applied)",
+  "forward_exact_bytes": "PASS",
+  "reverse_exact_bytes": "PASS",
+  "formatting": "Empty context lines use bare newline instead of space-newline; git apply forward/reverse and source exact bytes verified"
+}

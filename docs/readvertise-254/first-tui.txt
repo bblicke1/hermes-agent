@@ -1,73 +1,40 @@
-
- ──────────────────────────────────── Hermes Agent ────────────────────────────────────
-                     Nous Research · Messenger of the Digital Gods
- ──────────────────────────────────────────────────────────────────────────────────────
-
- ╭──────────────────────────────────────────────────────────────────────────────────────╮
- │                                                                                      │
- │  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⡀⠀⣀⣀⠀⢀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀           Hermes Agent v0.21.6 (2026.9.24)           │
- │  ⠀⠀⠀⠀⠀⠀⢀⣠⣴⣾⣿⣿⣇⠸⣿⣿⠇⣸⣿⣿⣷⣦⣄⡀⠀⠀⠀⠀⠀⠀                                                      │
- │  ⠀⢀⣠⣴⣶⠿⠋⣩⡿⣿⡿⠻⣿⡇⢠⡄⢸⣿⠟⢿⣿⢿⣍⠙⠿⣶⣦⣄⡀⠀                                                      │
- │  ⠀⠀⠉⠉⠁⠶⠟⠋⠀⠉⠀⢀⣈⣁⡈⢁⣈⣁⡀⠀⠉⠀⠙⠻⠶⠈⠉⠉⠀⠀      ▾ Available Tools                               │
- │  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣴⣿⡿⠛⢁⡈⠛⢿⣿⣦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀      other: tool_call, tool_describe, …+1            │
- │  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠿⣿⣦⣤⣈⠁⢠⣴⣿⠿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀      terminal: terminal                              │
- │  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠻⢿⣿⣦⡉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀                                                      │
- │  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⢷⣦⣈⠛⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀      ▸ Available Skills (0)                          │
- │  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣴⠦⠈⠙⠿⣦⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀                                                      │
- │  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⣿⣤⡈⠁⢤⣿⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀      ▸ System Prompt — 4,762 chars                   │
- │  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠷⠄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀      4 tools · 0 skills · /help for commands         │
- │  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⠑⢶⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀                                                      │
- │  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠁⢰⡆⠈⡿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀                                                      │
- │  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠳⠈⣡⠞⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀                                                      │
- │  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀                                                      │
- │  gb10-balanced · Nous Research                                                       │
- │  /tmp/hermes-readvertise-254-qt_n4…                                                  │
- │  Session: 7a3d4d21                                                                   │
- │                                                                                      │
- ╰──────────────────────────────────────────────────────────────────────────────────────╯
-
-    ◈ [BOT proof-254]
-    Read /tmp/hermes-readvertise-254-qt_n4i2u/run-state/mail/seat-test-254/20261012T20163
-    8147309Z-proof-d2a473dcf4b84f7d8b5e2084438acee6.json; then run `/usr/bin/python3
-    /home/brad/.hermes/scripts/agent_mail.py --root
-    /tmp/hermes-readvertise-254-qt_n4i2u/run-state/mail ack
-    /tmp/hermes-readvertise-254-qt_n4i2u/run-state/mail/seat-test-254/20261012T2016381473
-    09Z-proof-d2a473dcf4b84f7d8b5e2084438acee6.json`. Follow the envelope's authorized
-    work order.
-
- └─ ▾ Tool calls (2)
-   ├─ ● Terminal("cat /tmp/hermes-readvertise-254-qt_n4i2u/run-state/mail/seat-te…")
-      (0.0s)
-   └─ ● Terminal("/usr/bin/python3 /home/brad/.hermes/scripts/agent_mail.py --roo…")
-      (0.1s)
-
- ┊  G254-FIRST-ACK
+                                                                                                                       │
+ ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮  │
+ │                                                                                                                  │  │
+ │  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⡀⠀⣀⣀⠀⢀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀                         Hermes Agent v0.21.6 (2026.9.24)                         │  │
+ │  ⠀⠀⠀⠀⠀⠀⢀⣠⣴⣾⣿⣿⣇⠸⣿⣿⠇⣸⣿⣿⣷⣦⣄⡀⠀⠀⠀⠀⠀⠀                                                                                  │  │
+ │  ⠀⢀⣠⣴⣶⠿⠋⣩⡿⣿⡿⠻⣿⡇⢠⡄⢸⣿⠟⢿⣿⢿⣍⠙⠿⣶⣦⣄⡀⠀                                                                                  │  │
+ │  ⠀⠀⠉⠉⠁⠶⠟⠋⠀⠉⠀⢀⣈⣁⡈⢁⣈⣁⡀⠀⠉⠀⠙⠻⠶⠈⠉⠉⠀⠀      ▾ Available Tools                                                           │  │
+ │  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣴⣿⡿⠛⢁⡈⠛⢿⣿⣦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀      other: tool_call, tool_describe, tool_search                                │  ┃
+ │  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠿⣿⣦⣤⣈⠁⢠⣴⣿⠿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀      terminal: terminal                                                          │  ┃
+ │  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠻⢿⣿⣦⡉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀                                                                                  │  ┃
+ │  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⢷⣦⣈⠛⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀      ▸ Available Skills (0)                                                      │  ┃
+ │  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣴⠦⠈⠙⠿⣦⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀                                                                                  │  ┃
+ │  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⣿⣤⡈⠁⢤⣿⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀      ▸ System Prompt — 4,762 chars                                               │  ┃
+ │  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠷⠄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀      4 tools · 0 skills · /help for commands                                     │  ┃
+ │  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⠑⢶⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀                                                                                  │  ┃
+ │  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠁⢰⡆⠈⡿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀                                                                                  │  ┃
+ │  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠳⠈⣡⠞⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀                                                                                  │  ┃
+ │  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀                                                                                  │  ┃
+ │  gb10-balanced · Nous Research                                                                                   │  ┃
+ │  /tmp/hermes-readvertise-254-0z_2b…                                                                              │  ┃
+ │  Session: d2161778                                                                                               │  ┃
+ │                                                                                                                  │  ┃
+ ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯  ┃
+                                                                                                                       ┃
+    ◈ [BOT proof-254]                                                                                                  ┃
+    Read /tmp/hermes-readvertise-254-0z_2byjh/run-state/mail/seat-test-254/20261012T210207153778Z-proof-799d3dc76ac94  ┃
+    da69a64a60be8fa4ae2.json; then run `/usr/bin/python3 /home/brad/.hermes/scripts/agent_mail.py --root               ┃
+    /tmp/hermes-readvertise-254-0z_2byjh/run-state/mail ack /tmp/hermes-readvertise-254-0z_2byjh/run-state/mail/seat-  ┃
+    test-254/20261012T210207153778Z-proof-799d3dc76ac94da69a64a60be8fa4ae2.json`. Follow the envelope's authorized     ┃
+    work order.                                                                                                        ┃
+                                                                                                                       ┃
+ └─ ▾ Tool calls (2)                                                                                                   ┃
+   ├─ ● Terminal("cat /tmp/hermes-readvertise-254-0z_2byjh/run-state/mail/seat-te…") (0.0s)                            ┃
+   └─ ● Terminal("/usr/bin/python3 /home/brad/.hermes/scripts/agent_mail.py --roo…") (0.1s)                            ┃
+                                                                                                                       ┃
+ ┊  G254-FIRST-ACK                                                                                                     ┃
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- ─ ready │ gb10 balanced none │ 3.7k/25 ─  Read /tmp/hermes-readvertise-254-qt_n4i2u/run-s…
+ ─ ready │ gb10 balanced none │ 3.7k/256k │ [░░░░░░░░░░]  │ ◎ 65% ─  Read /tmp/hermes-readvertise-254-0z_2byjh/run-st…
  seat-test-254 ❯
