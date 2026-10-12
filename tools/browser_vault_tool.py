@@ -61,10 +61,11 @@ def _eval_js(task_id: str, expression: str) -> dict[str, Any]:
     embed secret values — the fallback places the expression in subprocess
     argv. Use :func:`_eval_js_secret` for secret-bearing expressions.
     """
+    from tools.browser_use_targets import TargetError, is_target_key
     try:
         from tools.browser_supervisor import SUPERVISOR_REGISTRY
 
-        supervisor = SUPERVISOR_REGISTRY.get(task_id)
+        supervisor = _ensure_supervisor(task_id) if is_target_key(task_id) else SUPERVISOR_REGISTRY.get(task_id)
         if supervisor is not None:
             sup = supervisor.evaluate_runtime(expression)
             if sup.get("ok"):
@@ -72,13 +73,14 @@ def _eval_js(task_id: str, expression: str) -> dict[str, Any]:
             err = str(sup.get("error") or "")
             if "supervisor" not in err.lower():
                 return {"success": False, "error": err}
+    except TargetError as exc:
+        return exc.result()
     except ImportError:
         pass
     except Exception as exc:  # pragma: no cover — defensive
         logger.debug("vault fill: supervisor eval unavailable (%s)", exc)
 
-    from tools.browser_use_targets import bound_url
-    if bound_url(task_id) is not None:
+    if is_target_key(task_id):
         return {"success": False, "error_type": "target_unreachable", "error": "Named browser supervisor is unavailable."}
 
     from tools.browser_tool import _last_session_key
@@ -100,19 +102,19 @@ def _ensure_supervisor(task_id: str):
     Returns None when no endpoint is reachable; the fill then refuses rather than touching argv."""
     from tools.browser_supervisor import SUPERVISOR_REGISTRY
 
+    from tools.browser_use_targets import TargetError, is_target_key, validated_binding
+    from tools.browser_tool_cdp import _get_dialog_policy_config, _resolve_cdp_override
+    if is_target_key(task_id):
+        binding = validated_binding(task_id)
+        policy, timeout_s = _get_dialog_policy_config()
+        try:
+            return SUPERVISOR_REGISTRY.get_or_start(task_id=task_id, cdp_url=binding.identity,
+                                                   dialog_policy=policy, dialog_timeout_s=timeout_s)
+        except (RuntimeError, OSError, ValueError) as exc:
+            raise TargetError("target_unreachable", "The bound browser supervisor could not attach.") from exc
     supervisor = SUPERVISOR_REGISTRY.get(task_id)
     if supervisor is not None:
         return supervisor
-    from tools.browser_use_targets import bound_url
-    from tools.browser_tool_cdp import _get_dialog_policy_config, _resolve_cdp_override
-    cdp_url = bound_url(task_id)
-    if cdp_url:
-        policy, timeout_s = _get_dialog_policy_config()
-        try:
-            return SUPERVISOR_REGISTRY.get_or_start(task_id=task_id, cdp_url=_resolve_cdp_override(cdp_url),
-                                                   dialog_policy=policy, dialog_timeout_s=timeout_s)
-        except (RuntimeError, OSError, ValueError):
-            return None
     from tools.browser_tool import _last_session_key
     from tools.browser_tool_session import _run_browser_command
 
@@ -138,8 +140,11 @@ def _eval_js_secret(task_id: str, expression: str) -> dict[str, Any]:
     When no supervisor session is available the caller gets a typed refusal
     (``error_type='supervisor_required'``) and nothing is written.
     """
+    from tools.browser_use_targets import TargetError
     try:
         supervisor = _ensure_supervisor(task_id)
+    except TargetError as exc:
+        return exc.result()
     except Exception as exc:
         logger.debug("vault fill: supervisor unavailable (%s)", exc)
         supervisor = None
@@ -308,13 +313,13 @@ def browser_vault_save_login(label: str = "", task_id: Optional[str] = None, ses
     from agent.vault_store import get_vault_store
 
     from tools.browser_use_targets import vault_session
-    effective_task_id, error = vault_session(task_id, session)
+    supervisor_key, error = vault_session(task_id, session)
     if error:
         return json.dumps(error)
     # The supervisor's default page session is whatever tab it attached to first (on Browser Use that is
     # the daemon's blank tab); the login form lives in the tab with a password field, so focus that one.
-    _focus_bound_origin(effective_task_id, "", "login")
-    origin = _current_page_origin(effective_task_id)
+    _focus_bound_origin(supervisor_key, "", "login")
+    origin = _current_page_origin(supervisor_key)
     if not origin:
         return json.dumps({"success": False, "error": "Open the site's login page first; the login is saved for that page's origin."})
     prompt = get_save_login_prompt_callback()
@@ -337,7 +342,7 @@ def browser_vault_save_login(label: str = "", task_id: Optional[str] = None, ses
         return json.dumps({"success": False, "error_type": "save_failed", "error": str(exc)[:200]})
     finally:
         answer.clear()
-    filled = json.loads(browser_vault_fill(meta.id, task_id=effective_task_id))
+    filled = json.loads(browser_vault_fill(meta.id, task_id=task_id, **({"session": session} if session else {})))
     return json.dumps({"success": True, "handle": meta.id, "origin": origin, "identifier": identifier,
                        "identifier_type": id_type, "fill": filled,
                        "next": "Type the identifier into the username field if the form has one, then submit."},
@@ -359,17 +364,17 @@ def browser_vault_enter_code(handle: str = "", task_id: Optional[str] = None, se
     from agent.vault_login_classifier import LoginControl, build_fill_js, build_inspection_js, build_otp_fills, classify_otp_controls
 
     from tools.browser_use_targets import vault_session
-    effective_task_id, error = vault_session(task_id, session)
+    supervisor_key, error = vault_session(task_id, session)
     if error:
         return json.dumps(error)
-    _focus_bound_origin(effective_task_id, "", "otp")
-    origin = _current_page_origin(effective_task_id)
+    _focus_bound_origin(supervisor_key, "", "otp")
+    origin = _current_page_origin(supervisor_key)
     if not origin:
         return json.dumps({"success": False, "error": "No page with a code field is open."})
     site = origin.split("://", 1)[-1]
 
     nonce = secrets.token_hex(8)
-    inspect = _eval_js(effective_task_id, build_inspection_js(nonce))
+    inspect = _eval_js(supervisor_key, build_inspection_js(nonce))
     raw_controls = _parse_json_result(inspect.get("result")) if inspect.get("success") else None
     if isinstance(raw_controls, str):
         raw_controls = _parse_json_result(raw_controls)
@@ -402,7 +407,7 @@ def browser_vault_enter_code(handle: str = "", task_id: Optional[str] = None, se
 
     register_vault_redaction_value(code)
     fills = build_otp_fills(otp_controls, code)
-    result = _eval_js_secret(effective_task_id, build_fill_js(fills, expected_origin=origin, nonce=nonce))
+    result = _eval_js_secret(supervisor_key, build_fill_js(fills, expected_origin=origin, nonce=nonce))
     del code
     if not result.get("success"):
         return json.dumps({"success": False, "error": str(result.get("error") or "fill failed")[:200]})
@@ -447,7 +452,7 @@ def browser_vault_fill(handle: str, task_id: Optional[str] = None, session: str 
     from agent.vault_store import ADDRESS_FIELDS, PAYMENT_FIELDS, scrub_secret_from_text
 
     from tools.browser_use_targets import vault_session
-    effective_task_id, error = vault_session(task_id, session)
+    supervisor_key, error = vault_session(task_id, session)
     if error:
         return json.dumps(error)
     backend = backend_for_handle(handle)
@@ -486,10 +491,10 @@ def browser_vault_fill(handle: str, task_id: Optional[str] = None, session: str 
     allowed = list(meta.allowed_origins) or ([str(meta.origin)] if meta.origin else [])
     page_origin = None
     for candidate in allowed:
-        page_origin = _focus_bound_origin(effective_task_id, candidate, meta.kind)
+        page_origin = _focus_bound_origin(supervisor_key, candidate, meta.kind)
         if page_origin:
             break
-    page_origin = page_origin or _current_page_origin(effective_task_id)
+    page_origin = page_origin or _current_page_origin(supervisor_key)
     if not page_origin:
         return json.dumps(
             {"success": False, "error": "Could not determine the current page origin. Navigate to the login page first."}
@@ -509,11 +514,9 @@ def browser_vault_fill(handle: str, task_id: Optional[str] = None, session: str 
 
     # ── Inspect + classify page controls ────────────────────────────────────
     nonce = secrets.token_hex(8)  # binds this fill to THIS inspection's stamps
-    inspect = _eval_js(effective_task_id, build_inspection_js(nonce))
+    inspect = _eval_js(supervisor_key, build_inspection_js(nonce))
     if not inspect.get("success"):
-        return json.dumps(
-            {"success": False, "error": f"Could not inspect page inputs: {inspect.get('error', 'eval failed')}"}
-        )
+        return json.dumps(inspect)
     raw_controls = _parse_json_result(inspect.get("result"))
     if isinstance(raw_controls, str):
         raw_controls = _parse_json_result(raw_controls)
@@ -556,7 +559,7 @@ def browser_vault_fill(handle: str, task_id: Optional[str] = None, session: str 
 
     try:
         fill_result = _eval_js_secret(
-            effective_task_id, build_fill_js(fills, expected_origin=page_origin, nonce=nonce)
+            supervisor_key, build_fill_js(fills, expected_origin=page_origin, nonce=nonce)
         )
     except Exception as exc:
         # Strip any secret material from exception text before surfacing.
@@ -715,9 +718,9 @@ for _schema in (BROWSER_VAULT_FILL_SCHEMA, BROWSER_VAULT_ENTER_CODE_SCHEMA, BROW
 
 
 def _bot_desktop_browser_session(task_id: Optional[str]) -> bool:
-    from tools.browser_use_targets import desktop_binding
-    if desktop_binding(task_id):
-        return True
+    from tools.browser_use_targets import desktop_binding, is_target_key
+    if is_target_key(task_id):
+        return desktop_binding(task_id)
     from tools.browser_tool import _active_sessions, _last_session_key
     from tools.browser_tool_session import _shares_bot_desktop_browser
     return _shares_bot_desktop_browser(_active_sessions.get(_last_session_key(task_id or "default")) or {})
@@ -732,8 +735,8 @@ def _fenced_page_op(task_id: Optional[str], fn, session_name: str = "") -> str:
 
     from tools.browser_use_targets import desktop_binding, session_key
     session = _active_sessions.get(_last_session_key(task_id or "default")) or {}
-    if session_name and desktop_binding(session_key(session_name)):
-        session = {"features": {"local": True}}
+    if session_name:
+        session = {"features": {"local": desktop_binding(session_key(session_name))}}
     res = run_fenced(session, lambda: {"raw": fn()})
     return res["raw"] if "raw" in res else json.dumps(res)
 

@@ -924,15 +924,36 @@ Configure an allowlist in `config.yaml` to route a flow to a particular browser:
 browser:
   targets:
     observe: http://127.0.0.1:9341
+    bot_desktop:
+      url: http://127.0.0.1:9342
+      fenced: true
 ```
+
+Target entries accept a URL string or `{url, fenced}`. `fenced` defaults to
+`false`: the separate agent-only Brave profile on a desktop can be watched
+without sharing Hermes's Bot Desktop lease. Use `fenced: true` for a browser
+that must obey that lease; this blocks reads and actions when a human takes
+over Hermes's Bot Desktop. It does not establish a lease on a remote desktop.
+The implicit `default` target retains the default route's desktop provenance.
 
 Call `browser_exec` with `session="money"` and `target="observe"`. The first
 explicit target binds that named session to its configured CDP URL; subsequent
-calls can omit `target` and reuse the binding. Changing the target requires a
-new session name. `target="default"` binds the endpoint selected by the usual
+calls can omit `target` and reuse the binding. Changing the target requires
+releasing the binding or choosing a new session name. `target="default"` binds the endpoint selected by the usual
 browser configuration. Raw URLs and unlisted names are refused. An unreachable
 target returns `target_unreachable` and does not select a fallback browser.
 Bindings are scoped to the served profile and the running Hermes process.
+Only one session per process may own a target endpoint, including across
+profiles (`target_busy`). Config removal or changes refuse existing sessions
+with `target_revoked`. A changed CDP browser identity returns
+`target_identity_changed`; the connection uses the WebSocket endpoint pinned
+at bind time.
+
+Release with `browser_exec(session="money", release=True)` (no code required)
+before choosing a different target or rebinding after a browser restart.
+Release stops that session's supervisor and harness daemon and frees the
+endpoint for another session. Model session names starting with
+`hermes-target-` are reserved and refused.
 
 Pass the same `session="money"` to `browser_vault_fill`,
 `browser_vault_enter_code`, or `browser_vault_save_login` to use that browser's
