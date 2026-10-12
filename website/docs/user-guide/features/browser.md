@@ -915,3 +915,28 @@ If paid features aren't available on your plan, Hermes automatically falls back 
 - **Session timeout** — cloud sessions expire based on your provider's plan settings
 - **Cost** — cloud sessions consume provider credits; sessions are automatically cleaned up when the conversation ends or after inactivity. Use `/browser connect` for free local browsing.
 - **No file downloads** — cannot download files from the browser
+
+### Named CDP targets for Browser Use
+
+Configure an allowlist in `config.yaml` to route a flow to a particular browser:
+
+```yaml
+browser:
+  targets:
+    observe: http://127.0.0.1:9341
+```
+
+Call `browser_exec` with `session="money"` and `target="observe"`. The first
+explicit target binds that named session to its configured CDP URL; subsequent
+calls can omit `target` and reuse the binding. Changing the target requires a
+new session name. `target="default"` binds the endpoint selected by the usual
+browser configuration. Raw URLs and unlisted names are refused. An unreachable
+target returns `target_unreachable` and does not select a fallback browser.
+Bindings are scoped to the served profile and the running Hermes process.
+
+Pass the same `session="money"` to `browser_vault_fill`,
+`browser_vault_enter_code`, or `browser_vault_save_login` to use that browser's
+supervisor. A session without an explicit target binding is refused by these
+vault calls. Omitting `session` preserves the default vault workflow. Exact
+origin matching, secret delivery through the supervisor WebSocket, and payment
+confirmation also apply to named targets.
