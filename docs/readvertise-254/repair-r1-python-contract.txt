@@ -8,9 +8,9 @@ Discovered 3 test files (~26 tests) under ['tests/tui_gateway/test_delivery_read
 
   ╔╍ Failed: tests/tui_gateway/test_delivery_transition_integration.py ╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍
   ║ ______________ test_real_resume_attach_new_handlers_and_idle_tick ______________
-  ║ 
+  ║
   ║ tmp_path = PosixPath('/var/tmp/hermes-pytest-1000/r-1y03xxo_/pytest-of-brad/pytest-0/test_real_resume_attach_new_ha0')
-  ║ 
+  ║
   ║ >   ???
   ║ E   AssertionError: Traceback (most recent call last):
   ║ E       File "<string>", line 8, in <module>
@@ -29,10 +29,10 @@ Discovered 3 test files (~26 tests) under ['tests/tui_gateway/test_delivery_read
   ║ E       File "/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/typing.py", line 293, in _check_generic
   ║ E         raise TypeError(f"Too {'many' if alen > elen else 'few'} arguments for {cls};"
   ║ E     TypeError: Too few arguments for typing.Generator; actual 2, expected 3
-  ║ E     
+  ║ E
   ║ E   assert 1 == 0
   ║ E    +  where 1 = CompletedProcess(args=['/home/brad/.hermes/hermes-agent/venv/bin/python', '-c', '\nimport json\nimport os\nfrom pathli...> elen else \'few\'} arguments for {cls};"\nTypeError: Too few arguments for typing.Generator; actual 2, expected 3\n').returncode
-  ║ 
+  ║
   ║ tests/tui_gateway/test_delivery_transition_integration.py:124: AssertionError
   ║ =========================== short test summary info ============================
   ║ FAILED tests/tui_gateway/test_delivery_transition_integration.py::test_real_resume_attach_new_handlers_and_idle_tick
@@ -44,9 +44,9 @@ Discovered 3 test files (~26 tests) under ['tests/tui_gateway/test_delivery_read
 [ 42.3% |    11/~26 | ✓0 | ✗1] ✗ tests/tools/test_bot_live_owner_delivery.py (15e, 2.7s)
 
   ╔╍ Failed: tests/tools/test_bot_live_owner_delivery.py ╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍
-  ║ 
+  ║
   ║ value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
-  ║ 
+  ║
   ║     @staticmethod
   ║     def refuse(value):
   ║ >       raise AssertionError(
@@ -55,7 +55,7 @@ Discovered 3 test files (~26 tests) under ['tests/tui_gateway/test_delivery_read
   ║         )
   ║ E       AssertionError: TEST BUG: file I/O against the REAL hermes home: /home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu
   ║ E       Use the isolated HERMES_HOME or a temporary fixture instead.
-  ║ 
+  ║
   ║ tests/home_io_guard.py:140: AssertionError
   ║ =========================== short test summary info ============================
   ║ ERROR tests/tools/test_bot_live_owner_delivery.py::test_delivery_is_idempotent_fenced_and_permanent[settled]
@@ -128,7 +128,7 @@ E         _check_generic(self, params, self._nparams)
 E       File "/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/typing.py", line 293, in _check_generic
 E         raise TypeError(f"Too {'many' if alen > elen else 'few'} arguments for {cls};"
 E     TypeError: Too few arguments for typing.Generator; actual 2, expected 3
-E     
+E
 E   assert 1 == 0
 E    +  where 1 = CompletedProcess(args=['/home/brad/.hermes/hermes-agent/venv/bin/python', '-c', '\nimport json\nimport os\nfrom pathli...> elen else \'few\'} arguments for {cls};"\nTypeError: Too few arguments for typing.Generator; actual 2, expected 3\n').returncode
 
@@ -152,8 +152,8 @@ _ ERROR at setup of test_delivery_is_idempotent_fenced_and_permanent[settled] __
 
 >   ???
 
-tests/conftest.py:1336: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/conftest.py:1336:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 agent/moa_loop.py:23: in <module>
     ???
 agent/auxiliary_client.py:127: in <module>
@@ -176,7 +176,7 @@ tests/home_io_guard.py:167: in guarded
     self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
 tests/home_io_guard.py:107: in check
     self.refuse(value)
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
 
@@ -195,7 +195,7 @@ __ ERROR at setup of test_delivery_is_idempotent_fenced_and_permanent[failed] __
     @pytest.fixture(autouse=True)
     def _moa_caches_isolated():
         """Clear module-level MoA cold-start caches before each test.
-    
+
         ``agent.moa_loop`` caches the resolved preset and each slot's provider
         runtime at module level (keyed on config mtime / provider+model) so the
         tool loop doesn't re-resolve them serially on every iteration. Tests
@@ -204,8 +204,8 @@ __ ERROR at setup of test_delivery_is_idempotent_fenced_and_permanent[failed] __
         """
 >       import agent.moa_loop as moa
 
-tests/conftest.py:1336: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/conftest.py:1336:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 agent/moa_loop.py:23: in <module>
     from agent.auxiliary_client import call_llm
 agent/auxiliary_client.py:127: in <module>
@@ -228,7 +228,7 @@ tests/home_io_guard.py:167: in guarded
     self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
 tests/home_io_guard.py:107: in check
     self.refuse(value)
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
 
@@ -247,7 +247,7 @@ _ ERROR at setup of test_delivery_is_idempotent_fenced_and_permanent[cancelled] 
     @pytest.fixture(autouse=True)
     def _moa_caches_isolated():
         """Clear module-level MoA cold-start caches before each test.
-    
+
         ``agent.moa_loop`` caches the resolved preset and each slot's provider
         runtime at module level (keyed on config mtime / provider+model) so the
         tool loop doesn't re-resolve them serially on every iteration. Tests
@@ -256,8 +256,8 @@ _ ERROR at setup of test_delivery_is_idempotent_fenced_and_permanent[cancelled] 
         """
 >       import agent.moa_loop as moa
 
-tests/conftest.py:1336: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/conftest.py:1336:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 agent/moa_loop.py:23: in <module>
     from agent.auxiliary_client import call_llm
 agent/auxiliary_client.py:127: in <module>
@@ -280,7 +280,7 @@ tests/home_io_guard.py:167: in guarded
     self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
 tests/home_io_guard.py:107: in check
     self.refuse(value)
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
 
@@ -299,7 +299,7 @@ _ ERROR at setup of test_cancel_queued_delivery_fences_claim_and_preserves_termi
     @pytest.fixture(autouse=True)
     def _moa_caches_isolated():
         """Clear module-level MoA cold-start caches before each test.
-    
+
         ``agent.moa_loop`` caches the resolved preset and each slot's provider
         runtime at module level (keyed on config mtime / provider+model) so the
         tool loop doesn't re-resolve them serially on every iteration. Tests
@@ -308,8 +308,8 @@ _ ERROR at setup of test_cancel_queued_delivery_fences_claim_and_preserves_termi
         """
 >       import agent.moa_loop as moa
 
-tests/conftest.py:1336: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/conftest.py:1336:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 agent/moa_loop.py:23: in <module>
     from agent.auxiliary_client import call_llm
 agent/auxiliary_client.py:127: in <module>
@@ -332,7 +332,7 @@ tests/home_io_guard.py:167: in guarded
     self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
 tests/home_io_guard.py:107: in check
     self.refuse(value)
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
 
@@ -351,7 +351,7 @@ ____ ERROR at setup of test_live_dm_bom_readers_preserve_pinned_intent[new] ____
     @pytest.fixture(autouse=True)
     def _moa_caches_isolated():
         """Clear module-level MoA cold-start caches before each test.
-    
+
         ``agent.moa_loop`` caches the resolved preset and each slot's provider
         runtime at module level (keyed on config mtime / provider+model) so the
         tool loop doesn't re-resolve them serially on every iteration. Tests
@@ -360,8 +360,8 @@ ____ ERROR at setup of test_live_dm_bom_readers_preserve_pinned_intent[new] ____
         """
 >       import agent.moa_loop as moa
 
-tests/conftest.py:1336: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/conftest.py:1336:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 agent/moa_loop.py:23: in <module>
     from agent.auxiliary_client import call_llm
 agent/auxiliary_client.py:127: in <module>
@@ -384,7 +384,7 @@ tests/home_io_guard.py:167: in guarded
     self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
 tests/home_io_guard.py:107: in check
     self.refuse(value)
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
 
@@ -403,7 +403,7 @@ _ ERROR at setup of test_live_dm_bom_readers_preserve_pinned_intent[existing] __
     @pytest.fixture(autouse=True)
     def _moa_caches_isolated():
         """Clear module-level MoA cold-start caches before each test.
-    
+
         ``agent.moa_loop`` caches the resolved preset and each slot's provider
         runtime at module level (keyed on config mtime / provider+model) so the
         tool loop doesn't re-resolve them serially on every iteration. Tests
@@ -412,8 +412,8 @@ _ ERROR at setup of test_live_dm_bom_readers_preserve_pinned_intent[existing] __
         """
 >       import agent.moa_loop as moa
 
-tests/conftest.py:1336: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/conftest.py:1336:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 agent/moa_loop.py:23: in <module>
     from agent.auxiliary_client import call_llm
 agent/auxiliary_client.py:127: in <module>
@@ -436,7 +436,7 @@ tests/home_io_guard.py:167: in guarded
     self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
 tests/home_io_guard.py:107: in check
     self.refuse(value)
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
 
@@ -455,7 +455,7 @@ ___ ERROR at setup of test_live_dm_bom_readers_preserve_pinned_intent[raced] ___
     @pytest.fixture(autouse=True)
     def _moa_caches_isolated():
         """Clear module-level MoA cold-start caches before each test.
-    
+
         ``agent.moa_loop`` caches the resolved preset and each slot's provider
         runtime at module level (keyed on config mtime / provider+model) so the
         tool loop doesn't re-resolve them serially on every iteration. Tests
@@ -464,8 +464,8 @@ ___ ERROR at setup of test_live_dm_bom_readers_preserve_pinned_intent[raced] ___
         """
 >       import agent.moa_loop as moa
 
-tests/conftest.py:1336: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/conftest.py:1336:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 agent/moa_loop.py:23: in <module>
     from agent.auxiliary_client import call_llm
 agent/auxiliary_client.py:127: in <module>
@@ -488,7 +488,7 @@ tests/home_io_guard.py:167: in guarded
     self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
 tests/home_io_guard.py:107: in check
     self.refuse(value)
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
 
@@ -507,7 +507,7 @@ _____________ ERROR at setup of test_fifo_survives_clock_rollback ______________
     @pytest.fixture(autouse=True)
     def _moa_caches_isolated():
         """Clear module-level MoA cold-start caches before each test.
-    
+
         ``agent.moa_loop`` caches the resolved preset and each slot's provider
         runtime at module level (keyed on config mtime / provider+model) so the
         tool loop doesn't re-resolve them serially on every iteration. Tests
@@ -516,8 +516,8 @@ _____________ ERROR at setup of test_fifo_survives_clock_rollback ______________
         """
 >       import agent.moa_loop as moa
 
-tests/conftest.py:1336: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/conftest.py:1336:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 agent/moa_loop.py:23: in <module>
     from agent.auxiliary_client import call_llm
 agent/auxiliary_client.py:127: in <module>
@@ -540,7 +540,7 @@ tests/home_io_guard.py:167: in guarded
     self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
 tests/home_io_guard.py:107: in check
     self.refuse(value)
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
 
@@ -559,7 +559,7 @@ _ ERROR at setup of test_only_canonical_capable_owner_receives_across_compressio
     @pytest.fixture(autouse=True)
     def _moa_caches_isolated():
         """Clear module-level MoA cold-start caches before each test.
-    
+
         ``agent.moa_loop`` caches the resolved preset and each slot's provider
         runtime at module level (keyed on config mtime / provider+model) so the
         tool loop doesn't re-resolve them serially on every iteration. Tests
@@ -568,8 +568,8 @@ _ ERROR at setup of test_only_canonical_capable_owner_receives_across_compressio
         """
 >       import agent.moa_loop as moa
 
-tests/conftest.py:1336: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/conftest.py:1336:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 agent/moa_loop.py:23: in <module>
     from agent.auxiliary_client import call_llm
 agent/auxiliary_client.py:127: in <module>
@@ -592,7 +592,7 @@ tests/home_io_guard.py:167: in guarded
     self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
 tests/home_io_guard.py:107: in check
     self.refuse(value)
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
 
@@ -611,7 +611,7 @@ _ ERROR at setup of test_only_canonical_capable_owner_receives_across_compressio
     @pytest.fixture(autouse=True)
     def _moa_caches_isolated():
         """Clear module-level MoA cold-start caches before each test.
-    
+
         ``agent.moa_loop`` caches the resolved preset and each slot's provider
         runtime at module level (keyed on config mtime / provider+model) so the
         tool loop doesn't re-resolve them serially on every iteration. Tests
@@ -620,8 +620,8 @@ _ ERROR at setup of test_only_canonical_capable_owner_receives_across_compressio
         """
 >       import agent.moa_loop as moa
 
-tests/conftest.py:1336: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/conftest.py:1336:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 agent/moa_loop.py:23: in <module>
     from agent.auxiliary_client import call_llm
 agent/auxiliary_client.py:127: in <module>
@@ -644,7 +644,7 @@ tests/home_io_guard.py:167: in guarded
     self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
 tests/home_io_guard.py:107: in check
     self.refuse(value)
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
 
@@ -663,7 +663,7 @@ _ ERROR at setup of test_delivery_keeps_the_sender_and_refuses_a_different_one_u
     @pytest.fixture(autouse=True)
     def _moa_caches_isolated():
         """Clear module-level MoA cold-start caches before each test.
-    
+
         ``agent.moa_loop`` caches the resolved preset and each slot's provider
         runtime at module level (keyed on config mtime / provider+model) so the
         tool loop doesn't re-resolve them serially on every iteration. Tests
@@ -672,8 +672,8 @@ _ ERROR at setup of test_delivery_keeps_the_sender_and_refuses_a_different_one_u
         """
 >       import agent.moa_loop as moa
 
-tests/conftest.py:1336: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/conftest.py:1336:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 agent/moa_loop.py:23: in <module>
     from agent.auxiliary_client import call_llm
 agent/auxiliary_client.py:127: in <module>
@@ -696,7 +696,7 @@ tests/home_io_guard.py:167: in guarded
     self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
 tests/home_io_guard.py:107: in check
     self.refuse(value)
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
 
@@ -715,7 +715,7 @@ ______ ERROR at setup of test_unreadable_ticket_does_not_wedge_bulk_scans ______
     @pytest.fixture(autouse=True)
     def _moa_caches_isolated():
         """Clear module-level MoA cold-start caches before each test.
-    
+
         ``agent.moa_loop`` caches the resolved preset and each slot's provider
         runtime at module level (keyed on config mtime / provider+model) so the
         tool loop doesn't re-resolve them serially on every iteration. Tests
@@ -724,8 +724,8 @@ ______ ERROR at setup of test_unreadable_ticket_does_not_wedge_bulk_scans ______
         """
 >       import agent.moa_loop as moa
 
-tests/conftest.py:1336: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/conftest.py:1336:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 agent/moa_loop.py:23: in <module>
     from agent.auxiliary_client import call_llm
 agent/auxiliary_client.py:127: in <module>
@@ -748,7 +748,7 @@ tests/home_io_guard.py:167: in guarded
     self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
 tests/home_io_guard.py:107: in check
     self.refuse(value)
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
 
@@ -767,7 +767,7 @@ __ ERROR at setup of test_unreadable_ticket_keeps_exact_id_reads_fail_closed ___
     @pytest.fixture(autouse=True)
     def _moa_caches_isolated():
         """Clear module-level MoA cold-start caches before each test.
-    
+
         ``agent.moa_loop`` caches the resolved preset and each slot's provider
         runtime at module level (keyed on config mtime / provider+model) so the
         tool loop doesn't re-resolve them serially on every iteration. Tests
@@ -776,8 +776,8 @@ __ ERROR at setup of test_unreadable_ticket_keeps_exact_id_reads_fail_closed ___
         """
 >       import agent.moa_loop as moa
 
-tests/conftest.py:1336: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/conftest.py:1336:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 agent/moa_loop.py:23: in <module>
     from agent.auxiliary_client import call_llm
 agent/auxiliary_client.py:127: in <module>
@@ -800,7 +800,7 @@ tests/home_io_guard.py:167: in guarded
     self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
 tests/home_io_guard.py:107: in check
     self.refuse(value)
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
 
@@ -819,7 +819,7 @@ _ ERROR at setup of test_non_dict_ticket_is_skipped_by_scans_and_fails_exact_id_
     @pytest.fixture(autouse=True)
     def _moa_caches_isolated():
         """Clear module-level MoA cold-start caches before each test.
-    
+
         ``agent.moa_loop`` caches the resolved preset and each slot's provider
         runtime at module level (keyed on config mtime / provider+model) so the
         tool loop doesn't re-resolve them serially on every iteration. Tests
@@ -828,8 +828,8 @@ _ ERROR at setup of test_non_dict_ticket_is_skipped_by_scans_and_fails_exact_id_
         """
 >       import agent.moa_loop as moa
 
-tests/conftest.py:1336: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/conftest.py:1336:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 agent/moa_loop.py:23: in <module>
     from agent.auxiliary_client import call_llm
 agent/auxiliary_client.py:127: in <module>
@@ -852,7 +852,7 @@ tests/home_io_guard.py:167: in guarded
     self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
 tests/home_io_guard.py:107: in check
     self.refuse(value)
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
 
@@ -871,7 +871,7 @@ ____ ERROR at setup of test_schema_damaged_ticket_does_not_wedge_bulk_scans ____
     @pytest.fixture(autouse=True)
     def _moa_caches_isolated():
         """Clear module-level MoA cold-start caches before each test.
-    
+
         ``agent.moa_loop`` caches the resolved preset and each slot's provider
         runtime at module level (keyed on config mtime / provider+model) so the
         tool loop doesn't re-resolve them serially on every iteration. Tests
@@ -880,8 +880,8 @@ ____ ERROR at setup of test_schema_damaged_ticket_does_not_wedge_bulk_scans ____
         """
 >       import agent.moa_loop as moa
 
-tests/conftest.py:1336: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/conftest.py:1336:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 agent/moa_loop.py:23: in <module>
     from agent.auxiliary_client import call_llm
 agent/auxiliary_client.py:127: in <module>
@@ -904,7 +904,7 @@ tests/home_io_guard.py:167: in guarded
     self.check(value, dir_fd=kwargs.get(descriptor) if descriptor else None, metadata=metadata,
 tests/home_io_guard.py:107: in check
     self.refuse(value)
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 value = '/home/brad/.hermes/hermes-agent/.hermes-runtime/python/generation-1785176736-1715540-9810fe62/cpython-3.11-linux-x86_64-gnu'
 

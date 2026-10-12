@@ -28,7 +28,7 @@ Discovered 1 test files (~15 tests) under ['tests/tui_gateway/test_delivery_read
   ║ >       assert completed, "paint registration blocked on the compression history lock"
   ║ E       AssertionError: paint registration blocked on the compression history lock
   ║ E       assert False
-  ║ 
+  ║
   ║ tests/tui_gateway/test_delivery_readvertisement.py:358: AssertionError
   ║ =========================== short test summary info ============================
   ║ FAILED tests/tui_gateway/test_delivery_readvertisement.py::test_advertise_failure_does_not_break_switch[refused]
@@ -161,7 +161,7 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x79bef118b9b0>
         current = owner(home, "B")
 >       assert session["delivery_advertisement"]["session_id"] == "B"
 E       AssertionError: assert 'A' == 'B'
-E         
+E
 E         - B
 E         + A
 
