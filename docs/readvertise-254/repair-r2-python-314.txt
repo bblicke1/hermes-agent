@@ -1,0 +1,24 @@
+▶ not activated — using HERMES_PYTHON: /home/brad/.hermes/installs/66cef3827c817e6e/test-environment/gen-0d5891f1091642ea909f2ee4a8cf4321/venv/bin/python
+▶ running per-file parallel test suite via run_tests_parallel.py
+  (TZ=UTC LANG=C.UTF-8 PYTHONHASHSEED=0; clean env)
+▶ pre-compiling bytecode cache
+▶ launching test runner
+Discovered 4 test files (~36 tests) under ['tests/tui_gateway/test_delivery_readvertisement.py', 'tests/tools/test_bot_live_owner_delivery.py', 'tests/tui_gateway/test_delivery_transition_integration.py', 'tests/tui_gateway/test_bot_live_owner_delivery.py']; running with -j 16
+[ 16.7% |     6/~36 | ✓6 | ✗0] ✓ tests/tui_gateway/test_bot_live_owner_delivery.py (6✓, 1.2s)
+[ 19.4% |     7/~36 | ✓7 | ✗0] ✓ tests/tui_gateway/test_delivery_transition_integration.py (1✓, 3.4s)
+[ 47.2% |    17/~36 | ✓22 | ✗ 0] ✓ tests/tools/test_bot_live_owner_delivery.py (15✓, 5.5s)
+[100.0% |    36/~36 | ✓48 | ✗ 0] ✓ tests/tui_gateway/test_delivery_readvertisement.py (26✓, 13.0s)
+
+=== Summary: 4 files, 48 tests passed, 0 failed (100% complete) in 13.0s (16 workers) ===
+  Durations cached to test_durations.json (4 files)
+
+=== Per-file subprocess time distribution ===
+  Files:   4
+  Total subprocess CPU-wall: 23.1s  (runner wall: 13.0s, parallelism: 16x)
+  P50: 5.53s  P90: 12.99s  P95: 12.99s  P99: 12.99s  Max: 12.99s
+  <1s: 0 files (0%)  <2s: 1 files (25%)
+  Top 10 slowest:
+     12.99s  tests/tui_gateway/test_delivery_readvertisement.py
+      5.53s  tests/tools/test_bot_live_owner_delivery.py
+      3.35s  tests/tui_gateway/test_delivery_transition_integration.py
+      1.20s  tests/tui_gateway/test_bot_live_owner_delivery.py

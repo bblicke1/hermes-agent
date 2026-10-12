@@ -1,5 +1,5 @@
 diff --git a/tools/bot_live_delivery.py b/tools/bot_live_delivery.py
-index 691c0082d46..a15c936aff4 100644
+index 691c0082d46..c24f44632c5 100644
 --- a/tools/bot_live_delivery.py
 +++ b/tools/bot_live_delivery.py
 @@ -85,7 +85,8 @@ def _read_advertisement(path: Path) -> dict | None:
@@ -21,19 +21,29 @@ index 691c0082d46..a15c936aff4 100644
 +                previous = _read_advertisement(_advertisement_path(home, previous_advertisement["session_id"]))
 +                # Keep already-admitted compression-chain mail claimable. Only a
 +                # current, exact same-process/runtime lease may carry its token.
-+                if (previous and previous["pid"] == os.getpid()
-+                        and previous["process_start"] == start
++                if (previous and previous.get("pid") == os.getpid()
++                        and previous.get("process_start") == start
 +                        and previous_advertisement.get("process_start") == start
-+                        and previous["profile_home"] == str(home)
-+                        and previous["live_session_id"] == live_session_id
-+                        and previous["lease_id"] == previous_advertisement.get("lease_id")):
-+                    token = previous["lease_id"]
++                        and previous.get("profile_home") == str(home)
++                        and previous.get("live_session_id") == live_session_id
++                        and previous.get("lease_id") == previous_advertisement.get("lease_id")):
++                    token = previous.get("lease_id")
              record = dict(profile_home=str(home), session_id=session_id, live_session_id=live_session_id,
 -                          lease_id=uuid.uuid4().hex, pid=os.getpid(), process_start=start)
 +                          lease_id=token, pid=os.getpid(), process_start=start)
              atomic_json_write(path, record, mode=0o600, fsync_dir=True)
              return record
      except (OSError, ValueError, TypeError) as exc:
+@@ -139,7 +152,8 @@ def revoke_advertisement(profile_home: Path | str, advertisement: dict) -> bool:
+     path = _advertisement_path(Path(profile_home).resolve(), advertisement["session_id"])
+     with _FileLock(path.parent / ".lock"):
+         current = _read_advertisement(path)
+-        if current and current["lease_id"] == advertisement["lease_id"]:
++        if (current and current["lease_id"] == advertisement["lease_id"]
++                and current["live_session_id"] == advertisement["live_session_id"]):
+             path.unlink(missing_ok=True)
+             return True
+     return False
 diff --git a/tui_gateway/compute_host_bridge.py b/tui_gateway/compute_host_bridge.py
 index ffff073d358..99289197404 100644
 --- a/tui_gateway/compute_host_bridge.py
@@ -108,12 +118,22 @@ index 6d085882df8..b0b34b40f7b 100644
          from tools import approval
          with contextlib.suppress(Exception):
 diff --git a/tui_gateway/session_lifecycle.py b/tui_gateway/session_lifecycle.py
-index 2ffcdf283a5..cd425aa0588 100644
+index 2ffcdf283a5..e66f529f7ba 100644
 --- a/tui_gateway/session_lifecycle.py
 +++ b/tui_gateway/session_lifecycle.py
-@@ -140,36 +140,107 @@ def _attach_lease(session: dict, lease) -> None:
+@@ -139,37 +139,118 @@ def _attach_lease(session: dict, lease) -> None:
+     session.pop("_lease_taken_over", None)  # owning again: its finalize ends the row like any owner
 
 
++_DELIVERY_DEFERRAL_WARN_AFTER = 12  # twelve idle attempts: about a minute at the 5s poll cadence
++
++
++def _note_tui_delivery_deferral(sid: str, session: dict, reason: str) -> None:
++    count = session["delivery_deferrals"] = int(session.get("delivery_deferrals", 0)) + 1
++    level = logging.WARNING if count == _DELIVERY_DEFERRAL_WARN_AFTER else logging.DEBUG
++    logger.log(level, "delivery registration deferred sid=%s attempts=%s: %s", sid, count, reason)
++
++
  def _register_open_tui_delivery(sid: str, session: dict) -> None:
 -    """Publish lightweight reachability; writer admission remains lazy and capped."""
 -    from tools.bot_live_delivery import advertise_session, write_delivery_reachability
@@ -131,7 +151,7 @@ index 2ffcdf283a5..cd425aa0588 100644
 +    # before calling. Warm resume/activate instead refresh inside transport attach:
 +    # resume_lock -> history_lock -> _refresh_tui_delivery_locked (no global lock).
 +    if not _sessions_lock.acquire(blocking=False):
-+        logger.debug("delivery registration deferred: busy sessions sid=%s", sid)
++        _note_tui_delivery_deferral(sid, session, "busy sessions")
 +        return
 +    try:
          active = frozenset(_sessions) if _sessions.get(sid) is session else None
@@ -152,9 +172,10 @@ index 2ffcdf283a5..cd425aa0588 100644
 +        _sessions_lock.release()
 +    # A concurrent turn must never block a paint/reattach response on publication.
 +    if not lock.acquire(blocking=False):
-+        logger.debug("delivery registration deferred: busy history sid=%s", sid)
++        _note_tui_delivery_deferral(sid, session, "busy history")
 +        return
 +    try:
++        session.pop("delivery_deferrals", None)
 +        _refresh_tui_delivery_locked(sid, session, retired=retired, active=active)
 +    finally:
 +        lock.release()
@@ -183,7 +204,7 @@ index 2ffcdf283a5..cd425aa0588 100644
 +            # Also retry a status write if revocation succeeded on an earlier pass.
 +            # The writer refuses to overwrite a different healthy generation.
 +            write_delivery_reachability(_session_home(session), old["session_id"],
-+                                        {"reachable": False, "reason": "session changed", "live_session_id": sid})
++                                        {"reachable": False, "reason": "session changed", "live_session_id": sid or old["live_session_id"]})
 +        except Exception:
 +            logger.exception("delivery retirement failed sid=%s session_id=%s", sid, old["session_id"])
          else:
@@ -243,16 +264,16 @@ index 2ffcdf283a5..cd425aa0588 100644
 
 
  def _detached_lease_holder(session: dict, key: str) -> tuple[str, dict] | None:
-@@ -388,6 +459,8 @@ def _finalize_delivery_advertisement(session: dict | None) -> bool:
+@@ -385,6 +466,8 @@ def _finalize_delivery_advertisement(session: dict | None) -> bool:
+     if not session:
+         return False
+     with (session.get("history_lock") or contextlib.nullcontext()):
++        previous = session.get("delivery_advertisement") or {}
++        _retire_tui_delivery_locked(str(session.get("_sid") or previous.get("live_session_id") or ""), session)
          if session.get("_finalized"):
              return False
          session["_finalized"] = True
-+        if previous := session.get("delivery_advertisement"):
-+            _retire_tui_delivery_locked(previous["live_session_id"], session)
-         if advertisement := session.pop("delivery_advertisement", None):
-             from tools.bot_live_delivery import revoke_advertisement, write_delivery_reachability
-             revoked = revoke_advertisement(_session_home(session), advertisement)
-@@ -889,6 +962,7 @@ def _rebind_live_transport(sid: str, session: dict, transport: Transport) -> Non
+@@ -889,6 +972,7 @@ def _rebind_live_transport(sid: str, session: dict, transport: Transport) -> Non
                  _schedule_ws_orphan_reap(sid)
          return
      _attach_session_transport(session, transport)

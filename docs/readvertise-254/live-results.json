@@ -1,12 +1,12 @@
 {
   "profile": "seat-test-254",
-  "scratch_root": "/tmp/hermes-readvertise-254-0z_2byjh",
+  "scratch_root": "/tmp/hermes-readvertise-254-z5wby35k",
   "interpreter": "/home/brad/.hermes/tools/python-3.14.7+20260901-linux-x64/bin/python3",
   "backend_source": "/home/brad/worktrees/hermes-agent-readvertise-254",
   "dependency_sites": "/home/brad/.hermes/installs/51181f1e9b6ad302/environments/b1b23c0085f246d39ba483c1c50d7e26/venv/lib/python3.14/site-packages",
   "renderer": "/home/brad/.hermes/hermes-agent/ui-tui/dist/entry.js",
-  "tab": "wN:tES",
-  "pane": "wN:pEZ",
+  "tab": "wN:tEZ",
+  "pane": "wN:pF5",
   "backend_runtime": {
     "exe": "/home/brad/.hermes/tools/python-3.14.7+20260901-linux-x64/bin/python3.14",
     "argv": [
@@ -16,7 +16,7 @@
       ""
     ],
     "source": "/home/brad/worktrees/hermes-agent-readvertise-254",
-    "profile_home": "/tmp/hermes-readvertise-254-0z_2byjh/profiles/seat-test-254"
+    "profile_home": "/tmp/hermes-readvertise-254-z5wby35k/profiles/seat-test-254"
   },
   "first_herdr": {
     "agent": "hermes",
@@ -24,20 +24,20 @@
       "agent": "hermes",
       "kind": "id",
       "source": "herdr:hermes",
-      "value": "20261012_170206_be5250"
+      "value": "20261012_172432_fa92f3"
     },
     "agent_status": "unknown",
-    "cwd": "/tmp/hermes-readvertise-254-0z_2byjh",
+    "cwd": "/tmp/hermes-readvertise-254-z5wby35k",
     "focused": false,
-    "foreground_cwd": "/tmp/hermes-readvertise-254-0z_2byjh",
+    "foreground_cwd": "/tmp/hermes-readvertise-254-z5wby35k",
     "name": "seat-test-254",
-    "pane_id": "wN:pEZ",
+    "pane_id": "wN:pF5",
     "revision": 3,
     "state_change_seq": 0,
-    "tab_id": "wN:tES",
-    "terminal_id": "term_65dab029867ef124",
-    "terminal_title": "\u2713 gb10-balanced \u00b7 \u2026eadvertise-254-0z_2byjh",
-    "terminal_title_stripped": "\u2713 gb10-balanced \u00b7 \u2026eadvertise-254-0z_2byjh",
+    "tab_id": "wN:tEZ",
+    "terminal_id": "term_65dab52d656bd12a",
+    "terminal_title": "\u2713 gb10-balanced \u00b7 \u2026eadvertise-254-z5wby35k",
+    "terminal_title_stripped": "\u2713 gb10-balanced \u00b7 \u2026eadvertise-254-z5wby35k",
     "workspace_id": "wN"
   },
   "first_route": {
@@ -45,21 +45,21 @@
     "status": "updated"
   },
   "first_admission": {
-    "delivery_id": "799d3dc76ac94da69a64a60be8fa4ae2",
-    "id": "799d3dc76ac94da69a64a60be8fa4ae2",
+    "delivery_id": "2dd9bba7efa642a2a23762f324a6c761",
+    "id": "2dd9bba7efa642a2a23762f324a6c761",
     "owner": {
-      "profile_home": "/tmp/hermes-readvertise-254-0z_2byjh/profiles/seat-test-254",
-      "session_id": "20261012_170206_be5250",
-      "lease_id": "ebc78708178e45078a0a18e935a12eb9",
-      "live_session_id": "d2161778"
+      "profile_home": "/tmp/hermes-readvertise-254-z5wby35k/profiles/seat-test-254",
+      "session_id": "20261012_172432_fa92f3",
+      "lease_id": "23ad2ee093f4422b919cc1a58c24c79f",
+      "live_session_id": "da64e120"
     },
-    "profile_home": "/tmp/hermes-readvertise-254-0z_2byjh/profiles/seat-test-254",
-    "session_id": "20261012_170206_be5250",
-    "lease_id": "ebc78708178e45078a0a18e935a12eb9",
-    "live_session_id": "d2161778",
-    "message": "Read /tmp/hermes-readvertise-254-0z_2byjh/run-state/mail/seat-test-254/20261012T210207153778Z-proof-799d3dc76ac94da69a64a60be8fa4ae2.json; then run `/usr/bin/python3 /home/brad/.hermes/scripts/agent_mail.py --root /tmp/hermes-readvertise-254-0z_2byjh/run-state/mail ack /tmp/hermes-readvertise-254-0z_2byjh/run-state/mail/seat-test-254/20261012T210207153778Z-proof-799d3dc76ac94da69a64a60be8fa4ae2.json`. Follow the envelope's authorized work order.",
+    "profile_home": "/tmp/hermes-readvertise-254-z5wby35k/profiles/seat-test-254",
+    "session_id": "20261012_172432_fa92f3",
+    "lease_id": "23ad2ee093f4422b919cc1a58c24c79f",
+    "live_session_id": "da64e120",
+    "message": "Read /tmp/hermes-readvertise-254-z5wby35k/run-state/mail/seat-test-254/20261012T212433128847Z-proof-2dd9bba7efa642a2a23762f324a6c761.json; then run `/usr/bin/python3 /home/brad/.hermes/scripts/agent_mail.py --root /tmp/hermes-readvertise-254-z5wby35k/run-state/mail ack /tmp/hermes-readvertise-254-z5wby35k/run-state/mail/seat-test-254/20261012T212433128847Z-proof-2dd9bba7efa642a2a23762f324a6c761.json`. Follow the envelope's authorized work order.",
     "status": "queued",
-    "created_at": 1791838927421573358,
+    "created_at": 1791840273376307075,
     "sequence": 1,
     "author": {
       "id": "bot:proof-254",
@@ -73,51 +73,51 @@
       "is_bot": true,
       "name": "proof-254"
     },
-    "claimed_at": 1791838927998383309,
-    "completed_at": 1791838935913626867,
-    "created_at": 1791838927421573358,
-    "delivery_id": "799d3dc76ac94da69a64a60be8fa4ae2",
+    "claimed_at": 1791840273852914433,
+    "completed_at": 1791840284084135681,
+    "created_at": 1791840273376307075,
+    "delivery_id": "2dd9bba7efa642a2a23762f324a6c761",
     "error": "",
-    "id": "799d3dc76ac94da69a64a60be8fa4ae2",
-    "lease_id": "ebc78708178e45078a0a18e935a12eb9",
-    "live_session_id": "d2161778",
-    "message": "Read /tmp/hermes-readvertise-254-0z_2byjh/run-state/mail/seat-test-254/20261012T210207153778Z-proof-799d3dc76ac94da69a64a60be8fa4ae2.json; then run `/usr/bin/python3 /home/brad/.hermes/scripts/agent_mail.py --root /tmp/hermes-readvertise-254-0z_2byjh/run-state/mail ack /tmp/hermes-readvertise-254-0z_2byjh/run-state/mail/seat-test-254/20261012T210207153778Z-proof-799d3dc76ac94da69a64a60be8fa4ae2.json`. Follow the envelope's authorized work order.",
+    "id": "2dd9bba7efa642a2a23762f324a6c761",
+    "lease_id": "23ad2ee093f4422b919cc1a58c24c79f",
+    "live_session_id": "da64e120",
+    "message": "Read /tmp/hermes-readvertise-254-z5wby35k/run-state/mail/seat-test-254/20261012T212433128847Z-proof-2dd9bba7efa642a2a23762f324a6c761.json; then run `/usr/bin/python3 /home/brad/.hermes/scripts/agent_mail.py --root /tmp/hermes-readvertise-254-z5wby35k/run-state/mail ack /tmp/hermes-readvertise-254-z5wby35k/run-state/mail/seat-test-254/20261012T212433128847Z-proof-2dd9bba7efa642a2a23762f324a6c761.json`. Follow the envelope's authorized work order.",
     "owner": {
-      "lease_id": "ebc78708178e45078a0a18e935a12eb9",
-      "live_session_id": "d2161778",
-      "profile_home": "/tmp/hermes-readvertise-254-0z_2byjh/profiles/seat-test-254",
-      "session_id": "20261012_170206_be5250"
+      "lease_id": "23ad2ee093f4422b919cc1a58c24c79f",
+      "live_session_id": "da64e120",
+      "profile_home": "/tmp/hermes-readvertise-254-z5wby35k/profiles/seat-test-254",
+      "session_id": "20261012_172432_fa92f3"
     },
-    "profile_home": "/tmp/hermes-readvertise-254-0z_2byjh/profiles/seat-test-254",
+    "profile_home": "/tmp/hermes-readvertise-254-z5wby35k/profiles/seat-test-254",
     "reason": "",
     "reply": "G254-FIRST-ACK",
     "sequence": 1,
-    "session_id": "20261012_170206_be5250",
+    "session_id": "20261012_172432_fa92f3",
     "status": "settled"
   },
   "first_read_ack": {
     "reader": "seat-test-254",
-    "ts": "2026-10-12T21:02:15.035599+00:00"
+    "ts": "2026-10-12T21:24:41.658149+00:00"
   },
-  "new_confirmation": " \u2502  \u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u28ff\u2801\u28b0\u2846\u2808\u287f\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800                                                                                  \u2502  \u2502\n \u2502  \u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2808\u2833\u2808\u28e1\u281e\u2801\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800                                                                                  \u2502  \u2502\n \u2502  \u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2808\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800\u2800                                                                                  \u2502  \u2502\n \u2502  gb10-balanced \u00b7 Nous Research                                                                                   \u2502  \u2502\n \u2502  /tmp/hermes-readvertise-254-0z_2b\u2026                                                                              \u2502  \u2502\n \u2502  Session: d2161778                                                                                               \u2502  \u2502\n \u2502                                                                                                                  \u2502  \u2503\n \u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f  \u2503\n                                                                                                                       \u2503\n    \u25c8 [BOT proof-254]                                                                                                  \u2503\n    Read /tmp/hermes-readvertise-254-0z_2byjh/run-state/mail/seat-test-254/20261012T210207153778Z-proof-799d3dc76ac94  \u2503\n    da69a64a60be8fa4ae2.json; then run `/usr/bin/python3 /home/brad/.hermes/scripts/agent_mail.py --root               \u2503\n    /tmp/hermes-readvertise-254-0z_2byjh/run-state/mail ack /tmp/hermes-readvertise-254-0z_2byjh/run-state/mail/seat-  \u2503\n    test-254/20261012T210207153778Z-proof-799d3dc76ac94da69a64a60be8fa4ae2.json`. Follow the envelope's authorized     \u2503\n    work order.                                                                                                        \u2503\n                                                                                                                       \u2503\n \u2514\u2500 \u25be Tool calls (2)                                                                                                   \u2503\n   \u251c\u2500 \u25cf Terminal(\"cat /tmp/hermes-readvertise-254-0z_2byjh/run-state/mail/seat-te\u2026\") (0.0s)                            \u2503\n   \u2514\u2500 \u25cf Terminal(\"/usr/bin/python3 /home/brad/.hermes/scripts/agent_mail.py --roo\u2026\") (0.1s)                            \u2503\n                                                                                                                       \u2503\n \u250a  G254-FIRST-ACK                                                                                                     \u2503\n                                                                                                                       \u2503\n \u00b7  /new                                                                                                               \u2503\n\n \u2554\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2557\n \u2551 \u26a0 Start a new session?      )                                                                                     \u2551 \u2503\n \u2551  This ends the current conversation and clears the transcript.                                                     \u2551\n \u2551 \u25b8 No, keep going                                                                                                   \u2551\n \u2551   Yes, start a new session                                                                                         \u2551\n \u2551 \u2191/\u2193 select \u00b7 Enter confirm \u00b7 Y/N quick \u00b7 Esc cancel                                                                \u2551\n \u255a\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u255d\n\n\n\n \u2500 ready \u2502 gb10 balanced none \u2502 3.7k/256k \u2502 [\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591\u2591]  \u2502 \u25ce 65% \u2500  Read /tmp/hermes-readvertise-254-0z_2byjh/run-st\u2026",
+  "new_confirmation": "   \u251c\u2500 \u25cf Terminal(\"cat /tmp/hermes-readvertise-254-z5wby35k/run-state/mail/seat-te\u2026\")\n      (0.0s)\n   \u2514\u2500 \u25cf Terminal(\"/usr/bin/python3 /home/brad/.hermes/scripts/agent_mail.py --roo\u2026\")\n      (0.1s)\n\n \u250a  G254-FIRST-ACK\n\n \u00b7  /new\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n \u2554\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2557\n \u2551 \u26a0 Start a new session?                                                                 \u2551\u2551\n \u2551  This ends the current conversation and clears the transcript.                          \u2551\n \u2551 \u25b8 No, keep going                                                                        \u2551\n \u2551   Yes, start a new session                                                              \u2551\n \u2551 \u2191/\u2193 select \u00b7 Enter confirm \u00b7 Y/N quick \u00b7 Esc cancel                                     \u2551\n \u255a\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u255d\n\n\n\n \u2500 ready \u2502 gb10 balanced none \u2502 3.7k/25 \u2500  Read /tmp/hermes-readvertise-254-z5wby35k/run-st\u2026",
   "first_owner": {
-    "profile_home": "/tmp/hermes-readvertise-254-0z_2byjh/profiles/seat-test-254",
-    "session_id": "20261012_170206_be5250",
-    "live_session_id": "d2161778",
-    "lease_id": "ebc78708178e45078a0a18e935a12eb9",
-    "pid": 4103643,
-    "process_start": 1791838924.95
+    "profile_home": "/tmp/hermes-readvertise-254-z5wby35k/profiles/seat-test-254",
+    "session_id": "20261012_172432_fa92f3",
+    "live_session_id": "da64e120",
+    "lease_id": "23ad2ee093f4422b919cc1a58c24c79f",
+    "pid": 18357,
+    "process_start": 1791840271.17
   },
   "second_owner": {
-    "profile_home": "/tmp/hermes-readvertise-254-0z_2byjh/profiles/seat-test-254",
-    "session_id": "20261012_170216_fb2527",
-    "live_session_id": "3a5a02eb",
-    "lease_id": "493083734f0343ecadbd67540b64afec",
-    "pid": 4103643,
-    "process_start": 1791838924.95
+    "profile_home": "/tmp/hermes-readvertise-254-z5wby35k/profiles/seat-test-254",
+    "session_id": "20261012_172444_f83b5a",
+    "live_session_id": "eb7bfa19",
+    "lease_id": "27064559410d4bb2ba4bea58377eaf3b",
+    "pid": 18357,
+    "process_start": 1791840271.17
   },
-  "old_session_id": "20261012_170206_be5250",
-  "new_session_id": "20261012_170216_fb2527",
+  "old_session_id": "20261012_172432_fa92f3",
+  "new_session_id": "20261012_172444_f83b5a",
   "same_backend_pid": true,
   "previous_advertisement_retired": true,
   "second_herdr": {
@@ -126,42 +126,54 @@
       "agent": "hermes",
       "kind": "id",
       "source": "herdr:hermes",
-      "value": "20261012_170216_fb2527"
+      "value": "20261012_172444_f83b5a"
     },
     "agent_status": "idle",
-    "cwd": "/tmp/hermes-readvertise-254-0z_2byjh",
+    "cwd": "/tmp/hermes-readvertise-254-z5wby35k",
     "focused": false,
-    "foreground_cwd": "/tmp/hermes-readvertise-254-0z_2byjh",
+    "foreground_cwd": "/tmp/hermes-readvertise-254-z5wby35k",
     "name": "seat-test-254",
-    "pane_id": "wN:pEZ",
+    "pane_id": "wN:pF5",
     "revision": 7,
-    "state_change_seq": 4243,
-    "tab_id": "wN:tES",
-    "terminal_id": "term_65dab029867ef124",
-    "terminal_title": "\u2713 gb10-balanced \u00b7 \u2026eadvertise-254-0z_2byjh",
-    "terminal_title_stripped": "\u2713 gb10-balanced \u00b7 \u2026eadvertise-254-0z_2byjh",
+    "state_change_seq": 4310,
+    "tab_id": "wN:tEZ",
+    "terminal_id": "term_65dab52d656bd12a",
+    "terminal_title": "\u2713 gb10-balanced \u00b7 \u2026eadvertise-254-z5wby35k",
+    "terminal_title_stripped": "\u2713 gb10-balanced \u00b7 \u2026eadvertise-254-z5wby35k",
     "workspace_id": "wN"
+  },
+  "dual_owner_dry_run": {
+    "seat": "seat-test-254",
+    "status": "would-update"
+  },
+  "dual_owner_selected": {
+    "profile_home": "/tmp/hermes-readvertise-254-z5wby35k/profiles/seat-test-254",
+    "session_id": "20261012_172444_f83b5a",
+    "live_session_id": "eb7bfa19",
+    "lease_id": "27064559410d4bb2ba4bea58377eaf3b",
+    "pid": 18357,
+    "process_start": 1791840271.17
   },
   "second_route": {
     "seat": "seat-test-254",
     "status": "updated"
   },
   "second_admission": {
-    "delivery_id": "5a417d503867480f890589685bf553bf",
-    "id": "5a417d503867480f890589685bf553bf",
+    "delivery_id": "ca877bac2fb2493c873bf2792d63867b",
+    "id": "ca877bac2fb2493c873bf2792d63867b",
     "owner": {
-      "profile_home": "/tmp/hermes-readvertise-254-0z_2byjh/profiles/seat-test-254",
-      "session_id": "20261012_170216_fb2527",
-      "lease_id": "493083734f0343ecadbd67540b64afec",
-      "live_session_id": "3a5a02eb"
+      "profile_home": "/tmp/hermes-readvertise-254-z5wby35k/profiles/seat-test-254",
+      "session_id": "20261012_172444_f83b5a",
+      "lease_id": "27064559410d4bb2ba4bea58377eaf3b",
+      "live_session_id": "eb7bfa19"
     },
-    "profile_home": "/tmp/hermes-readvertise-254-0z_2byjh/profiles/seat-test-254",
-    "session_id": "20261012_170216_fb2527",
-    "lease_id": "493083734f0343ecadbd67540b64afec",
-    "live_session_id": "3a5a02eb",
-    "message": "Read /tmp/hermes-readvertise-254-0z_2byjh/run-state/mail/seat-test-254/20261012T210216803778Z-proof-5a417d503867480f890589685bf553bf.json; then run `/usr/bin/python3 /home/brad/.hermes/scripts/agent_mail.py --root /tmp/hermes-readvertise-254-0z_2byjh/run-state/mail ack /tmp/hermes-readvertise-254-0z_2byjh/run-state/mail/seat-test-254/20261012T210216803778Z-proof-5a417d503867480f890589685bf553bf.json`. Follow the envelope's authorized work order.",
+    "profile_home": "/tmp/hermes-readvertise-254-z5wby35k/profiles/seat-test-254",
+    "session_id": "20261012_172444_f83b5a",
+    "lease_id": "27064559410d4bb2ba4bea58377eaf3b",
+    "live_session_id": "eb7bfa19",
+    "message": "Read /tmp/hermes-readvertise-254-z5wby35k/run-state/mail/seat-test-254/20261012T212445012035Z-proof-ca877bac2fb2493c873bf2792d63867b.json; then run `/usr/bin/python3 /home/brad/.hermes/scripts/agent_mail.py --root /tmp/hermes-readvertise-254-z5wby35k/run-state/mail ack /tmp/hermes-readvertise-254-z5wby35k/run-state/mail/seat-test-254/20261012T212445012035Z-proof-ca877bac2fb2493c873bf2792d63867b.json`. Follow the envelope's authorized work order.",
     "status": "queued",
-    "created_at": 1791838936816165641,
+    "created_at": 1791840285024657397,
     "sequence": 2,
     "author": {
       "id": "bot:proof-254",
@@ -175,36 +187,37 @@
       "is_bot": true,
       "name": "proof-254"
     },
-    "claimed_at": 1791838941628316091,
-    "completed_at": 1791838953297363485,
-    "created_at": 1791838936816165641,
-    "delivery_id": "5a417d503867480f890589685bf553bf",
+    "claimed_at": 1791840289825374483,
+    "completed_at": 1791840296621037163,
+    "created_at": 1791840285024657397,
+    "delivery_id": "ca877bac2fb2493c873bf2792d63867b",
     "error": "",
-    "id": "5a417d503867480f890589685bf553bf",
-    "lease_id": "493083734f0343ecadbd67540b64afec",
-    "live_session_id": "3a5a02eb",
-    "message": "Read /tmp/hermes-readvertise-254-0z_2byjh/run-state/mail/seat-test-254/20261012T210216803778Z-proof-5a417d503867480f890589685bf553bf.json; then run `/usr/bin/python3 /home/brad/.hermes/scripts/agent_mail.py --root /tmp/hermes-readvertise-254-0z_2byjh/run-state/mail ack /tmp/hermes-readvertise-254-0z_2byjh/run-state/mail/seat-test-254/20261012T210216803778Z-proof-5a417d503867480f890589685bf553bf.json`. Follow the envelope's authorized work order.",
+    "id": "ca877bac2fb2493c873bf2792d63867b",
+    "lease_id": "27064559410d4bb2ba4bea58377eaf3b",
+    "live_session_id": "eb7bfa19",
+    "message": "Read /tmp/hermes-readvertise-254-z5wby35k/run-state/mail/seat-test-254/20261012T212445012035Z-proof-ca877bac2fb2493c873bf2792d63867b.json; then run `/usr/bin/python3 /home/brad/.hermes/scripts/agent_mail.py --root /tmp/hermes-readvertise-254-z5wby35k/run-state/mail ack /tmp/hermes-readvertise-254-z5wby35k/run-state/mail/seat-test-254/20261012T212445012035Z-proof-ca877bac2fb2493c873bf2792d63867b.json`. Follow the envelope's authorized work order.",
     "owner": {
-      "lease_id": "493083734f0343ecadbd67540b64afec",
-      "live_session_id": "3a5a02eb",
-      "profile_home": "/tmp/hermes-readvertise-254-0z_2byjh/profiles/seat-test-254",
-      "session_id": "20261012_170216_fb2527"
+      "lease_id": "27064559410d4bb2ba4bea58377eaf3b",
+      "live_session_id": "eb7bfa19",
+      "profile_home": "/tmp/hermes-readvertise-254-z5wby35k/profiles/seat-test-254",
+      "session_id": "20261012_172444_f83b5a"
     },
-    "profile_home": "/tmp/hermes-readvertise-254-0z_2byjh/profiles/seat-test-254",
+    "profile_home": "/tmp/hermes-readvertise-254-z5wby35k/profiles/seat-test-254",
     "reason": "",
     "reply": "G254-SECOND-ACK",
     "sequence": 2,
-    "session_id": "20261012_170216_fb2527",
+    "session_id": "20261012_172444_f83b5a",
     "status": "settled"
   },
   "second_read_ack": {
     "reader": "seat-test-254",
-    "ts": "2026-10-12T21:02:30.603919+00:00"
+    "ts": "2026-10-12T21:24:55.376754+00:00"
   },
+  "dual_owner_wake": true,
   "passed": true,
   "cleanup": {
     "tabs_closed": [
-      "wN:tES"
+      "wN:tEZ"
     ],
     "profile_removed": true,
     "scratch_root_removed": true,

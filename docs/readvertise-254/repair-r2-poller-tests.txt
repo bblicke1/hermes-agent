@@ -1,0 +1,18 @@
+▶ not activated — using HERMES_PYTHON: /home/brad/.hermes/installs/66cef3827c817e6e/test-environment/gen-0d5891f1091642ea909f2ee4a8cf4321/venv/bin/python
+▶ running per-file parallel test suite via run_tests_parallel.py
+  (TZ=UTC LANG=C.UTF-8 PYTHONHASHSEED=0; clean env)
+▶ pre-compiling bytecode cache
+▶ launching test runner
+Discovered 1 test files (~6 tests) under ['tests/tui_gateway/test_bot_live_owner_delivery.py']; running with -j 16
+[100.0% |     6/~6 | ✓6 | ✗0] ✓ tests/tui_gateway/test_bot_live_owner_delivery.py (6✓, 1.2s)
+
+=== Summary: 1 files, 6 tests passed, 0 failed (100% complete) in 1.2s (16 workers) ===
+  Durations cached to test_durations.json (1 files)
+
+=== Per-file subprocess time distribution ===
+  Files:   1
+  Total subprocess CPU-wall: 1.2s  (runner wall: 1.2s, parallelism: 16x)
+  P50: 1.17s  P90: 1.17s  P95: 1.17s  P99: 1.17s  Max: 1.17s
+  <1s: 0 files (0%)  <2s: 1 files (100%)
+  Top 10 slowest:
+      1.17s  tests/tui_gateway/test_bot_live_owner_delivery.py
